@@ -5,7 +5,6 @@ export interface AuthUser {
   lastName: string
   email: string
   phoneNumber: string | null
-  timezone: string
   isSuperAdmin: boolean
   createdAt: string
 }
@@ -16,8 +15,6 @@ export interface SignupRequest {
   email: string
   password: string
   phoneNumber?: string
-  // IANA timezone id, e.g. "Asia/Manila"
-  timezone?: string
 }
 
 export type SignupResponse = AuthUser

@@ -8,7 +8,7 @@ const props = defineProps<{ class?: HTMLAttributes['class'] }>()
 <template>
   <!-- Light mode: the app icon, brand pink C on brand teal. The tile is fixed to #1F6E6C (the theme's light
        `--primary`) because `--primary` turns lagoon in dark mode.
-       Dark mode: the brand sheet's inverse tile, brand teal C on brand pink, so the tile stands out on dark surfaces.
+       Dark mode: the brand sheet's inverse tile, brand teal C on brand pink, so the tile stands out on dark backgrounds.
        The SVG draws with currentColor; `text-secondary` is the brand pink (#F4B6C2 in both modes).
        `size-full!` beats SidebarMenuButton's `[&_svg]:size-4`, which would shrink it to 16px in the sidebar. -->
   <span :class="cn('flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#1F6E6C] text-secondary dark:bg-secondary dark:text-[#1F6E6C]', props.class)">

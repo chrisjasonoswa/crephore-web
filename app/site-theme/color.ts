@@ -68,17 +68,22 @@ function toOklch(hex: string): [number, number, number] {
   return [L, Math.hypot(A, B), (Math.atan2(B, A) * 180) / Math.PI]
 }
 
-function fromOklch([L, C, H]: [number, number, number]): string {
+/** oklch → linear sRGB (0–1 when the colour is displayable; outside that range it is out of gamut). */
+function oklchToLinearRgb([L, C, H]: [number, number, number]): Rgb {
   const A = C * Math.cos((H * Math.PI) / 180)
   const B = C * Math.sin((H * Math.PI) / 180)
   const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3
   const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3
   const s = (L - 0.0894841775 * A - 1.2914855480 * B) ** 3
-  return toHex([
-    fromLinear(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
-    fromLinear(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
-    fromLinear(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s),
-  ])
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+  ]
+}
+
+function fromOklch(lch: [number, number, number]): string {
+  return toHex(oklchToLinearRgb(lch).map(fromLinear) as Rgb)
 }
 
 /** Same result as `color-mix(in oklch, a <weight*100>%, b)`. */
@@ -112,4 +117,60 @@ export function fadeTowards(fg: string, bg: string, weight: number, min = MIN_CO
       return mixed
   }
   return fg
+}
+
+/**
+ * `color` if it reaches `min` contrast on every background in `bgs`; otherwise the same colour made
+ * darker (light backgrounds) or lighter (dark backgrounds) until it does.
+ * Only the oklch lightness changes, so hue and saturation are kept: a pink stays pink.
+ * Used when a brand colour is used as text. Pass backgrounds that are all light or all dark;
+ * the first one picks the direction.
+ */
+export function ensureContrast(color: string, bgs: string[], min = MIN_CONTRAST): string {
+  const passes = (candidate: string) => bgs.every(bg => contrastRatio(candidate, bg) >= min)
+  const normalized = normalizeHex(color)
+  if (passes(normalized))
+    return normalized
+
+  const target = readableTextOn(bgs[0]!)
+  const step = target === LIGHT_TEXT ? 0.02 : -0.02
+  const [lightness, chroma, hue] = toOklch(normalized)
+  for (let l = lightness + step; l > 0 && l < 1; l += step) {
+    const adjusted = fromOklch([l, chroma, hue])
+    if (passes(adjusted))
+      return adjusted
+  }
+  return target
+}
+
+/** Perceptual distance between two colours (Euclidean distance in OKLab; 0 = identical, ~0.02 = barely visible). */
+export function colorDistance(a: string, b: string): number {
+  const toOklab = (hex: string) => {
+    const [L, C, H] = toOklch(hex)
+    return [L, C * Math.cos((H * Math.PI) / 180), C * Math.sin((H * Math.PI) / 180)]
+  }
+  const [la, aa, ba] = toOklab(a) as [number, number, number]
+  const [lb, ab, bb] = toOklab(b) as [number, number, number]
+  return Math.hypot(la - lb, aa - ab, ba - bb)
+}
+
+// Below this chroma a colour counts as grey: its hue is meaningless, so no colour is added to it.
+const NEUTRAL_CHROMA = 0.01
+
+/**
+ * A dark "tonal" version of a colour: the same hue at a fixed oklch lightness, with at least
+ * `minChroma` of colour. Unlike mixing with black, every colour ends up equally dark and pale
+ * colours keep their character (pale pink → deep wine, not taupe). Greys stay grey.
+ * Chroma is reduced if needed so the result can be displayed (sRGB gamut) without shifting the hue.
+ */
+export function tonalShade(hex: string, lightness: number, minChroma: number): string {
+  const [, chroma, hue] = toOklch(hex)
+  let c = chroma < NEUTRAL_CHROMA ? chroma : Math.max(chroma, minChroma)
+
+  const inGamut = (candidate: number) =>
+    oklchToLinearRgb([lightness, candidate, hue]).every(channel => channel >= -1e-4 && channel <= 1 + 1e-4)
+  while (c > 0 && !inGamut(c))
+    c = Math.max(0, c - 0.002)
+
+  return fromOklch([lightness, c, hue])
 }

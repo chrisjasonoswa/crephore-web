@@ -15,7 +15,7 @@ describe('auth api', () => {
   })
 
   it('signs up with /auth/signup', () => {
-    const payload = { firstName: 'Chris', lastName: 'Oswa', email: 'chris@test.com', password: 'password123', timezone: 'Asia/Manila' }
+    const payload = { firstName: 'Chris', lastName: 'Oswa', email: 'chris@test.com', password: 'password123' }
 
     signup(payload)
 

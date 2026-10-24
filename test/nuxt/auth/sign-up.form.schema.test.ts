@@ -46,24 +46,16 @@ describe('signUpFormSchema', () => {
 })
 
 describe('mapFormValuesToSignupRequest', () => {
-  it('trims text fields and sends the timezone', () => {
+  it('trims text fields but not the password', () => {
     const request = mapFormValuesToSignupRequest(
-      { firstName: ' Chris ', lastName: ' Oswa ', email: ' chris@test.com ', password: 'password123' },
-      'Asia/Manila',
+      { firstName: ' Chris ', lastName: ' Oswa ', email: ' chris@test.com ', password: ' password123 ' },
     )
 
     expect(request).toEqual({
       firstName: 'Chris',
       lastName: 'Oswa',
       email: 'chris@test.com',
-      password: 'password123',
-      timezone: 'Asia/Manila',
+      password: ' password123 ',
     })
-  })
-
-  it('defaults the timezone to the browser timezone', () => {
-    const request = mapFormValuesToSignupRequest(validValues)
-
-    expect(request.timezone).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone)
   })
 })

@@ -18,7 +18,6 @@ const user: AuthUser = {
   lastName: 'Oswa',
   email: 'chris@test.com',
   phoneNumber: null,
-  timezone: 'Asia/Manila',
   isSuperAdmin: false,
   createdAt: '2026-10-22T00:00:00Z',
 }

@@ -34,23 +34,9 @@ export const signUpFormInitialValues: SignUpFormValues = {
   password: '',
 }
 
-// The browser's IANA timezone (e.g. "Asia/Manila"); the API defaults to UTC when it is missing.
-export const getBrowserTimezone = (): string | undefined => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined
-  }
-  catch {
-    return undefined
-  }
-}
-
-export const mapFormValuesToSignupRequest = (
-  values: SignUpFormValues,
-  timezone: string | undefined = getBrowserTimezone(),
-): SignupRequest => ({
+export const mapFormValuesToSignupRequest = (values: SignUpFormValues): SignupRequest => ({
   firstName: values.firstName.trim(),
   lastName: values.lastName.trim(),
   email: values.email.trim(),
   password: values.password,
-  timezone,
 })

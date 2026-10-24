@@ -22,7 +22,7 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
 ---
 
 ## Project Structure
-- `app/features/<feature>/`: everything that talks to the API for one backend feature
+- `app/features/<feature>/`: the data side of one feature (types, API calls, stores, registries)
   - `<feature>.type.ts`: request/response types mirroring the backend DTOs
   - `<feature>.api.ts`: one function per endpoint plus a `<Feature>ApiRoutes` object; only uses `get/post/put/patch/del` from `~/lib/axios`
   - `<feature>.store.ts`: Pinia setup store (`use<Feature>Store`), when state is shared across pages
@@ -55,6 +55,7 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
 - `app/middleware/auth.global.ts`: route guard
 - `app/types/api.ts`: `ApiResponse<T>` envelope
 - `app/config/`: static app config (`navigation.ts` drives the sidebar, breadcrumbs and admin overview; `brand.ts`)
+- `app/components/sections/`: event-website sections, one folder per section type, one component per layout (see "Sections")
 - `app/site-theme/`: theming for the event websites hosts build (Crephore-specific)
 - `app/layouts/`: `default` (signed-in sidebar shell, calls `init()` on mount), `auth` (sign-in/up), `landing` (public site)
 - `app/assets/css/`: `tailwind.css` (entry) imports `tailwind-tweakcn.css` (theme tokens from tweakcn; edit with the tweakcn editor and paste back)
@@ -86,6 +87,33 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
 3. Return one error per field: use `.pipe(...)` for format checks that should only run after a "required" check.
 4. Trim text in the `mapFormValuesTo<Request>()` mapper, never the password.
 5. Disable the submit button while `isSubmitting` and change its label (e.g. "Signing in…").
+
+---
+
+## Sections
+Sections are the building blocks of the event websites (Hero, RSVP, FAQ, …). They render in the admin playground, previews, the host editor and the public event site, so they follow strict rules.
+
+1. Files:
+   - `features/sections/section.type.ts`: `SectionBackground`, content shape per type (`SectionContentMap`), `Section`, `SectionLayoutProps<T>`
+   - `features/sections/section.background.ts`: classes per background (`root`, `muted`, `eyebrow`, `button`)
+   - `features/sections/section.registry.ts`: every section type and layout (name, async component, default background, default content), plus `createDefaultSection(type)` for new sections
+   - `components/sections/<type>/<Type><Layout>.vue`: one component per layout (e.g. `hero/HeroCentered.vue`)
+   - `components/sections/SectionRenderer.vue`: renders a `Section` through the registry
+   - `components/sections/SiteThemeScope.vue`: applies an event's `SiteTheme` (`--site-*` variables on a `.crephore-site` wrapper)
+2. Layout components only take `SectionLayoutProps<T>` (`content`, `background`). No API calls, stores or route access, so the same component works everywhere, including server rendering.
+3. Style only with site-theme variables (`bg-(--site-bg)`, `text-(--site-on-primary)`, `font-(family-name:--site-font-heading)`, `rounded-(--site-radius)`, …) and the shared `backgroundStyles`. Never use the Crephore app theme (`bg-primary`, `text-foreground`, …) inside a section; those are Crephore's colours, not the host's.
+   - Hosts can pick any colours, so never use the raw `--site-primary` or `--site-accent` as text. Use the contrast-checked versions: `--site-primary-text` (on light backgrounds), `--site-accent-on-photo`, and the `--site-on-*` text colours. New brand-coloured text needs a checked variable in `siteThemeVars` (via `ensureContrast`) and a case in `test/nuxt/site-theme/useSiteTheme.test.ts`.
+   - Buttons always use the other brand colour: main colour on `light` and `accent`; accent on `primary` and `photo`. Never assume which colour is dark. Use `backgroundStyles[background].button` (`--site-button-<background>` / `--site-on-button-<background>`), which `siteThemeVars` adjusts to stand out (3:1) with readable text.
+4. Every layout supports every background: `light`, `photo`, `primary`, `accent`. Backgrounds are independent of layouts, so the picker offers the same options for every layout (photo + `--site-photo-overlay`). Without a photo, the photo background renders exactly like `primary`: `SectionFrame` handles this (via `resolveBackground`). Background keys are stored on saved sections, so never rename one; display names live in `sectionBackgroundLabels`.
+   - Responsive styles use container queries (`@sm:` … `@2xl:`, sized against `SiteThemeScope`, which is the `@container`), never viewport breakpoints (`sm:`, `md:` …). Sections then fit any frame: the full page, the playground's device preview, editor previews and thumbnails. `test/nuxt/sections/responsive.test.ts` enforces this. Use `@2xl:` (42rem) where you would otherwise use `sm:`.
+5. Pages render sections with `SectionRenderer` inside `SiteThemeScope`; never import layout components directly. Never set `--site-*` variables on `:root`.
+6. Adding a layout: create the component, register it in `section.registry.ts` (its `key` is stored on saved sections, so never rename it), and check it in the playground (`/admin/section-types/playground`), which previews a page as a theme plus a list of sections, across backgrounds, colour presets, fonts and corners.
+   - One component per layout, named after its key (`text-left` → `hero/HeroTextLeft.vue`). Never let one component serve several layouts. Shared pieces that are not layouts live next to them (e.g. `hero/HeroContentBlock.vue`, the hero's text) so layouts stay consistent.
+   - Layouts only decide where the text sits, and keys say exactly that: `centered`, `text-left`, `text-right`, `text-top`, `text-bottom`, and the corners `text-top-left`, `text-top-right`, `text-bottom-left`, `text-bottom-right`.
+   - Images are content options, not layouts: `backgroundImageUrl` fills the background on the `photo` background; `layoutImageUrl` is an optional photo inside the layout on any background, in the space the text doesn't use (the other column for left/right text, above the text for centered and bottom, below it for top). Render it with `hero/HeroLayoutImage.vue`.
+   - Layouts never draw backgrounds: they wrap their content in `SectionFrame` (background colour, photo + overlay, primary fallback without a photo) and only position things. The background decides the background (pick `photo` to put the photo behind the text); the layout decides placement. Pick the frame `overlay` (`full`, `top`, `bottom`, `start`, `end`) so it is at full strength wherever the text sits.
+7. Adding a section type: add its content interface to `SectionContentMap`, a registry entry with `defaultContent`, and a `components/sections/<type>/` folder.
+8. Tests in `test/nuxt/sections/`: each layout renders its content, hides missing optional content, and applies each supported background.
 
 ---
 
