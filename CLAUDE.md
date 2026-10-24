@@ -4,7 +4,7 @@ This file is the source of truth for this repository's structure, API, auth, for
 Follow it for every change, and update it when conventions change.
 
 The structure mirrors the Zao POS web app (`~/Projects/zao/zao-pos-web`). When something is not covered here, follow how that project does it.
-Intentional differences from zao: npm instead of pnpm, SSR for public pages (zao is `ssr: false`), the `landing` layout and `site-theme/` for the public site and event websites, `config/navigation.ts` instead of inline sidebar data, and the `c-`/`C` prefix instead of `z-`/`Z`.
+Intentional differences from zao: SSR for public pages (zao is `ssr: false`), the `landing` layout and `site-theme/` for the public site and event websites, `config/navigation.ts` instead of inline sidebar data, and the `c-`/`C` prefix instead of `z-`/`Z`.
 The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with its DTOs.
 
 ---
@@ -17,7 +17,7 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
 - Forms: vee-validate + zod (`@vee-validate/zod`, zod 3 syntax: `z.string().email()`)
 - Toasts: vue-sonner through `cToast()` in `app/lib/cToast.ts`
 - Tests: vitest + `@nuxt/test-utils` (`environment: 'nuxt'`)
-- Package manager: npm
+- Package manager: pnpm (version pinned in `package.json` `packageManager`; dependency build scripts allowed in `pnpm-workspace.yaml` `allowBuilds`, as in zao). Do not use npm or commit a `package-lock.json`.
 
 ---
 
@@ -43,7 +43,7 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
     - `c-form/CPasswordInput.vue`: password input with show/hide toggle
     - `c-header/CPageHeader.vue`: page title, description, `#actions` slot
     - `c-toast/CToast.vue`: the toaster, mounted once in `app.vue`
-  - `ui/`: shadcn-vue components. Add them with `npx shadcn-vue@latest add <name>` and do not edit them by hand.
+  - `ui/`: shadcn-vue components. Add them with `pnpm dlx shadcn-vue@latest add <name>` and do not edit them by hand.
   - Import app and custom components explicitly in `<script setup>` (as zao does); `ui/` components are used through auto-import.
 - `app/lib/`: framework-level helpers
   - `axios.ts`: request helpers, error toasts, session-expiry handling, `isAuthFailure`, `getApiErrors`
@@ -96,15 +96,15 @@ The API is `../crephore-backend` (see its `CLAUDE.md`); keep types in sync with 
    - `*.form.schema.ts`: valid values, each required field, each rule's message, and the mappers
    - stores: state changes and API failure handling (mock the feature's `*.api.ts`)
    - middleware: redirects for signed-in and signed-out users
-3. Run before finishing: `npm test`, `npm run typecheck`, and `npx nuxi build` for routing or config changes.
+3. Run before finishing: `pnpm test`, `pnpm typecheck`, and `pnpm build` for routing or config changes.
 
 ---
 
 ## Commands
 ```bash
-npm install
-npm run dev        # http://localhost:3000 (needs the API on http://localhost:5180)
-npm test
-npm run typecheck
-npm run build
+pnpm install
+pnpm dev            # http://localhost:3000 (needs the API on http://localhost:5180)
+pnpm test
+pnpm typecheck
+pnpm build
 ```
