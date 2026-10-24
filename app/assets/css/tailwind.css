@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "vue-sonner/style.css";
+
+/*
+  NOTE: The theme below is configured and copied from tweakcn.
+  If changes have to be made, tweakcn editor should be used and the updated config should be pasted there.
+*/
+@import "tailwind-tweakcn.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
