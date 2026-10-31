@@ -6,6 +6,8 @@ import { areas, navItems } from '~/config/navigation'
 
 const route = useRoute()
 const area = computed(() => route.meta.area ?? 'user')
+// Set by pages whose last segment is an id (e.g. the event's name)
+const pageTitle = useBreadcrumbTitle()
 
 // Area label first, then one crumb per segment below the area root
 // (the root page itself shows its nav title, e.g. "Admin › Overview").
@@ -20,8 +22,11 @@ const crumbs = computed(() => {
   const segments = path.slice(root.length).split('/').filter(Boolean)
   segments.forEach((segment, i) => {
     const to = `${root}/${segments.slice(0, i + 1).join('/')}`
+    const isLast = i === segments.length - 1
     trail.push({
-      label: items.find(item => item.to === to)?.title ?? segment.replace(/-/g, ' ').replace(/^./, c => c.toUpperCase()),
+      label: items.find(item => item.to === to)?.title
+        ?? (isLast ? pageTitle.value : null)
+        ?? segment.replace(/-/g, ' ').replace(/^./, c => c.toUpperCase()),
       to,
     })
   })

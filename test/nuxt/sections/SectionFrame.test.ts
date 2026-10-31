@@ -8,7 +8,7 @@ import { sectionBackgrounds } from '~/features/sections/section.type'
 
 const photo = 'https://example.com/couple.jpg'
 
-const mountFrame = (props: { background: SectionBackground, imageUrl?: string, overlay?: 'full' | 'top' | 'bottom' | 'start' | 'end' }, attrs: Record<string, unknown> = {}) =>
+const mountFrame = (props: { background: SectionBackground, imageUrl?: string, overlay?: 'full' | 'top' | 'bottom' | 'start' | 'end' | 'none' }, attrs: Record<string, unknown> = {}) =>
   mountSuspended(SectionFrame, {
     props,
     attrs,
@@ -52,6 +52,13 @@ describe('SectionFrame', () => {
     const wrapper = await mountFrame({ background: 'photo', imageUrl: photo, overlay })
 
     expect(wrapper.find('img + div').classes()).toEqual(expect.arrayContaining([...classes]))
+  })
+
+  it('draws no overlay with overlay none (text on its own card)', async () => {
+    const wrapper = await mountFrame({ background: 'photo', imageUrl: photo, overlay: 'none' })
+
+    expect(wrapper.find('img').exists()).toBe(true)
+    expect(wrapper.find('img + div').exists()).toBe(false)
   })
 
   it('puts the layout\'s classes on the section', async () => {

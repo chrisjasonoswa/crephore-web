@@ -18,7 +18,7 @@ onMounted(() => {
     <SidebarInset>
       <SiteHeader />
       <main class="flex-1 px-4 py-8 md:px-8 md:py-10">
-        <div class="mx-auto w-full" :class="route.meta.wide ? 'max-w-none' : 'max-w-5xl'">
+        <div class="mx-auto w-full" :class="route.meta.wide ? 'max-w-none' : 'max-w-screen-2xl'">
           <slot />
         </div>
       </main>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { colorDistance, contrastRatio, ensureContrast, MIN_CONTRAST, relativeLuminance, tonalShade } from '~/site-theme/color'
+import { MIN_CONTRAST, colorDistance, contrastRatio, ensureContrast, ensureLight, relativeLuminance, tonalShade } from '~/site-theme/color'
 
 describe('ensureContrast', () => {
   it('keeps a colour that is already readable', () => {
@@ -79,5 +79,23 @@ describe('tonalShade', () => {
   it('is dark enough for white text on any colour', () => {
     for (const color of ['#FFE600', '#00FF85', '#FF00E5', '#F7F7F7', '#3A86FF'])
       expect(contrastRatio('#FFFFFF', tonalShade(color, lightness, minChroma)), color).toBeGreaterThanOrEqual(MIN_CONTRAST)
+  })
+})
+
+describe('ensureLight', () => {
+  it('keeps a colour that is already light and soft', () => {
+    expect(ensureLight('#F7F1E7', 0.92, 0.05)).toBe('#F7F1E7')
+  })
+
+  it('raises a dark colour to the minimum lightness', () => {
+    expect(relativeLuminance(ensureLight('#3A2A1F', 0.92, 0.05))).toBeGreaterThan(relativeLuminance('#E0E0E0'))
+  })
+
+  it('softens a saturated colour into a tint', () => {
+    const tint = ensureLight('#FF4FA3', 0.92, 0.05)
+
+    expect(colorDistance(tint, '#FFFFFF')).toBeLessThan(colorDistance('#FF4FA3', '#FFFFFF'))
+    // Still pink (red channel highest)
+    expect(Number.parseInt(tint.slice(1, 3), 16)).toBeGreaterThanOrEqual(Number.parseInt(tint.slice(3, 5), 16))
   })
 })

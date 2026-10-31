@@ -15,7 +15,8 @@ const props = withDefaults(defineProps<{
   //  - top / bottom: top / bottom 60%, fading out towards the other edge
   //  - start / end: the left / right half from 768px (fading across); everywhere on narrow screens,
   //    where the text spans the full width
-  overlay?: 'full' | 'top' | 'bottom' | 'start' | 'end'
+  //  - none: no overlay (the text sits on its own solid card)
+  overlay?: 'full' | 'top' | 'bottom' | 'start' | 'end' | 'none'
 }>(), {
   overlay: 'full',
 })
@@ -31,6 +32,7 @@ const overlayClasses: Record<NonNullable<typeof props.overlay>, string> = {
   bottom: 'bg-linear-to-t from-(--site-photo-overlay) from-60% to-transparent',
   start: 'bg-(--site-photo-overlay) @3xl:bg-transparent @3xl:bg-linear-to-r @3xl:from-(--site-photo-overlay) @3xl:from-50% @3xl:to-transparent',
   end: 'bg-(--site-photo-overlay) @3xl:bg-transparent @3xl:bg-linear-to-l @3xl:from-(--site-photo-overlay) @3xl:from-50% @3xl:to-transparent',
+  none: '',
 }
 </script>
 
@@ -38,7 +40,7 @@ const overlayClasses: Record<NonNullable<typeof props.overlay>, string> = {
   <section class="relative isolate overflow-hidden" :class="styles.root">
     <template v-if="photoUrl">
       <img :src="photoUrl" alt="" class="absolute inset-0 -z-20 size-full object-cover">
-      <div class="absolute inset-0 -z-10" :class="overlayClasses[overlay]" />
+      <div v-if="overlay !== 'none'" class="absolute inset-0 -z-10" :class="overlayClasses[overlay]" />
     </template>
 
     <slot :styles="styles" :background="resolvedBackground" />

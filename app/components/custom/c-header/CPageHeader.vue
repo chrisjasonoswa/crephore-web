@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   title: string
-  description: string
+  description?: string
 }>()
 
 useHead({ title: () => props.title })
@@ -13,7 +13,11 @@ useHead({ title: () => props.title })
       <h1 class="text-3xl font-semibold tracking-tight">
         {{ title }}
       </h1>
-      <p class="mt-1 text-muted-foreground">
+      <!-- #description for richer content, e.g. an event's date -->
+      <div v-if="$slots.description" class="mt-1 text-muted-foreground">
+        <slot name="description" />
+      </div>
+      <p v-else-if="description" class="mt-1 text-muted-foreground">
         {{ description }}
       </p>
     </div>

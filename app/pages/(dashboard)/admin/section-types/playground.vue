@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import type { Section } from '~/features/sections/section.type'
+import type { Section, SectionOccasion } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
-import { Monitor, Smartphone, Tablet } from '@lucide/vue'
 import CPageHeader from '~/components/custom/c-header/CPageHeader.vue'
 import SectionRenderer from '~/components/sections/SectionRenderer.vue'
 import SiteThemeScope from '~/components/sections/SiteThemeScope.vue'
+import PreviewFrame from '~/components/site-editor/PreviewFrame.vue'
+import ThemeControls from '~/components/site-editor/ThemeControls.vue'
 import { createDefaultSection } from '~/features/sections/section.registry'
+import { sampleOccasion } from '~/features/sections/section.type'
 import { fontPairings } from '~/site-theme/fontPairings'
 import { colorPresets } from '~/site-theme/presets'
 import PlaygroundSectionControls from './_components/PlaygroundSectionControls.vue'
-import PlaygroundThemeControls from './_components/PlaygroundThemeControls.vue'
 
 definePageMeta({ area: 'admin', wide: true })
 
@@ -21,25 +22,29 @@ const theme = ref<SiteTheme>({
   cornerStyle: 'soft',
 })
 
-// For now the page only has a hero; more section types will be added here.
-const sections = ref<Section[]>([createDefaultSection('hero')])
+// One section of each type, in page order
+const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown')])
 
-// Preview screen sizes (common device widths); desktop uses the full preview width.
-const devices = [
-  { key: 'desktop', label: 'Desktop', width: undefined, icon: Monitor },
-  { key: 'tablet', label: 'Tablet', width: 768, icon: Tablet },
-  { key: 'mobile', label: 'Mobile', width: 390, icon: Smartphone },
+// The event's start, for the countdown: try a far date, the last hour, and one that has passed
+const occasionChoices = [
+  { key: 'sample', label: 'In 112 days' },
+  { key: 'soon', label: 'In 1 hour' },
+  { key: 'passed', label: 'Passed' },
 ] as const
 
-type DeviceKey = (typeof devices)[number]['key']
+type OccasionKey = (typeof occasionChoices)[number]['key']
 
-const device = ref<DeviceKey>('desktop')
-const activeDevice = computed(() => devices.find(option => option.key === device.value)!)
+const occasionKey = ref<OccasionKey>('sample')
+const occasion = computed<SectionOccasion>(() => {
+  if (occasionKey.value === 'sample')
+    return sampleOccasion()
+  const offset = occasionKey.value === 'soon' ? 60 * 60_000 : -60_000
+  return { startsAt: new Date(Date.now() + offset).toISOString(), timezone: 'Asia/Manila' }
+})
 
-// A single-select toggle group emits an empty value when the active item is clicked again; keep the current one.
-function setDevice(next: unknown) {
+function setOccasion(next: unknown) {
   if (typeof next === 'string' && next)
-    device.value = next as DeviceKey
+    occasionKey.value = next as OccasionKey
 }
 </script>
 
@@ -57,7 +62,28 @@ function setDevice(next: unknown) {
             <h2 class="font-semibold">
               Theme
             </h2>
-            <PlaygroundThemeControls v-model:theme="theme" />
+            <ThemeControls v-model:theme="theme" />
+          </section>
+
+          <Separator />
+
+          <!-- The event the page belongs to (sections that show its details, e.g. the countdown) -->
+          <section class="flex flex-col gap-2">
+            <h2 class="font-semibold">
+              Event starts
+            </h2>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              :model-value="occasionKey"
+              aria-label="Event starts"
+              class="grid w-full auto-cols-fr grid-flow-col"
+              @update:model-value="setOccasion"
+            >
+              <ToggleGroupItem v-for="choice in occasionChoices" :key="choice.key" :value="choice.key" class="text-xs">
+                {{ choice.label }}
+              </ToggleGroupItem>
+            </ToggleGroup>
           </section>
 
           <Separator />
@@ -76,41 +102,12 @@ function setDevice(next: unknown) {
         </CardContent>
       </Card>
 
-      <div class="flex min-w-0 flex-col gap-3">
-        <div class="flex items-center justify-between gap-3">
-          <p class="text-sm text-muted-foreground">
-            {{ activeDevice.label }} · {{ activeDevice.width ? `${activeDevice.width}px` : 'full width' }}
-          </p>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            :model-value="device"
-            aria-label="Preview screen size"
-            @update:model-value="setDevice"
-          >
-            <ToggleGroupItem
-              v-for="option in devices"
-              :key="option.key"
-              :value="option.key"
-              :aria-label="option.label"
-              :title="option.label"
-            >
-              <component :is="option.icon" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-
-        <!-- The frame narrows to the device width; sections respond to it through container queries.
-             The preview uses the event's site theme, not the Crephore app theme. -->
-        <div
-          class="mx-auto w-full overflow-hidden rounded-xl border transition-[max-width] duration-300"
-          :style="{ maxWidth: activeDevice.width ? `${activeDevice.width}px` : undefined }"
-        >
-          <SiteThemeScope :theme="theme">
-            <SectionRenderer v-for="(section, index) in sections" :key="index" :section="section" />
-          </SiteThemeScope>
-        </div>
-      </div>
+      <!-- The preview uses the event's site theme, not the Crephore app theme -->
+      <PreviewFrame>
+        <SiteThemeScope :theme="theme">
+          <SectionRenderer v-for="(section, index) in sections" :key="index" :section="section" :occasion="occasion" />
+        </SiteThemeScope>
+      </PreviewFrame>
     </div>
   </div>
 </template>

@@ -13,7 +13,7 @@ const storyChapters = ['Getting Ready', 'Ceremony', 'Reception', 'First Dance', 
     <section class="mx-auto max-w-7xl px-4 pt-12 pb-16 md:px-6 md:pt-20">
       <h1 class="max-w-5xl text-5xl leading-[0.95] font-bold tracking-tighter text-balance sm:text-6xl lg:text-7xl">
         Your guest list, RSVPs and photos,
-        <em class="font-serif font-normal tracking-normal italic text-pink-deep">finally</em> in one place.
+        <em class="font-serif font-normal tracking-normal italic text-taupe-deep">finally</em> in one place.
       </h1>
       <div class="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <p class="max-w-md leading-relaxed text-muted-foreground">
@@ -138,7 +138,7 @@ const storyChapters = ['Getting Ready', 'Ceremony', 'Reception', 'First Dance', 
               <span class="hidden h-0.5 flex-1 md:block" :class="i < tagline.length - 1 ? 'bg-secondary' : 'invisible'" />
             </div>
             <p class="mt-6 text-3xl font-bold tracking-tight md:text-center md:text-2xl lg:text-4xl xl:whitespace-nowrap">
-              <span class="text-pink-deep">{{ part.syllable }}</span>{{ part.rest }}
+              <span class="text-taupe-deep">{{ part.syllable }}</span>{{ part.rest }}
             </p>
           </div>
           <span v-if="i < tagline.length - 1" class="mt-4.75 hidden h-0.5 min-w-6 flex-1 bg-secondary md:block" />
@@ -163,7 +163,7 @@ const storyChapters = ['Getting Ready', 'Ceremony', 'Reception', 'First Dance', 
     <section class="mx-auto max-w-7xl px-4 py-24 md:px-6 md:py-32">
       <h2 class="text-5xl leading-[0.95] font-bold tracking-tighter sm:text-7xl lg:text-8xl">
         Your next event starts<br>
-        <em class="font-serif font-normal tracking-normal italic text-pink-deep">here.</em>
+        <em class="font-serif font-normal tracking-normal italic text-taupe-deep">here.</em>
       </h2>
       <Button size="lg" class="mt-10 h-12 px-6 font-semibold" as-child>
         <NuxtLink to="/sign-up">Create your event, free</NuxtLink>

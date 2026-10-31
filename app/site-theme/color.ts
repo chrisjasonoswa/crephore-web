@@ -174,3 +174,24 @@ export function tonalShade(hex: string, lightness: number, minChroma: number): s
 
   return fromOklch([lightness, c, hue])
 }
+
+/**
+ * `hex` kept light enough for a light page background: oklch lightness raised to at least `minLightness`
+ * and chroma capped at `maxChroma` (a soft tint, not a pastel), keeping the hue. Colours that are
+ * already light enough come back unchanged.
+ */
+export function ensureLight(hex: string, minLightness: number, maxChroma: number): string {
+  const normalized = normalizeHex(hex)
+  const [lightness, chroma, hue] = toOklch(normalized)
+  if (lightness >= minLightness && chroma <= maxChroma)
+    return normalized
+
+  const l = Math.max(lightness, minLightness)
+  let c = Math.min(chroma, maxChroma)
+  const inGamut = (candidate: number) =>
+    oklchToLinearRgb([l, candidate, hue]).every(channel => channel >= -1e-4 && channel <= 1 + 1e-4)
+  while (c > 0 && !inGamut(c))
+    c = Math.max(0, c - 0.002)
+
+  return fromOklch([l, c, hue])
+}

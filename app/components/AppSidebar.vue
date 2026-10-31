@@ -27,7 +27,7 @@ const otherArea = computed(() => (props.area === 'admin' ? 'user' : 'admin'))
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" class="hover:bg-transparent hover:text-sidebar-foreground active:bg-transparent active:text-sidebar-foreground" as-child>
             <NuxtLink :to="areas[area].root">
-              <!-- App icon: pink C on teal in light mode, teal C on pink in dark mode -->
+              <!-- App icon: linen C on midnight in light mode, midnight C on linen in dark mode -->
               <AppLogoMark />
               <span class="text-lg font-bold tracking-tight">crephore</span>
               <Badge

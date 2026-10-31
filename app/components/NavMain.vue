@@ -18,10 +18,14 @@ function matches(item: NavItem) {
 }
 
 // Only the most specific match in the whole area is active (e.g. Playground, not also Section types).
-const activeTo = computed(() =>
-  navItems(props.area).filter(matches).sort((a, b) => b.to.length - a.to.length)[0]?.to,
+// Ties go to the sub-item, so "All" is active rather than its parent "My events" on the same route.
+const activeItem = computed(() =>
+  navItems(props.area).filter(matches).reduce<NavItem | undefined>(
+    (best, item) => (!best || item.to.length >= best.to.length ? item : best),
+    undefined,
+  ),
 )
-const isActive = (item: NavItem) => item.to === activeTo.value
+const isActive = (item: NavItem) => item === activeItem.value
 </script>
 
 <template>

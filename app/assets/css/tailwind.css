@@ -1,3 +1,9 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/*
+  ---break---
+*/
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "vue-sonner/style.css";
@@ -10,11 +16,45 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  The shadcn-vue components (`components/ui`) style state with attribute variants like `data-checked:` and
+  `data-open:`, but reka-ui exposes state as `data-state="checked"` / `"open"` / `"active"` and
+  `data-orientation="horizontal"`. Without these, Tailwind's built-in `data-*` variants look for attributes that
+  are never set: switches and checkboxes never look on, tabs never stack or look active, and dialogs, dropdowns,
+  popovers and tooltips never animate. Each variant also matches the plain attribute, for components that set it
+  themselves (e.g. the sidebar's `data-active`).
+*/
+@custom-variant data-open (&:is([data-state="open"], [data-open]));
+@custom-variant data-closed (&:is([data-state="closed"], [data-closed]));
+@custom-variant data-active (&:is([data-state="active"], [data-active]));
+@custom-variant data-checked (&:is([data-state="checked"], [data-checked]));
+@custom-variant data-unchecked (&:is([data-state="unchecked"], [data-unchecked]));
+@custom-variant data-horizontal (&:is([data-orientation="horizontal"], [data-horizontal]));
+@custom-variant data-vertical (&:is([data-orientation="vertical"], [data-vertical]));
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+/*
+  ---break---
+*/
+@theme inline {
+
+  --font-heading: var(--font-sans);
+}
+/*
+  ---break---
+*/
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

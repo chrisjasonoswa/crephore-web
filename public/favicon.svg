@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- The brand mark (AppLogoMark.vue): a linen C on a midnight tile, flipped to a midnight C on linen in dark mode -->
+  <style>
+    .tile { fill: #1E2A44; }
+    .mark { fill: #E6D7C5; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #E6D7C5; }
+      .mark { fill: #1E2A44; }
+    }
+  </style>
+  <rect class="tile" width="120" height="120" rx="26" />
+  <path
+    class="mark"
+    transform="translate(3.74 0)"
+    d="M87.777 81.702 A35.25 35.25 0 1 1 87.777 38.298 L82.655 42.300 A28.75 28.75 0 1 0 82.655 77.700 Z M65.387 45.466 A15.5 15.5 0 1 0 74.534 54.613 A6.5 6.5 0 0 1 65.387 45.466 Z"
+  />
+</svg>

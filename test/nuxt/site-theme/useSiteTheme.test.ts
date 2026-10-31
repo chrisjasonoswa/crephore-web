@@ -1,8 +1,8 @@
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { describe, expect, it } from 'vitest'
 import { contrastRatio, LIGHT_TEXT, MIN_CONTRAST, mixOklch, mixSrgb } from '~/site-theme/color'
-import { colorPresets } from '~/site-theme/presets'
-import { siteThemeVars, siteThemeWarnings } from '~/site-theme/useSiteTheme'
+import { backgroundPresets, colorPresets } from '~/site-theme/presets'
+import { lightBackground, siteThemeVars, siteThemeWarnings } from '~/site-theme/useSiteTheme'
 
 const themeWith = (primaryColor: string, accentColor: string): SiteTheme => ({
   primaryColor,
@@ -131,5 +131,48 @@ describe('siteThemeWarnings', () => {
 
   it('does not warn about dark colours, since buttons adjust themselves', () => {
     expect(siteThemeWarnings(themeWith('#1F2F5C', '#050505'))).toEqual([])
+  })
+})
+
+describe('siteThemeVars light background', () => {
+  it('uses plain white by default', () => {
+    expect(siteThemeVars(themeWith('#1E2A44', '#E8A598'))['--site-bg']).toBe('#FFFFFF')
+  })
+
+  it.each(backgroundPresets.filter(preset => preset.color))('uses the $name preset exactly as given', ({ color }) => {
+    expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), backgroundColor: color! })['--site-bg']).toBe(color)
+  })
+
+  it('lightens a colour that is too dark for a page background, keeping its hue', () => {
+    const background = lightBackground({ backgroundColor: '#8B6F4E' })
+
+    expect(contrastRatio('#111827', background)).toBeGreaterThan(12)
+    // Still warm (red channel above blue), not grey
+    expect(Number.parseInt(background.slice(1, 3), 16)).toBeGreaterThan(Number.parseInt(background.slice(5, 7), 16))
+  })
+
+  // Every text colour on the light background, and its button, checked against the chosen background
+  it.each([
+    ...backgroundPresets.filter(preset => preset.color).map(preset => [preset.name, preset.color!] as const),
+    ['a dark brown (lightened)', '#5A3E2B'] as const,
+  ])('keeps text and buttons readable on the %s background', (_, backgroundColor) => {
+    for (const [name, theme] of extremeThemes) {
+      const vars = siteThemeVars({ ...theme, backgroundColor })
+      const bg = vars['--site-bg']!
+
+      expect(contrastRatio(vars['--site-primary-text']!, bg), `${name}: primary-text`).toBeGreaterThanOrEqual(MIN_CONTRAST)
+      expect(contrastRatio(vars['--site-muted']!, bg), `${name}: muted`).toBeGreaterThanOrEqual(MIN_CONTRAST)
+      expect(contrastRatio(vars['--site-button-light']!, bg), `${name}: light button`).toBeGreaterThanOrEqual(3)
+      expect(contrastRatio(vars['--site-on-button-light']!, vars['--site-button-light']!), `${name}: light button text`).toBeGreaterThanOrEqual(MIN_CONTRAST)
+    }
+  })
+
+  it('mixes borders with the chosen background', () => {
+    expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), backgroundColor: '#F7F1E7' })['--site-border']).toContain('var(--site-bg)')
+  })
+
+  it('warns when the accent is very close to the background', () => {
+    expect(siteThemeWarnings({ ...themeWith('#1E2A44', '#F5EFE5'), backgroundColor: '#F7F1E7' }))
+      .toContain('The accent is very close to the background, so accent sections will barely stand out from the page.')
   })
 })
