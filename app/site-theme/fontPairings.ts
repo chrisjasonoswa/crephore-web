@@ -3,6 +3,8 @@ export interface SiteFont {
   fallback: string
   weights: number[]
   italic?: boolean
+  // A handwritten script: it already flows, so text that would be italic stays upright (a slanted script looks wrong)
+  script?: boolean
 }
 
 export interface FontPairing {
@@ -36,6 +38,20 @@ export const fontPairings: FontPairing[] = [
     name: 'Playful',
     heading: { family: 'Fredoka', fallback: 'system-ui, sans-serif', weights: [400, 500, 600] },
     body: { family: 'Nunito', fallback: 'system-ui, sans-serif', weights: [400, 600, 700] },
+  },
+  {
+    key: 'script',
+    name: 'Script',
+    // Calligraphy headings (one weight only) with a clean, light sans for everything else
+    heading: { family: 'Great Vibes', fallback: 'cursive', weights: [400], script: true },
+    body: { family: 'Raleway', fallback: 'system-ui, sans-serif', weights: [400, 500, 600, 700] },
+  },
+  {
+    key: 'luxurious_script',
+    name: 'Luxurious script',
+    // Formal copperplate headings (one weight only) with an elegant geometric sans
+    heading: { family: 'Luxurious Script', fallback: 'cursive', weights: [400], script: true },
+    body: { family: 'Jost', fallback: 'system-ui, sans-serif', weights: [400, 500, 600, 700] },
   },
 ]
 

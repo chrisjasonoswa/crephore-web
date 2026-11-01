@@ -6,10 +6,12 @@ import SectionThumbnail from '~/components/sections/SectionThumbnail.vue'
 import { createWebsiteSection, eventOccasion } from '~/features/event-websites/event-website'
 import { sectionRegistry } from '~/features/sections/section.registry'
 
-// The section types a page can have, each shown as it would look on this event's page.
+// The section types a page can have, each shown as it would look on this event's page. A page has one hero, so the
+// hero isn't offered again once there is one.
 const props = defineProps<{
   event: Event
   theme: SiteTheme
+  hasHero: boolean
 }>()
 
 const open = defineModel<boolean>('open', { required: true })
@@ -23,6 +25,7 @@ const occasion = computed(() => eventOccasion(props.event))
 const choices = computed(() => Object.values(sectionRegistry).map(definition => ({
   definition,
   sample: createWebsiteSection(definition.type, props.event),
+  isTaken: definition.type === 'hero' && props.hasHero,
 })))
 
 function add(type: SectionType) {
@@ -43,17 +46,21 @@ function add(type: SectionType) {
 
       <div class="grid gap-4 sm:grid-cols-2">
         <button
-          v-for="{ definition, sample } in choices"
+          v-for="{ definition, sample, isTaken } in choices"
           :key="definition.type"
           type="button"
           :data-add-section="definition.type"
-          class="flex cursor-pointer flex-col gap-2 rounded-xl border p-2 text-left transition-colors hover:border-primary/60"
+          :disabled="isTaken"
+          class="flex cursor-pointer flex-col gap-2 rounded-xl border p-2 text-left transition-colors hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-border"
           @click="add(definition.type)"
         >
           <SectionThumbnail :section="sample" :theme="theme" :occasion="occasion" class="aspect-16/10 w-full rounded-lg border bg-muted" />
           <span class="flex flex-col gap-0.5 px-1 pb-1">
             <span class="text-sm font-medium">{{ definition.name }}</span>
             <span class="text-xs text-muted-foreground">{{ definition.description }}</span>
+            <span v-if="isTaken" data-add-section-taken class="text-xs font-medium text-muted-foreground">
+              Your page already has its hero. Change its layout to try another look.
+            </span>
           </span>
         </button>
       </div>

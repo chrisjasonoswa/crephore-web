@@ -1,6 +1,11 @@
 import type { EventWebsite } from '~/features/event-websites/event-website.type'
 import type { Event } from '~/features/events/event.type'
-import { describe, expect, it } from 'vitest'
+import type { CountdownContent } from '~/features/sections/section.content.type'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+// Passes content through; a test checks that loading goes through it
+const { upgradeSectionContent } = vi.hoisted(() => ({ upgradeSectionContent: vi.fn((_type: string, content: unknown) => content) }))
+vi.mock('~/features/sections/section.upgrade', () => ({ upgradeSectionContent }))
+
 import {
   createBlankWebsite,
   createWebsiteSection,
@@ -10,6 +15,7 @@ import {
   mapWebsiteToRequest,
   moveItem,
   websiteFromApi,
+  websiteProblem,
   withSavedIds,
 } from '~/features/event-websites/event-website'
 import { getSectionType } from '~/features/sections/section.registry'
@@ -52,7 +58,7 @@ describe('event website', () => {
 
     expect(hero).toMatchObject({ type: 'hero', layout: 'fullscreen', background: 'photo', isVisible: true })
     expect(hero.content).toMatchObject({
-      title: 'Ana & Marco',
+      heading: 'Ana & Marco',
       date: 'Saturday, 12 June 2027',
       venue: 'Manila Cathedral',
       eyebrow: getSectionType('hero').defaultContent.eyebrow,
@@ -64,8 +70,12 @@ describe('event website', () => {
     expect(createWebsiteSection('hero', { ...event, venueName: '' }).content.venue).toBeUndefined()
   })
 
+  it('starts a new message with a generic signature', () => {
+    expect(createWebsiteSection('message', event).content).toMatchObject({ signature: 'With love, from us', heading: 'Welcome, family & friends' })
+  })
+
   it('fills a new countdown with the event\'s name', () => {
-    expect(createWebsiteSection('countdown', event).content).toMatchObject({ title: 'Ana & Marco', showSeconds: true })
+    expect(createWebsiteSection('countdown', event).content).toMatchObject({ heading: 'Ana & Marco', showSeconds: true })
   })
 
   it('gives every section its own key', () => {
@@ -90,14 +100,33 @@ describe('event website', () => {
     expect(items).toEqual(['a', 'b', 'c'])
   })
 
+  describe('websiteProblem', () => {
+    const hero = createWebsiteSection('hero', event)
+    const countdown = createWebsiteSection('countdown', event)
+
+    it('accepts a website with exactly one hero, shown or hidden', () => {
+      expect(websiteProblem({ ...createBlankWebsite(), sections: [hero, countdown] })).toBeNull()
+      expect(websiteProblem({ ...createBlankWebsite(), sections: [countdown, { ...hero, isVisible: false }] })).toBeNull()
+    })
+
+    it('asks for a hero when there is none', () => {
+      expect(websiteProblem(createBlankWebsite())).toBe('Add a hero section: every website needs one.')
+      expect(websiteProblem({ ...createBlankWebsite(), sections: [countdown] })).toBe('Add a hero section: every website needs one.')
+    })
+
+    it('allows only one hero', () => {
+      expect(websiteProblem({ ...createBlankWebsite(), sections: [hero, duplicateWebsiteSection(hero)] })).toBe('A website can only have one hero section.')
+    })
+  })
+
   describe('saving', () => {
     const saved: EventWebsite = {
       id: 3,
       eventId: 5,
       theme: { primaryColor: '#5E7A63', accentColor: '#E9DFC8', backgroundColor: null, fontPairingKey: 'romantic', cornerStyle: 'round' },
       sections: [
-        { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'left' }, content: { title: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
-        { id: 12, type: 'countdown', layout: 'boxes', background: 'primary', options: {}, content: { title: 'Soon', showSeconds: false }, contentVersion: 1, isVisible: false, visibility: 'Always' },
+        { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'left' }, content: { heading: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
+        { id: 12, type: 'countdown', layout: 'boxes', background: 'primary', options: {}, content: { heading: 'Soon', showSeconds: false, layoutPhotos: [] }, contentVersion: 1, isVisible: false, visibility: 'Always' },
       ],
       publishedAt: null,
       hasUnpublishedChanges: false,
@@ -113,6 +142,15 @@ describe('event website', () => {
       expect(website.sections.map(section => [section.key, section.id, section.layout, section.isVisible]))
         .toEqual([['section-11', 11, 'split', true], ['section-12', 12, 'boxes', false]])
       expect(websiteFromApi({ ...saved, theme: { ...saved.theme, backgroundColor: '#FFFCF4' } }).theme.backgroundColor).toBe('#FFFCF4')
+    })
+
+    it('upgrades saved content from its content version', () => {
+      const upgraded: CountdownContent = { heading: 'Upgraded', showSeconds: false, layoutPhotos: [] }
+      upgradeSectionContent.mockReturnValueOnce(upgraded)
+      const website = websiteFromApi({ ...saved, sections: [{ ...saved.sections[1]!, contentVersion: 1 }] })
+
+      expect(upgradeSectionContent).toHaveBeenCalledWith('countdown', saved.sections[1]!.content, 1)
+      expect(website.sections[0]!.content).toBe(upgraded)
     })
 
     it('saves the whole website in page order: saved sections by id, new ones without, no editor keys', () => {
@@ -131,7 +169,7 @@ describe('event website', () => {
     it('compares websites by what would be saved, whatever order the content fields are in', () => {
       const website = websiteFromApi(saved)
       const hero = website.sections[0]!
-      const reordered = { ...hero, content: { layoutPhotos: [], title: 'Ana & Marco' } }
+      const reordered = { ...hero, content: { layoutPhotos: [], heading: 'Ana & Marco' } }
 
       expect(isSameWebsite({ ...website, sections: [reordered, website.sections[1]!] }, website)).toBe(true)
       expect(isSameWebsite({ ...website, sections: [{ ...hero, key: 'other' }, website.sections[1]!] }, website)).toBe(true)

@@ -8,7 +8,7 @@ import CountdownButton from './CountdownButton.vue'
 import CountdownHeading from './CountdownHeading.vue'
 import CountdownTiles from './CountdownTiles.vue'
 
-// Layout `boxes`: eyebrow and title, one tile per unit, then the date. Aligned by `textAlign`.
+// Layout `boxes`: eyebrow and heading, one tile per unit, then the date. Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)

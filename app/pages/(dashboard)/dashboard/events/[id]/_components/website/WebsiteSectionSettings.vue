@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { WebsiteSection } from '~/features/event-websites/event-website.type'
 import type { Event } from '~/features/events/event.type'
-import type { CountdownContent, HeroContent } from '~/features/sections/section.content.type'
+import type { AboutContent, CountdownContent, HeroContent, MessageContent } from '~/features/sections/section.content.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { SectionBackground, SectionOccasion } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
@@ -17,6 +17,9 @@ import WebsiteHeroFields from './WebsiteHeroFields.vue'
 import WebsiteLayoutPickerDialog from './WebsiteLayoutPickerDialog.vue'
 import WebsitePhotoField from './WebsitePhotoField.vue'
 import WebsitePositionPicker from './WebsitePositionPicker.vue'
+import WebsiteMessageFields from './WebsiteMessageFields.vue'
+import WebsiteAboutFields from './WebsiteAboutFields.vue'
+import { aboutTimelineShowsPhotos, isAboutTimelineLayout } from '~/features/sections/about'
 
 // Everything about one section, top to bottom: its layout (picked from thumbnails), the layout's placement options,
 // the background (and its photo), the photos inside the layout, and the text.
@@ -24,6 +27,8 @@ const props = defineProps<{
   event: Event
   theme: SiteTheme
   occasion: SectionOccasion
+  // The section was just added: the layout picker says so
+  isNew?: boolean
 }>()
 
 const section = defineModel<WebsiteSection>('section', { required: true })
@@ -36,7 +41,8 @@ const definition = computed(() => getSectionType(section.value.type))
 const layout = computed(() => getSectionLayout(section.value.type, section.value.layout))
 const options = computed(() => (layout.value ? resolveLayoutOptions(layout.value.options, section.value.options) : {}))
 
-const isLayoutPickerOpen = ref(false)
+// The editor opens it right after a section is added, so the host picks its layout first
+const isLayoutPickerOpen = defineModel<boolean>('layoutPickerOpen', { default: false })
 // Switching layout resets its options and keeps the background when the new layout supports it
 const pickLayout = (key: string) => (section.value = changeSectionLayout(section.value, key))
 
@@ -70,6 +76,14 @@ const heroContent = computed({
 })
 const countdownContent = computed({
   get: () => section.value.content as CountdownContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const aboutContent = computed({
+  get: () => section.value.content as AboutContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const messageContent = computed({
+  get: () => section.value.content as MessageContent,
   set: content => (section.value = { ...section.value, content }),
 })
 </script>
@@ -184,6 +198,14 @@ const countdownContent = computed({
       </h4>
       <WebsiteHeroFields v-if="section.type === 'hero'" v-model:content="heroContent" :event="event" />
       <WebsiteCountdownFields v-else-if="section.type === 'countdown'" v-model:content="countdownContent" />
+      <WebsiteMessageFields v-else-if="section.type === 'message'" v-model:content="messageContent" />
+      <WebsiteAboutFields
+        v-else-if="section.type === 'about'"
+        v-model:content="aboutContent"
+        :event-id="event.id"
+        :is-timeline="isAboutTimelineLayout(section.layout)"
+        :show-chapter-photos="aboutTimelineShowsPhotos(section.layout)"
+      />
     </section>
 
     <WebsiteLayoutPickerDialog
@@ -191,6 +213,7 @@ const countdownContent = computed({
       :section="section"
       :theme="theme"
       :occasion="occasion"
+      :is-new="isNew"
       @pick="pickLayout"
     />
   </div>

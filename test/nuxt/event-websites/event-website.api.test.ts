@@ -37,7 +37,7 @@ describe('event website api', () => {
         layout: 'boxes',
         background: 'primary' as const,
         options: { dateSide: 'left' },
-        content: { title: 'Soon', showSeconds: true },
+        content: { heading: 'Soon', showSeconds: true, layoutPhotos: [] },
         contentVersion: 1,
         isVisible: true,
         visibility: 'Always' as const,

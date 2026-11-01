@@ -89,11 +89,18 @@ const confirmDialog = async (label: string) => {
   await settle()
 }
 
+const pressEscape = async () => {
+  document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  await settle()
+}
+
+// Adds a section and keeps its first layout (closes the layout picker that opens after adding)
 async function addSection(wrapper: Editor, type: string) {
   await buttonNamed(wrapper, 'Add a section').trigger('click')
   await settle()
   inBody(`[data-add-section="${type}"]`)!.click()
   await settle()
+  await pressEscape()
   // Layouts load on demand
   await vi.waitFor(() => expect(wrapper.find('[data-preview-section] section').exists()).toBe(true))
 }
@@ -101,6 +108,75 @@ async function addSection(wrapper: Editor, type: string) {
 describe('website editor', () => {
   afterEach(() => {
     document.body.innerHTML = ''
+  })
+
+  describe('one hero per page', () => {
+    const sectionMenuItem = async (wrapper: Editor, typeName: string, label: string) => {
+      await wrapper.find(`button[aria-label="More actions for ${typeName}"]`).trigger('keydown', { key: 'Enter' })
+      await settle()
+      return [...document.body.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(item => item.textContent?.trim() === label)!
+    }
+
+    it('cannot save or publish without a hero, saying why', async () => {
+      const countdown = createWebsiteSection('countdown', event)
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [countdown] }, { isSaved: true, isDirty: true })
+
+      expect(wrapper.find('[data-save-status]').text()).toBe('Add a hero section: every website needs one.')
+      expect(wrapper.find('[data-save-bar]').classes()).toContain('bg-red-50')
+      expect(buttonNamed(wrapper, 'Save changes').attributes('disabled')).toBeDefined()
+      expect(wrapper.find('[data-publish]').attributes('disabled')).toBeDefined()
+      expect(wrapper.find('[data-publish]').attributes('title')).toBe('Add a hero section: every website needs one.')
+
+      await addSection(wrapper, 'hero')
+      expect(wrapper.find('[data-save-status]').text()).toBe('You have unsaved changes.')
+      expect(buttonNamed(wrapper, 'Save changes').attributes('disabled')).toBeUndefined()
+      expect(wrapper.find('[data-publish]').attributes('disabled')).toBeUndefined()
+    })
+
+    it('counts a hidden hero as the page\'s hero', async () => {
+      const hero = { ...createWebsiteSection('hero', event), isVisible: false }
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [hero, createWebsiteSection('countdown', event)] }, { isSaved: true, isDirty: true })
+
+      expect(wrapper.find('[data-save-status]').text()).toBe('You have unsaved changes.')
+      expect(buttonNamed(wrapper, 'Save changes').attributes('disabled')).toBeUndefined()
+    })
+
+    it('does not offer another hero once the page has one', async () => {
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] })
+
+      await buttonNamed(wrapper, 'Add a section').trigger('click')
+      await settle()
+
+      expect(inBody('[data-add-section="hero"]')!.hasAttribute('disabled')).toBe(true)
+      expect(inBody('[data-add-section="hero"]')!.textContent).toContain('Your page already has its hero')
+      expect(inBody('[data-add-section="countdown"]')!.hasAttribute('disabled')).toBe(false)
+      inBody('[data-add-section="hero"]')!.click()
+      await settle()
+      expect(website(wrapper).sections).toHaveLength(1)
+    })
+
+    it('cannot duplicate the hero', async () => {
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event), createWebsiteSection('countdown', event)] })
+
+      expect((await sectionMenuItem(wrapper, 'Hero', 'Duplicate')).hasAttribute('data-disabled')).toBe(true)
+    })
+
+    it('can still duplicate other sections', async () => {
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event), createWebsiteSection('countdown', event)] })
+
+      expect((await sectionMenuItem(wrapper, 'Countdown', 'Duplicate')).hasAttribute('data-disabled')).toBe(false)
+    })
+
+    it('asks for a new hero after the hero is deleted', async () => {
+      const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event), createWebsiteSection('countdown', event)] }, { isSaved: true })
+
+      ;(await sectionMenuItem(wrapper, 'Hero', 'Delete')).click()
+      await settle()
+      await confirmDialog('Delete')
+
+      expect(website(wrapper).sections.map(section => section.type)).toEqual(['countdown'])
+      expect(wrapper.find('[data-save-status]').text()).toBe('Add a hero section: every website needs one.')
+    })
   })
 
   it('starts empty, offering each section type to add', async () => {
@@ -111,7 +187,7 @@ describe('website editor', () => {
     await settle()
 
     expect([...document.body.querySelectorAll('[data-add-section]')].map(el => el.getAttribute('data-add-section')))
-      .toEqual(['hero', 'countdown'])
+      .toEqual(['hero', 'countdown', 'message', 'about'])
   })
 
   it('adds a hero with the event\'s details, shows it in the preview and opens its settings', async () => {
@@ -135,6 +211,51 @@ describe('website editor', () => {
     expect(wrapper.find('[data-preview-section] h1').text()).toBe('Ana & Marco Santos')
   })
 
+  it('adds a message with a generic signature and edits its message', async () => {
+    const wrapper = await mountEditor()
+    await addSection(wrapper, 'message')
+
+    expect(wrapper.find('[data-preview-section] [data-message-signature]').text()).toBe('With love, from us')
+    await wrapper.find('textarea').setValue('Thank you for coming.\nSee you there!')
+
+    expect(website(wrapper).sections[0]!.content).toMatchObject({ body: 'Thank you for coming.\nSee you there!' })
+    expect(wrapper.find('[data-preview-section] [data-message-body]').text()).toContain('Thank you for coming.')
+  })
+
+  it('asks for the layout right after a section is added', async () => {
+    const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] })
+    await buttonNamed(wrapper, 'Add a section').trigger('click')
+    await settle()
+    inBody('[data-add-section="countdown"]')!.click()
+    await settle()
+
+    const dialog = inBody('[role="dialog"]')!
+    expect(dialog.textContent).toContain('Choose a countdown layout')
+    expect(dialog.textContent).toContain('Pick how your new section looks')
+    // The section is already there with the first layout, picked by default
+    expect(website(wrapper).sections.map(section => section.layout)).toEqual(['fullscreen', 'boxes'])
+    expect(inBody('[data-layout="boxes"]')!.getAttribute('aria-pressed')).toBe('true')
+
+    inBody('[data-layout="rings"]')!.click()
+    await settle()
+
+    expect(website(wrapper).sections[1]!.layout).toBe('rings')
+    expect(inBody('[role="dialog"]')).toBeNull()
+  })
+
+  it('keeps the first layout when the picker is closed, and later offers it with the usual wording', async () => {
+    const wrapper = await mountEditor()
+    await addSection(wrapper, 'hero')
+
+    expect(inBody('[role="dialog"]')).toBeNull()
+    expect(website(wrapper).sections[0]!.layout).toBe('fullscreen')
+
+    await wrapper.find('[data-change-layout]').trigger('click')
+    await settle()
+    expect(inBody('[role="dialog"]')!.textContent).toContain('only the arrangement changes')
+    expect(inBody('[role="dialog"]')!.textContent).not.toContain('Pick how your new section looks')
+  })
+
   it('changes the layout from the layout picker, keeping the text', async () => {
     const wrapper = await mountEditor()
     await addSection(wrapper, 'hero')
@@ -144,14 +265,14 @@ describe('website editor', () => {
     inBody('[data-layout="split"]')!.click()
     await settle()
 
-    // Every layout supports the photo background, so it is kept
-    expect(website(wrapper).sections[0]).toMatchObject({ layout: 'split', background: 'photo' })
+    // Full starts on the photo; Split has its own photo, so it starts on light
+    expect(website(wrapper).sections[0]).toMatchObject({ layout: 'split', background: 'light' })
     await vi.waitFor(() => expect(wrapper.find('[data-preview-section] h1').text()).toBe('Ana & Marco'))
-    // Split shows one photo inside the layout: a photo field next to the background photo
+    // Split shows one photo inside the layout: one photo field (no background photo on light)
     const photoLabels = wrapper.findAll('[data-photo-label]')
-    expect(photoLabels.map(label => label.text())).toEqual(['Background photo', 'Photo'])
+    expect(photoLabels.map(label => label.text())).toEqual(['Photo'])
     // A single photo is already named by the "Photo" heading, so its label is for screen readers only
-    expect(photoLabels[1]!.classes()).toContain('sr-only')
+    expect(photoLabels[0]!.classes()).toContain('sr-only')
   })
 
   it('offers the background photo only on the photo background', async () => {
@@ -273,7 +394,7 @@ describe('website editor', () => {
   })
 
   it('saves and discards from the save bar, only when there are changes', async () => {
-    const wrapper = await mountEditor(createBlankWebsite(), { isSaved: true, isDirty: false })
+    const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] }, { isSaved: true, isDirty: false })
 
     expect(wrapper.find('[data-save-status]').text()).toBe('All changes saved.')
     expect(wrapper.find('[data-save-bar]').classes()).toContain('bg-green-50')
@@ -314,7 +435,7 @@ describe('website editor', () => {
       const wrapper = await mountEditor(withHero(), { isSaved: true, isDirty: false })
 
       expect(wrapper.find('[data-publish-status]').text()).toBe('Not published')
-      expect(buttonNamed(wrapper, 'View live site').attributes('disabled')).toBeDefined()
+      expect(buttonNamed(wrapper, 'View website').attributes('disabled')).toBeDefined()
       expect(wrapper.find('[data-view-site]').exists()).toBe(false)
       expect(publishButton(wrapper).text()).toBe('Publish')
 

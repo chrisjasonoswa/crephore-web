@@ -13,7 +13,7 @@ const FRAMES = 5
 const frames = computed(() => Array.from({ length: FRAMES }, (_, i) => props.content.layoutPhotos[i]))
 const align = computed(() => (props.options.textAlign === 'start' ? 'start' : 'center'))
 // Above the names, or between the details and the button
-const stripSlot = computed(() => (props.options.photoPosition === 'above' ? 'before-title' : 'before-cta'))
+const stripSlot = computed(() => (props.options.photoPosition === 'above' ? 'before-heading' : 'before-cta'))
 </script>
 
 <template>

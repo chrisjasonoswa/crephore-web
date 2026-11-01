@@ -23,7 +23,7 @@ const theme = ref<SiteTheme>({
 })
 
 // One section of each type, in page order
-const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown')])
+const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown'), createDefaultSection('message'), createDefaultSection('about')])
 
 // The event's start, for the countdown: try a far date, the last hour, and one that has passed
 const occasionChoices = [

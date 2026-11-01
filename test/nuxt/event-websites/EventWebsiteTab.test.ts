@@ -49,7 +49,7 @@ const saved = {
   eventId: 5,
   theme: { primaryColor: '#1E2A44', accentColor: '#E8A598', backgroundColor: null, fontPairingKey: 'serif_classic', cornerStyle: 'soft' },
   sections: [
-    { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'right', textPosition: 'center' }, content: { title: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
+    { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'right', textPosition: 'center' }, content: { heading: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
   ],
   publishedAt: null,
   hasUnpublishedChanges: false,
@@ -156,20 +156,21 @@ describe('event website tab', () => {
     const wrapper = await mountTab()
 
     await wrapper.find('[data-start="blank"]').trigger('click')
-    // A blank page has nothing to save yet
-    expect(saveStatus(wrapper)).toBe('Not saved yet. Save to keep your website.')
+    // A blank page has nothing to save yet, and needs its hero first
+    expect(saveStatus(wrapper)).toBe('Add a hero section: every website needs one.')
     expect(buttonNamed(wrapper, 'Save changes').attributes('disabled')).toBeDefined()
 
     await buttonNamed(wrapper, 'Add a section').trigger('click')
     await settle()
-    document.body.querySelector<HTMLElement>('[data-add-section="countdown"]')!.click()
+    document.body.querySelector<HTMLElement>('[data-add-section="hero"]')!.click()
     await settle()
-    updateEventWebsite.mockResolvedValue({ data: { ...saved, sections: [{ ...saved.sections[0]!, id: 31, type: 'countdown', layout: 'boxes' }] } })
+    expect(saveStatus(wrapper)).toBe('Not saved yet. Save to keep your website.')
+    updateEventWebsite.mockResolvedValue({ data: { ...saved, sections: [{ ...saved.sections[0]!, id: 31 }] } })
     await buttonNamed(wrapper, 'Save changes').trigger('click')
     await settle()
 
     expect(updateEventWebsite).toHaveBeenCalledWith(5, expect.objectContaining({
-      sections: [expect.objectContaining({ id: null, type: 'countdown' })],
+      sections: [expect.objectContaining({ id: null, type: 'hero' })],
     }))
     expect(saveStatus(wrapper)).toBe('All changes saved.')
   })

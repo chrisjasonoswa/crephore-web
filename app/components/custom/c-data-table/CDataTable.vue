@@ -3,7 +3,7 @@
   lang="ts"
   generic="TItem extends { id: number }, TForm extends Record<string, unknown>, TRequest extends ApiPaginatedRequest"
 >
-import { ChevronRight, Loader2 } from '@lucide/vue'
+import { ChevronRight, Eye, Loader2, Pencil, Trash2 } from '@lucide/vue'
 import {
   FlexRender,
   getCoreRowModel,
@@ -43,6 +43,7 @@ import { pluralize, titleize } from "inflection"
 export type CDataTableRowActionsConfig<TData> = {
   separator?: boolean
   buttonName?: string
+  icon?: Component
   className?: string
   variant?: 'default' | 'destructive'
   onClick?: (data: any) => void
@@ -61,6 +62,8 @@ type GeneralProps = {
   updateItem?: (payload: WithRequiredId<TForm>) => Promise<unknown>
   // Edit somewhere else (e.g. its own page) instead of the table's dialog
   onUpdateItemClicked?: (item: TItem) => void
+  // The row's edit button; "Edit" by default (e.g. "Manage" when it opens a page with more than a form)
+  updateItemLabel?: string
   deleteItem?: (id: number) => Promise<unknown>
   mapItemToFormValues?: (item: TItem) => TForm
   viewOnlyRow?: (row: TItem | null) => boolean
@@ -86,6 +89,7 @@ const props = withDefaults(defineProps<
 >(), {
   defaultPageSize: 10,
   dialogMaxWidth: '960px',
+  updateItemLabel: 'Edit',
 })
 
 const tableIsLoading = ref(false)
@@ -135,7 +139,8 @@ const columnsWithRowActions = computed(() => {
 
   if (onUpdateClicked) {
     actions.push({
-      buttonName: 'Edit',
+      buttonName: props.updateItemLabel,
+      icon: Pencil,
       onClick: (row) => onUpdateClicked(row.original),
     })
   }
@@ -147,6 +152,7 @@ const columnsWithRowActions = computed(() => {
 
     actions.push({
       buttonName: 'Delete',
+      icon: Trash2,
       variant: 'destructive',
       onClick: (row) => openForm('delete', row.original),
     })
@@ -156,6 +162,7 @@ const columnsWithRowActions = computed(() => {
     if (props.viewOnlyRow && props.viewOnlyRow(row.original)) {
       return [{
         buttonName: 'View',
+        icon: Eye,
         onClick: () => openForm('view', row.original),
       }]
     }

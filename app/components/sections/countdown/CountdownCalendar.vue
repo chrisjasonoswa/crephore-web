@@ -7,7 +7,7 @@ import CountdownDividedNumbers from './CountdownDividedNumbers.vue'
 import CountdownHeading from './CountdownHeading.vue'
 
 // Layout `calendar`: a calendar page of the occasion's month with its day circled, beside (`calendarSide`) the
-// eyebrow, title, date and a small countdown. On phones the calendar goes on top and everything is centred.
+// eyebrow, heading, date and a small countdown. On phones the calendar goes on top and everything is centred.
 // The page is paper-like (the light background and text) on every background.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 

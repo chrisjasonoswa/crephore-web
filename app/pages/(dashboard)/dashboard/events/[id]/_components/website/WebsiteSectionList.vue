@@ -108,7 +108,8 @@ async function onHandleKeydown(event: KeyboardEvent, index: number) {
           <DropdownMenuItem :disabled="index === sections.length - 1" @select="emit('move', index, index + 1)">
             <ArrowDown /> Move down
           </DropdownMenuItem>
-          <DropdownMenuItem @select="emit('duplicate', section)">
+          <!-- A page has one hero -->
+          <DropdownMenuItem :disabled="section.type === 'hero'" @select="emit('duplicate', section)">
             <Copy /> Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />

@@ -17,8 +17,8 @@ const backgroundPhoto = computed({
   set: backgroundPhoto => (content.value = { ...content.value, backgroundPhoto }),
 })
 const layoutPhoto = computed({
-  get: () => content.value.layoutPhoto,
-  set: layoutPhoto => (content.value = { ...content.value, layoutPhoto }),
+  get: () => content.value.layoutPhotos[0],
+  set: url => (content.value = { ...content.value, layoutPhotos: url ? [url] : [] }),
 })
 </script>
 

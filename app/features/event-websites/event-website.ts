@@ -5,6 +5,7 @@ import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { toRaw } from 'vue'
 import { formatOccasionDate } from '~/features/sections/countdown'
 import { createDefaultSection, getSectionType } from '~/features/sections/section.registry'
+import { upgradeSectionContent } from '~/features/sections/section.upgrade'
 import { fontPairings } from '~/site-theme/fontPairings'
 import { colorPresets } from '~/site-theme/presets'
 
@@ -31,11 +32,14 @@ export function createBlankWebsite(): EventWebsiteDraft {
 // The event's own details a new section starts with, instead of the sample text
 const eventDetails: { [T in SectionType]: (event: Event) => Partial<SectionContentMap[T]> } = {
   hero: event => ({
-    title: event.name,
+    heading: event.name,
     date: formatOccasionDate(eventOccasion(event)),
     venue: event.venueName || undefined,
   }),
-  countdown: event => ({ title: event.name }),
+  countdown: event => ({ heading: event.name }),
+  // Generic text that suits any event; hosts sign it themselves
+  message: () => ({}),
+  about: () => ({}),
 }
 
 /** A new section for the event's page: the type's first layout and default content, with the event's details filled in. */
@@ -65,7 +69,20 @@ export function moveItem<T>(items: T[], from: number, to: number): T[] {
 }
 
 /* Saving */
-/** A saved website as the editor holds it; each section gets an editor key. */
+/**
+ * Why the website can't be saved, or null. Every website has exactly one hero section (its opening), shown or hidden.
+ * The API checks the same with the same messages.
+ */
+export function websiteProblem(website: EventWebsiteDraft): string | null {
+  const heroes = website.sections.filter(section => section.type === 'hero').length
+  if (heroes === 0)
+    return 'Add a hero section: every website needs one.'
+  if (heroes > 1)
+    return 'A website can only have one hero section.'
+  return null
+}
+
+/** A saved website as the editor holds it; each section gets an editor key, and older content is upgraded. */
 export function websiteFromApi(website: EventWebsite): EventWebsiteDraft {
   const { backgroundColor, ...theme } = website.theme
   return {
@@ -77,7 +94,7 @@ export function websiteFromApi(website: EventWebsite): EventWebsiteDraft {
       layout: section.layout,
       background: section.background,
       options: section.options,
-      content: section.content,
+      content: upgradeSectionContent(section.type, section.content, section.contentVersion),
       isVisible: section.isVisible,
       visibility: section.visibility,
     })),

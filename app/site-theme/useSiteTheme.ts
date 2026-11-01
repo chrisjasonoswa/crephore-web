@@ -112,6 +112,8 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
     '--site-border': `color-mix(in oklch, var(--site-primary) ${pct(BORDER_TINT)}, var(--site-bg))`,
     '--site-font-heading': fontStack(fonts.heading),
     '--site-font-body': fontStack(fonts.body),
+    // Use for italic heading text (`[font-style:var(--site-font-heading-italic)]`), never `italic`: scripts stay upright
+    '--site-font-heading-italic': fonts.heading.script ? 'normal' : 'italic',
     '--site-radius': RADIUS[theme.cornerStyle] ?? RADIUS.soft,
   }
   for (const [step, share] of Object.entries(TINTS))

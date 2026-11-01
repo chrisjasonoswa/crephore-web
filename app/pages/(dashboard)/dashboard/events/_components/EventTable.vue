@@ -30,9 +30,11 @@ const form = useForm<EventFormValues>({
 const loadEvents = (params: ListEventsRequest) =>
   listEvents({ ...params, eventGroupId: props.eventGroupId ?? undefined })
 
+// A new event opens its page right away, where the host carries on (details, website, guests)
 const addEventPayload = async (payload: EventFormValues) => {
-  await addEvent(mapFormValuesToEventRequest(payload))
+  const { data: event } = await addEvent(mapFormValuesToEventRequest(payload))
   emit('changed')
+  navigateTo(eventPagePath(event.id))
 }
 
 const deleteEventPayload = async (id: number) => {
@@ -40,7 +42,8 @@ const deleteEventPayload = async (id: number) => {
   emit('changed')
 }
 
-// Adding is a quick dialog; editing opens the event's page, which also holds its website and guests.
+// Adding is a quick dialog; "Manage" opens the event's page, which holds its details, website and guests (more than
+// editing a form, hence not "Edit").
 const tableProps = computed(() => ({
   resourceName: 'event',
   dialogMaxWidth: '760px',
@@ -51,6 +54,7 @@ const tableProps = computed(() => ({
   loadItems: loadEvents,
   addItem: addEventPayload,
   onUpdateItemClicked: (event: Event) => navigateTo(eventPagePath(event.id)),
+  updateItemLabel: 'Manage',
   deleteItem: deleteEventPayload,
   // The delete dialog submits the form, so it needs valid form values
   mapItemToFormValues: mapEventToFormValues,

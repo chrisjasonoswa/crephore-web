@@ -25,12 +25,12 @@ describe('section photos', () => {
     expect(backgroundPhotoOf(withFirst)).toBeUndefined()
   })
 
-  it('sets the countdown\'s single layout photo', () => {
-    const countdown = withLayoutPhoto(createDefaultSection('countdown'), 0, photo)
+  it.each(['countdown', 'message'] as const)('keeps the %s\'s layout photos in the same list as the hero\'s', (type) => {
+    const section = withLayoutPhoto(createDefaultSection(type), 0, photo)
 
-    expect(layoutPhotosOf(countdown)).toEqual([photo])
-    expect(countdown.content).toMatchObject({ layoutPhoto: photo })
-    expect(backgroundPhotoOf(countdown)).toBeUndefined()
-    expect(layoutPhotosOf(withLayoutPhoto(countdown, 0, ''))).toEqual([undefined])
+    expect(layoutPhotosOf(section)).toEqual([photo])
+    expect(section.content).toMatchObject({ layoutPhotos: [photo] })
+    expect(backgroundPhotoOf(section)).toBeUndefined()
+    expect(layoutPhotosOf(withLayoutPhoto(section, 0, ''))).toEqual([])
   })
 })

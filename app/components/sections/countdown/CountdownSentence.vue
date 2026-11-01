@@ -7,7 +7,7 @@ import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 
 // Layout `sentence`: the countdown written as a line of text, like an invitation ("112 days, 6 hours and
-// 45 minutes"), the title under it in italics ("until we say I do."). Aligned by `textAlign`.
+// 45 minutes"), the heading under it in italics ("until we say I do."). Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
@@ -40,11 +40,11 @@ const joiner = (index: number) => (index === 0 ? '' : index === parts.value.leng
       </p>
 
       <h2
-        v-if="content.title"
-        class="font-(family-name:--site-font-heading) text-2xl italic text-balance @2xl:text-4xl"
+        v-if="content.heading"
+        class="font-(family-name:--site-font-heading) text-2xl [font-style:var(--site-font-heading-italic)] text-balance @2xl:text-4xl"
         :class="styles.eyebrow"
       >
-        {{ content.title }}
+        {{ content.heading }}
       </h2>
 
       <CountdownButton :cta="content.cta" :styles="styles" class="mt-2" />

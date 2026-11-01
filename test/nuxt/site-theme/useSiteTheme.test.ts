@@ -1,6 +1,7 @@
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { describe, expect, it } from 'vitest'
 import { contrastRatio, LIGHT_TEXT, MIN_CONTRAST, mixOklch, mixSrgb } from '~/site-theme/color'
+import { fontPairings, siteFontFamilies } from '~/site-theme/fontPairings'
 import { backgroundPresets, colorPresets } from '~/site-theme/presets'
 import { lightBackground, siteThemeVars, siteThemeWarnings } from '~/site-theme/useSiteTheme'
 
@@ -174,5 +175,28 @@ describe('siteThemeVars light background', () => {
   it('warns when the accent is very close to the background', () => {
     expect(siteThemeWarnings({ ...themeWith('#1E2A44', '#F5EFE5'), backgroundColor: '#F7F1E7' }))
       .toContain('The accent is very close to the background, so accent sections will barely stand out from the page.')
+  })
+})
+
+describe('siteThemeVars fonts', () => {
+  it('uses the pairing\'s heading and body fonts', () => {
+    const vars = siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: 'script' })
+
+    expect(vars['--site-font-heading']).toBe('"Great Vibes", cursive')
+    expect(vars['--site-font-body']).toBe('"Raleway", system-ui, sans-serif')
+  })
+
+  it('keeps italic heading text upright for a script, and slanted for the others', () => {
+    for (const key of ['script', 'luxurious_script'])
+      expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: key })['--site-font-heading-italic'], key).toBe('normal')
+    for (const pairing of fontPairings.filter(pairing => !pairing.heading.script))
+      expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: pairing.key })['--site-font-heading-italic'], pairing.key).toBe('italic')
+  })
+
+  it('registers every pairing\'s fonts so they load on event websites', () => {
+    const names = siteFontFamilies.map(font => font.name)
+
+    expect(names).toEqual(expect.arrayContaining(['Great Vibes', 'Raleway', 'Luxurious Script', 'Jost']))
+    expect(new Set(fontPairings.map(pairing => pairing.key)).size).toBe(fontPairings.length)
   })
 })

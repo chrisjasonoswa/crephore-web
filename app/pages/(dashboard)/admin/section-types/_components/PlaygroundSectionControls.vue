@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import type { CountdownContent, HeroContent } from '~/features/sections/section.content.type'
+import type { AboutContent, CountdownContent, HeroContent, MessageContent } from '~/features/sections/section.content.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { Section, SectionBackground } from '~/features/sections/section.type'
 import { positions, resolveLayoutOptions } from '~/features/sections/section.options'
 import { changeSectionLayout, getSectionLayout, getSectionType } from '~/features/sections/section.registry'
-import { sectionBackgroundLabels } from '~/features/sections/section.type'
+import { inPickerOrder, sectionBackgroundLabels } from '~/features/sections/section.type'
 import PlaygroundCountdownContent from './PlaygroundCountdownContent.vue'
 import PlaygroundHeroContent from './PlaygroundHeroContent.vue'
+import PlaygroundAboutContent from './PlaygroundAboutContent.vue'
+import PlaygroundMessageContent from './PlaygroundMessageContent.vue'
 
 // Settings of one section on the page: layout, its placement options, background, and its content
-// (per section type: the hero's background and layout photos; the countdown's seconds, button, background and layout photo).
+// (per section type: the hero's background and layout photos; the countdown's seconds, button, background and layout photo;
+// the message's signature, background and layout photo; the about section's photos, story length and chapters).
 const section = defineModel<Section>('section', { required: true })
 
 const id = useId()
@@ -45,6 +48,14 @@ const heroContent = computed({
 })
 const countdownContent = computed({
   get: () => section.value.content as CountdownContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const aboutContent = computed({
+  get: () => section.value.content as AboutContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const messageContent = computed({
+  get: () => section.value.content as MessageContent,
   set: content => (section.value = { ...section.value, content }),
 })
 </script>
@@ -104,7 +115,7 @@ const countdownContent = computed({
         class="grid w-full auto-cols-fr grid-flow-col"
         @update:model-value="setBackground"
       >
-        <ToggleGroupItem v-for="option in layout?.backgrounds" :key="option" :value="option">
+        <ToggleGroupItem v-for="option in inPickerOrder(layout?.backgrounds ?? [])" :key="option" :value="option">
           {{ sectionBackgroundLabels[option] }}
         </ToggleGroupItem>
       </ToggleGroup>
@@ -115,5 +126,7 @@ const countdownContent = computed({
 
     <PlaygroundHeroContent v-if="section.type === 'hero'" v-model:content="heroContent" />
     <PlaygroundCountdownContent v-else-if="section.type === 'countdown'" v-model:content="countdownContent" />
+    <PlaygroundMessageContent v-else-if="section.type === 'message'" v-model:content="messageContent" />
+    <PlaygroundAboutContent v-else-if="section.type === 'about'" v-model:content="aboutContent" />
   </div>
 </template>

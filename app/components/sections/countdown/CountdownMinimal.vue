@@ -8,7 +8,7 @@ import CountdownButton from './CountdownButton.vue'
 import CountdownDividedNumbers from './CountdownDividedNumbers.vue'
 import CountdownHeading from './CountdownHeading.vue'
 
-// Layout `minimal` ("Minimal numbers"): the title over big serif numbers divided by thin lines; no boxes, no date.
+// Layout `minimal` ("Minimal numbers"): the heading over big serif numbers divided by thin lines; no boxes, no date.
 // Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 

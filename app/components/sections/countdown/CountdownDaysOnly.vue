@@ -6,7 +6,7 @@ import { formatOccasionDate, useCountdown } from '~/features/sections/countdown'
 import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 
-// Layout `days-only` ("Days only"): one huge number of days ("112 days to go"), then the title and date.
+// Layout `days-only` ("Days only"): one huge number of days ("112 days to go"), then the heading and date.
 // Bold and simple; ignores `showSeconds`. Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 
@@ -35,10 +35,10 @@ const justify = { start: 'justify-start', center: 'justify-center', end: 'justif
       </p>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="[justify[align], styles.muted]">
-        <h2 v-if="content.title">
-          {{ content.title }}
+        <h2 v-if="content.heading">
+          {{ content.heading }}
         </h2>
-        <span v-if="content.title" aria-hidden="true">·</span>
+        <span v-if="content.heading" aria-hidden="true">·</span>
         <span data-countdown-date>{{ date }}</span>
       </div>
 

@@ -24,7 +24,7 @@ const layoutPhotos = ['https://example.com/1.jpg', 'https://example.com/2.jpg', 
 
 const content: HeroContent = {
   eyebrow: 'Together with their families',
-  title: 'Bea & Carlo',
+  heading: 'Bea & Carlo',
   date: 'Saturday, 14 February 2027',
   venue: 'Manila Cathedral',
   backgroundPhoto,
@@ -72,7 +72,7 @@ const comesBefore = (wrapper: Awaited<ReturnType<typeof mountLayout>>, first: st
 }
 
 describe.each(layouts)('hero layout $key', ({ key, photoCount, placeholderCount = photoCount }) => {
-  it('renders the title, details and RSVP button', async () => {
+  it('renders the heading, details and RSVP button', async () => {
     const wrapper = await mountLayout(key)
 
     expect(wrapper.find('h1').text()).toBe('Bea & Carlo')
@@ -134,8 +134,8 @@ describe.each(layouts)('hero layout $key', ({ key, photoCount, placeholderCount 
     }
   })
 
-  it('renders only the title when the optional content is missing', async () => {
-    const wrapper = await mountLayout(key, { content: { title: 'Bea & Carlo', layoutPhotos: [] } })
+  it('renders only the heading when the optional content is missing', async () => {
+    const wrapper = await mountLayout(key, { content: { heading: 'Bea & Carlo', layoutPhotos: [] } })
 
     expect(wrapper.find('h1').text()).toBe('Bea & Carlo')
     expect(wrapper.find('a').exists()).toBe(false)

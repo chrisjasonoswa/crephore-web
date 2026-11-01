@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { changeSectionLayout, createDefaultSection, getSectionLayout, getSectionType, sectionRegistry } from '~/features/sections/section.registry'
-import { sectionBackgrounds } from '~/features/sections/section.type'
+import { inPickerOrder, sectionBackgrounds } from '~/features/sections/section.type'
 
 describe('section registry', () => {
   it('registers the eleven hero layouts in picker order', () => {
@@ -32,6 +32,37 @@ describe('section registry', () => {
       'calendar',
       'strip',
     ])
+  })
+
+  it('registers the eleven message layouts in picker order, each with one photo', () => {
+    const layouts = getSectionType('message').layouts
+    expect(layouts.map(layout => layout.key)).toEqual([
+      'stacked',
+      'split',
+      'side-photo',
+      'polaroid',
+      'portrait',
+      'card',
+      'overlap',
+      'postcard',
+      'editorial',
+      'inline',
+      'photo-middle',
+    ])
+    expect(layouts.every(layout => layout.layoutPhotoCount === 1)).toBe(true)
+  })
+
+  it('starts the message\'s paper layouts on the accent, and the others on light', () => {
+    for (const key of ['polaroid', 'card', 'postcard'])
+      expect(getSectionLayout('message', key)!.backgrounds, key).toEqual(['accent', 'light', 'primary', 'photo'])
+    expect(getSectionLayout('message', 'stacked')!.backgrounds).toEqual(['light', 'primary', 'accent', 'photo'])
+  })
+
+  it('shows the backgrounds in one order in pickers, whatever the layout starts on', () => {
+    expect(inPickerOrder(getSectionLayout('message', 'card')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
+    expect(inPickerOrder(getSectionLayout('countdown', 'strip')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
+    expect(inPickerOrder(getSectionLayout('hero', 'fullscreen')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
+    expect(inPickerOrder(getSectionLayout('hero', 'overlay-card')!.backgrounds)).toEqual(['photo'])
   })
 
   it('puts the countdown over a photo on the photo background only, and the strip on a colour band by default', () => {
@@ -83,6 +114,17 @@ describe('section registry', () => {
     }
   })
 
+  it('starts only Full and Photo + card on the photo; layouts with their own photos never do', () => {
+    for (const definition of Object.values(sectionRegistry)) {
+      for (const layout of definition.layouts) {
+        if (layout.layoutPhotoCount > 0)
+          expect(layout.backgrounds[0], `${definition.type}/${layout.key}`).not.toBe('photo')
+      }
+    }
+    expect(getSectionType('hero').layouts.filter(layout => layout.backgrounds[0] === 'photo').map(layout => layout.key))
+      .toEqual(['fullscreen', 'overlay-card'])
+  })
+
   it('puts photo-backed layouts on the photo background only, Full on the photo first, and the rest on a colour first', () => {
     expect(getSectionLayout('hero', 'fullscreen')!.backgrounds).toEqual(['photo', 'light', 'primary', 'accent'])
     expect(getSectionLayout('hero', 'overlay-card')!.backgrounds).toEqual(['photo'])
@@ -118,10 +160,10 @@ describe('createDefaultSection', () => {
   it('copies the default content so editing a section never changes the registry', () => {
     const section = createDefaultSection('hero')
 
-    section.content.title = 'Changed'
+    section.content.heading = 'Changed'
     section.content.layoutPhotos.push('https://example.com/photo.jpg')
 
-    expect(getSectionType('hero').defaultContent.title).not.toBe('Changed')
+    expect(getSectionType('hero').defaultContent.heading).not.toBe('Changed')
     expect(getSectionType('hero').defaultContent.layoutPhotos).toEqual([])
   })
 })
@@ -134,13 +176,24 @@ describe('changeSectionLayout', () => {
     expect(section.options).toEqual({ photoSide: 'right', textPosition: 'left' })
   })
 
-  it('keeps the background when the new layout supports it, else uses its default', () => {
-    const onPhoto = createDefaultSection('hero')
+  it('moves a default background to the new layout\'s default', () => {
+    // A new hero starts on Full, on the photo: layouts with their own photos start on light instead
+    const full = createDefaultSection('hero')
 
-    expect(changeSectionLayout(onPhoto, 'overlay-card').background).toBe('photo')
-    expect(changeSectionLayout(onPhoto, 'arch').background).toBe('photo')
-    expect(changeSectionLayout({ ...onPhoto, background: 'light' }, 'overlay-card').background).toBe('photo')
-    expect(changeSectionLayout({ ...onPhoto, layout: 'arch', background: 'accent' }, 'collage').background).toBe('accent')
+    expect(changeSectionLayout(full, 'arch').background).toBe('light')
+    expect(changeSectionLayout(full, 'split').background).toBe('light')
+    expect(changeSectionLayout(full, 'overlay-card').background).toBe('photo')
+    expect(changeSectionLayout({ ...full, layout: 'split', background: 'light' }, 'fullscreen').background).toBe('photo')
+    // The message's paper layouts start on the accent, the others on light
+    expect(changeSectionLayout({ ...createDefaultSection('message'), layout: 'card', background: 'accent' }, 'stacked').background).toBe('light')
+  })
+
+  it('keeps a background the host picked when the new layout supports it, else uses its default', () => {
+    const full = createDefaultSection('hero')
+
+    expect(changeSectionLayout({ ...full, layout: 'arch', background: 'accent' }, 'collage').background).toBe('accent')
+    expect(changeSectionLayout({ ...full, layout: 'split', background: 'photo' }, 'banner').background).toBe('photo')
+    expect(changeSectionLayout({ ...full, background: 'light' }, 'overlay-card').background).toBe('photo')
   })
 
   it('leaves the section alone for an unknown layout', () => {

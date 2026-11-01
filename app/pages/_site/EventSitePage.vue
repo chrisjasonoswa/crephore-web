@@ -4,6 +4,7 @@ import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { setResponseStatus } from 'h3'
 import SectionRenderer from '~/components/sections/SectionRenderer.vue'
 import SiteThemeScope from '~/components/sections/SiteThemeScope.vue'
+import { upgradeSectionContent } from '~/features/sections/section.upgrade'
 import { getSite } from '~/features/sites/site.api'
 
 // An event's published website, as guests see it at <subdomain>.<site domain> (see app/router.options.ts).
@@ -33,7 +34,11 @@ const theme = computed<SiteTheme | null>(() => {
   const { backgroundColor, ...rest } = site.value.theme
   return backgroundColor ? { ...rest, backgroundColor } : rest
 })
-const sections = computed<Section[]>(() => site.value?.sections ?? [])
+// Published content may be from an older content version; upgraded like in the editor
+const sections = computed<Section[]>(() => (site.value?.sections ?? []).map(section => ({
+  ...section,
+  content: upgradeSectionContent(section.type, section.content, section.contentVersion),
+})))
 const occasion = computed(() => site.value && { startsAt: site.value.startsAt, timezone: site.value.timezone })
 
 // The event's name alone, without Crephore's title suffix

@@ -2,7 +2,7 @@
 // A section type has one or more layouts (visual variations); each layout is one component
 // in `components/sections/<type>/` and is registered in `section.registry.ts`.
 
-import type { CountdownContent, HeroContent } from './section.content.type'
+import type { AboutContent, CountdownContent, HeroContent, MessageContent } from './section.content.type'
 
 /**
  * The background a section sits on. Each background maps to site-theme variables
@@ -12,8 +12,13 @@ import type { CountdownContent, HeroContent } from './section.content.type'
  */
 export type SectionBackground = 'light' | 'photo' | 'primary' | 'accent'
 
-// Order used in pickers (two per row: Light / Photo, Primary / Accent)
-export const sectionBackgrounds: SectionBackground[] = ['light', 'photo', 'primary', 'accent']
+// Order used in pickers, whatever a layout's default
+export const sectionBackgrounds: SectionBackground[] = ['light', 'primary', 'accent', 'photo']
+
+/** The given backgrounds in picker order (a layout lists its default first, which may not be Light). */
+export function inPickerOrder(backgrounds: SectionBackground[]): SectionBackground[] {
+  return sectionBackgrounds.filter(background => backgrounds.includes(background))
+}
 
 /** Display names for the backgrounds (shown in the playground and editor). */
 export const sectionBackgroundLabels: Record<SectionBackground, string> = {
@@ -27,6 +32,8 @@ export const sectionBackgroundLabels: Record<SectionBackground, string> = {
 export interface SectionContentMap {
   hero: HeroContent
   countdown: CountdownContent
+  message: MessageContent
+  about: AboutContent
 }
 
 export type SectionType = keyof SectionContentMap

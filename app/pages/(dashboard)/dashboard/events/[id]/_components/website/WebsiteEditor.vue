@@ -7,7 +7,7 @@ import { CloudOff, ExternalLink, MoreHorizontal, Plus, RotateCcw } from '@lucide
 import CConfirmationModal from '~/components/custom/c-modal/CConfirmationModal.vue'
 import PreviewFrame from '~/components/site-editor/PreviewFrame.vue'
 import ThemeControls from '~/components/site-editor/ThemeControls.vue'
-import { createWebsiteSection, duplicateWebsiteSection, eventOccasion, moveItem } from '~/features/event-websites/event-website'
+import { createWebsiteSection, duplicateWebsiteSection, eventOccasion, moveItem, websiteProblem } from '~/features/event-websites/event-website'
 import { getSectionType } from '~/features/sections/section.registry'
 import WebsiteAddSectionDialog from './WebsiteAddSectionDialog.vue'
 import WebsitePreview from './WebsitePreview.vue'
@@ -46,13 +46,18 @@ const emit = defineEmits<{
   publish: []
 }>()
 
+// What has to change before it can be saved (e.g. no hero), shown instead of the save status
+const problem = computed(() => websiteProblem(website.value))
+
 const saveStatus = computed(() => {
+  if (problem.value)
+    return problem.value
   if (!props.isSaved)
     return 'Not saved yet. Save to keep your website.'
   return props.isDirty ? 'You have unsaved changes.' : 'All changes saved.'
 })
 // Green once everything is saved, red while anything isn't
-const saveAlert = computed(() => toastAndAlertStyles[(props.isSaved && !props.isDirty ? 'success' : 'error') satisfies CustomToastType])
+const saveAlert = computed(() => toastAndAlertStyles[(props.isSaved && !props.isDirty && !problem.value ? 'success' : 'error') satisfies CustomToastType])
 
 const isPublished = computed(() => props.publishedAt !== null)
 // Guests would see something else after publishing (unsaved edits are saved first)
@@ -63,7 +68,7 @@ const publishStatus = computed(() => {
   return hasChangesToPublish.value ? 'Live · changes not published' : 'Live'
 })
 const canPublish = computed(() =>
-  hasChangesToPublish.value && !props.isSaving && !props.isPublishing && website.value.sections.some(section => section.isVisible))
+  hasChangesToPublish.value && !props.isSaving && !props.isPublishing && !problem.value && website.value.sections.some(section => section.isVisible))
 const publishLabel = computed(() => {
   if (props.isPublishing)
     return 'Publishing…'
@@ -71,7 +76,15 @@ const publishLabel = computed(() => {
     return 'Publish'
   return hasChangesToPublish.value ? 'Publish changes' : 'Published'
 })
+const publishHint = computed(() => {
+  if (problem.value)
+    return problem.value
+  return website.value.sections.some(section => section.isVisible) ? undefined : 'Add a visible section to publish'
+})
 const isBusy = computed(() => props.isSaving || props.isPublishing)
+
+// One hero per page: the add dialog doesn't offer another
+const hasHero = computed(() => website.value.sections.some(section => section.type === 'hero'))
 
 const isUnpublishOpen = ref(false)
 
@@ -96,10 +109,20 @@ const selected = computed({
   },
 })
 
+// The layout picker of the section being edited; it opens on its own for a section just added
+const isLayoutPickerOpen = ref(false)
+const newSectionKey = ref<string | null>(null)
+watch(isLayoutPickerOpen, (open) => {
+  if (!open)
+    newSectionKey.value = null
+})
+
 function select(key: string) {
   selectedKey.value = key
   panel.value = 'sections'
+  isLayoutPickerOpen.value = false
 }
+
 
 const indexOf = (section: WebsiteSection) => sections.value.findIndex(item => item.key === section.key)
 
@@ -112,7 +135,10 @@ function insertAt(index: number, section: WebsiteSection) {
 const isAddOpen = ref(false)
 function addSection(type: SectionType) {
   const index = selected.value ? indexOf(selected.value) + 1 : sections.value.length
-  insertAt(index, createWebsiteSection(type, props.event))
+  const section = createWebsiteSection(type, props.event)
+  insertAt(index, section)
+  newSectionKey.value = section.key
+  isLayoutPickerOpen.value = true
 }
 
 const duplicate = (section: WebsiteSection) => insertAt(indexOf(section) + 1, duplicateWebsiteSection(section))
@@ -161,17 +187,17 @@ function startOver() {
       <Button v-if="isPublished" variant="outline" size="sm" as-child>
         <a data-view-site :href="siteUrl" target="_blank" rel="noopener">
           <ExternalLink />
-          View live site
+          View website
         </a>
       </Button>
       <Button v-else type="button" variant="outline" size="sm" disabled title="Publish your website to see it live">
         <ExternalLink />
-        View live site
+        View website
       </Button>
       <Button type="button" variant="outline" size="sm" :disabled="!isSaved || !isDirty || isBusy" @click="emit('discard')">
         Discard changes
       </Button>
-      <Button type="button" variant="outline" size="sm" :disabled="!isDirty || isBusy" @click="emit('save')">
+      <Button type="button" variant="outline" size="sm" :disabled="!isDirty || isBusy || !!problem" @click="emit('save')">
         {{ isSaving ? 'Saving…' : 'Save changes' }}
       </Button>
       <Button
@@ -179,7 +205,7 @@ function startOver() {
         size="sm"
         data-publish
         :disabled="!canPublish"
-        :title="website.sections.some(section => section.isVisible) ? undefined : 'Add a visible section to publish'"
+        :title="publishHint"
         @click="emit('publish')"
       >
         {{ publishLabel }}
@@ -218,9 +244,11 @@ function startOver() {
             <WebsiteSectionSettings
               v-if="selected"
               v-model:section="selected"
+              v-model:layout-picker-open="isLayoutPickerOpen"
               :event="event"
               :theme="theme"
               :occasion="occasion"
+              :is-new="selected.key === newSectionKey"
               @back="selectedKey = null"
             />
             <div v-else class="flex flex-col gap-3">
@@ -261,7 +289,7 @@ function startOver() {
       />
     </PreviewFrame>
 
-    <WebsiteAddSectionDialog v-model:open="isAddOpen" :event="event" :theme="theme" @add="addSection" />
+    <WebsiteAddSectionDialog v-model:open="isAddOpen" :event="event" :theme="theme" :has-hero="hasHero" @add="addSection" />
 
     <CConfirmationModal
       v-model:is-open="isDeleteOpen"

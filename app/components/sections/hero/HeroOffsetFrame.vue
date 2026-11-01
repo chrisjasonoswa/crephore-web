@@ -64,7 +64,7 @@ const blockColours: Record<SectionBackground, string> = {
         align="start"
         size="large"
         labelled-details
-        :title-class="shown === 'light' ? 'text-(--site-primary-text)' : undefined"
+        :heading-class="shown === 'light' ? 'text-(--site-primary-text)' : undefined"
         class="max-w-xl"
       />
     </div>

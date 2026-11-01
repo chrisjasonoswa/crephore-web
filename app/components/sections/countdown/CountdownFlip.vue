@@ -7,7 +7,7 @@ import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 
 // Layout `flip` ("Flip clock"): split-flap cards like an airport board, flipping on each tick (not with reduced
-// motion). The eyebrow above; the title and date below. The cards use the background's button colours, so they
+// motion). The eyebrow above; the heading and date below. The cards use the background's button colours, so they
 // stand out on any background. Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 
@@ -53,10 +53,10 @@ const justifyWide = { start: '@2xl:justify-start', center: '@2xl:justify-center'
       </div>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="justify[align]">
-        <h2 v-if="content.title" class="font-medium">
-          {{ content.title }}
+        <h2 v-if="content.heading" class="font-medium">
+          {{ content.heading }}
         </h2>
-        <span v-if="content.title" aria-hidden="true" :class="styles.muted">·</span>
+        <span v-if="content.heading" aria-hidden="true" :class="styles.muted">·</span>
         <span data-countdown-date :class="styles.muted">{{ date }}</span>
       </div>
 

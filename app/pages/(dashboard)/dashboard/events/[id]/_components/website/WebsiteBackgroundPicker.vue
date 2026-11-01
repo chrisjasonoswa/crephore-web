@@ -2,7 +2,7 @@
 import type { SectionBackground } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { ImageIcon } from '@lucide/vue'
-import { sectionBackgroundLabels } from '~/features/sections/section.type'
+import { inPickerOrder, sectionBackgroundLabels } from '~/features/sections/section.type'
 import { lightBackground } from '~/site-theme/useSiteTheme'
 import WebsiteChoiceGroup from './WebsiteChoiceGroup.vue'
 
@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const background = defineModel<SectionBackground>({ required: true })
 
-const choices = computed(() => props.backgrounds.map(value => ({ value, label: sectionBackgroundLabels[value] })))
+const choices = computed(() => inPickerOrder(props.backgrounds).map(value => ({ value, label: sectionBackgroundLabels[value] })))
 
 const swatchColors = computed<Record<Exclude<SectionBackground, 'photo'>, string>>(() => ({
   light: lightBackground(props.theme),

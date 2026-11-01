@@ -13,7 +13,8 @@ export interface SectionLayoutDefinition {
   // One component per layout, named after the key (`overlay-card` → HeroOverlayCard.vue).
   // Loaded on demand so event pages only download the layouts they use.
   component: Component
-  // The backgrounds it supports, in picker order; the first is the default for new sections.
+  // The backgrounds it supports; the first is the default for new sections. Pickers always show them in the same
+  // order (`inPickerOrder`), whatever the default.
   // Every layout offers `photo` (the optional background photo, under an overlay so the text stays readable).
   // Photo-backed layouts only use `photo`; the others start on a colour.
   backgrounds: SectionBackground[]
@@ -48,6 +49,8 @@ function layout(
 const onPhoto: SectionBackground[] = ['photo']
 const colours: SectionBackground[] = ['light', 'primary', 'accent']
 const onColour: SectionBackground[] = [...colours, 'photo']
+// Paper (a card, a postcard, an instant photo) stands out on a colour, so these start on the accent
+const onPaper: SectionBackground[] = ['accent', 'light', 'primary', 'photo']
 
 /** Every section type and layout the builder offers. Register new layouts here. */
 type SectionRegistry = { [T in SectionType]: SectionTypeDefinition<T> }
@@ -60,7 +63,7 @@ export const sectionRegistry: SectionRegistry = {
     contentVersion: 1,
     defaultContent: {
       eyebrow: 'Together with their families',
-      title: 'Bea & Carlo',
+      heading: 'Bea & Carlo',
       date: 'Saturday, 14 February 2027',
       venue: 'Manila Cathedral',
       layoutPhotos: [],
@@ -165,7 +168,7 @@ export const sectionRegistry: SectionRegistry = {
       layout({
         key: 'polaroid',
         name: 'Polaroids',
-        description: 'Two tilted instant photos beside the title. Best for birthdays, debuts, kids\' parties, barkada events.',
+        description: 'Two tilted instant photos beside the names. Best for birthdays, debuts, kids\' parties, barkada events.',
         layoutPhotoCount: 2,
         backgrounds: onColour,
         options: [{ key: 'photoSide', label: 'Photos side', choices: sideChoices, default: 'right' }],
@@ -198,8 +201,9 @@ export const sectionRegistry: SectionRegistry = {
     contentVersion: 1,
     defaultContent: {
       eyebrow: 'Counting down to',
-      title: 'Bea & Carlo\'s wedding',
+      heading: 'Bea & Carlo\'s wedding',
       showSeconds: true,
+      layoutPhotos: [],
     },
     // Every layout uses the same fields; the target date always comes from the occasion.
     layouts: [
@@ -254,7 +258,7 @@ export const sectionRegistry: SectionRegistry = {
       layout({
         key: 'sentence',
         name: 'Sentence',
-        description: 'The countdown written as one line of text, like an invitation, with the title in italics.',
+        description: 'The countdown written as one line of text, like an invitation, with the heading in italics.',
         layoutPhotoCount: 0,
         backgrounds: onColour,
         options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' }],
@@ -286,6 +290,272 @@ export const sectionRegistry: SectionRegistry = {
       }, () => import('~/components/sections/countdown/CountdownStrip.vue')),
     ],
   },
+  message: {
+    type: 'message',
+    name: 'Message',
+    description: 'A short, signed note from the hosts to their guests, with one photo: a welcome, a thank you, …',
+    contentVersion: 1,
+    defaultContent: {
+      eyebrow: 'A note from us',
+      heading: 'Welcome, family & friends',
+      body: 'We are so glad you\'re here. Over the years you have laughed with us, prayed for us and cheered us on. We can\'t imagine this day without you.',
+      signature: 'With love, from us',
+      layoutPhotos: [],
+    },
+    // Every layout uses the same fields and one photo; only the arrangement changes. None of them can be made from
+    // another with a background or option.
+    layouts: [
+      layout({
+        key: 'stacked',
+        name: 'Photo on top',
+        description: 'A wide photo strip across the top, the note below it. Simple; works with landscape photos.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' }],
+      }, () => import('~/components/sections/message/MessageStacked.vue')),
+      layout({
+        key: 'split',
+        name: 'Split',
+        description: 'The photo fills one half edge to edge, the note sits on the other.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/message/MessageSplit.vue')),
+      layout({
+        key: 'side-photo',
+        name: 'Side photo',
+        description: 'A smaller photo beside the note, in a plain, arch or framed print. Best for portraits.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [
+          {
+            key: 'frame',
+            label: 'Frame',
+            choices: [
+              { value: 'plain', label: 'Plain' },
+              { value: 'arch', label: 'Arch' },
+              { value: 'framed', label: 'Framed' },
+            ],
+            default: 'arch',
+          },
+          { key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' },
+        ],
+      }, () => import('~/components/sections/message/MessageSidePhoto.vue')),
+      layout({
+        key: 'polaroid',
+        name: 'Polaroid',
+        description: 'A tilted instant photo next to the note. Warm, casual and personal.',
+        layoutPhotoCount: 1,
+        backgrounds: onPaper,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/message/MessagePolaroid.vue')),
+      layout({
+        key: 'portrait',
+        name: 'Centred letter',
+        description: 'The note centred like a letter, with a small round photo on top or beside the signature. Without a photo it\'s a plain letter.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{
+          key: 'photoPlacement',
+          label: 'Photo',
+          choices: [
+            { value: 'top', label: 'Top' },
+            { value: 'signature', label: 'By signature' },
+          ],
+          default: 'top',
+        }],
+      }, () => import('~/components/sections/message/MessagePortrait.vue')),
+      layout({
+        key: 'card',
+        name: 'Letter card',
+        description: 'The note on a paper card, with the photo taped to its corner.',
+        layoutPhotoCount: 1,
+        backgrounds: onPaper,
+        options: [{ key: 'photoCorner', label: 'Photo corner', choices: sideChoices, default: 'right' }],
+      }, () => import('~/components/sections/message/MessageCard.vue')),
+      layout({
+        key: 'overlap',
+        name: 'Overlap',
+        description: 'A large photo with the note on a panel overlapping its edge, editorial style.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/message/MessageOverlap.vue')),
+      layout({
+        key: 'postcard',
+        name: 'Postcard',
+        description: 'A postcard: the photo on one side, the note on the other, with a divider and a stamp.',
+        layoutPhotoCount: 1,
+        backgrounds: onPaper,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/message/MessagePostcard.vue')),
+      layout({
+        key: 'editorial',
+        name: 'Two column',
+        description: 'A big heading on the left, the message and signature on the right, and a wide photo.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'photoPosition', label: 'Photo', choices: aboveBelowChoices, default: 'below' }],
+      }, () => import('~/components/sections/message/MessageEditorial.vue')),
+      layout({
+        key: 'inline',
+        name: 'Magazine',
+        description: 'The photo sits inside the message and the text wraps around it, with a drop cap.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'right' }],
+      }, () => import('~/components/sections/message/MessageInline.vue')),
+      layout({
+        key: 'photo-middle',
+        name: 'Photo in the middle',
+        description: 'The heading above, a landscape photo in the middle, the message and signature below.',
+        layoutPhotoCount: 1,
+        backgrounds: onColour,
+        options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' }],
+      }, () => import('~/components/sections/message/MessagePhotoMiddle.vue')),
+    ],
+  },
+  about: {
+    type: 'about',
+    name: 'About',
+    description: 'Your story: how it started, who the celebrant is, or the moments that led here, with photos or as a timeline.',
+    contentVersion: 1,
+    defaultContent: {
+      eyebrow: 'Our story',
+      heading: 'How we met',
+      body: 'We met in 2019 at a friend\'s birthday in Quezon City. Carlo spilled coffee on Bea\'s notes, and offered to rewrite them over dinner.\n\nFive years, two cities and one very patient barkada later, we\'re ready to say yes to forever.',
+      timeline: [
+        { eyebrow: '2019 · How we met', heading: 'Spilled coffee', body: 'Carlo knocked his coffee onto Bea\'s notes, then offered to rewrite them over dinner.' },
+        { eyebrow: '2021 · Long distance', heading: 'Two cities, one love', body: 'Work took Bea to Cebu. Weekend flights kept us close.' },
+        { eyebrow: '2025 · The proposal', heading: 'Yes, in Batangas', body: 'On the beach of our first trip, Carlo finally asked.' },
+      ],
+      layoutPhotos: [],
+    },
+    // Story layouts (the body with up to three photos) first, then timeline layouts (the chapters). Every layout uses
+    // the same fields; only what it shows and the arrangement change.
+    layouts: [
+      layout({
+        key: 'split',
+        name: 'Split',
+        description: 'Photos fill one side edge to edge, the story on the other.',
+        layoutPhotoCount: 3,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/about/AboutSplit.vue')),
+      layout({
+        key: 'photo-row',
+        name: 'Photo row',
+        description: 'The story with its photos in a row, above or below it; the heading and story stacked or side by side.',
+        layoutPhotoCount: 3,
+        backgrounds: onColour,
+        options: [
+          { key: 'photoPosition', label: 'Photos', choices: aboveBelowChoices, default: 'below' },
+          { key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' },
+          {
+            key: 'textLayout',
+            label: 'Heading and story',
+            choices: [
+              { value: 'stacked', label: 'Stacked' },
+              { value: 'side', label: 'Side by side' },
+            ],
+            default: 'stacked',
+          },
+        ],
+      }, () => import('~/components/sections/about/AboutPhotoRow.vue')),
+      layout({
+        key: 'mosaic',
+        name: 'Mosaic',
+        description: 'The story beside an inset photo grid: one tall photo and two small ones.',
+        layoutPhotoCount: 3,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'right' }],
+      }, () => import('~/components/sections/about/AboutMosaic.vue')),
+      layout({
+        key: 'divider',
+        name: 'Divider',
+        description: 'A photo and the story split by a thin line, with a round photo sitting on the line.',
+        layoutPhotoCount: 2,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/about/AboutDivider.vue')),
+      layout({
+        key: 'portrait',
+        name: 'Portrait',
+        description: 'A framed portrait above the story, extra photos as small circles. For a celebrant or a tribute.',
+        layoutPhotoCount: 3,
+        backgrounds: onColour,
+        options: [
+          {
+            key: 'frame',
+            label: 'Frame',
+            choices: [
+              { value: 'arch', label: 'Arch' },
+              { value: 'oval', label: 'Oval' },
+              { value: 'circle', label: 'Circle' },
+            ],
+            default: 'oval',
+          },
+          { key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' },
+        ],
+      }, () => import('~/components/sections/about/AboutPortrait.vue')),
+      layout({
+        key: 'scrapbook',
+        name: 'Scrapbook',
+        description: 'Tilted instant photos beside the story on a sheet of paper. Warm and personal.',
+        layoutPhotoCount: 3,
+        backgrounds: onPaper,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/about/AboutScrapbook.vue')),
+      layout({
+        key: 'magazine',
+        name: 'Long read',
+        description: 'Like a magazine: a drop cap, the first photo inside the story, the rest in a row below. Best for longer stories.',
+        layoutPhotoCount: 3,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'right' }],
+      }, () => import('~/components/sections/about/AboutMagazine.vue')),
+      layout({
+        key: 'timeline-zigzag',
+        name: 'Timeline: zigzag',
+        description: 'The chapters alternate sides along a centre line, each with its photo across from it.',
+        layoutPhotoCount: 0,
+        backgrounds: onColour,
+        options: [{ key: 'firstPhotoSide', label: 'First photo', choices: sideChoices, default: 'left' }],
+      }, () => import('~/components/sections/about/AboutTimelineZigzag.vue')),
+      layout({
+        key: 'timeline-list',
+        name: 'Timeline: list',
+        description: 'One column of chapters down a line, a photo beside each.',
+        layoutPhotoCount: 0,
+        backgrounds: onColour,
+        options: [{ key: 'photoSide', label: 'Photo side', choices: sideChoices, default: 'right' }],
+      }, () => import('~/components/sections/about/AboutTimelineList.vue')),
+      layout({
+        key: 'timeline-cards',
+        name: 'Timeline: cards',
+        description: 'The chapters as cards in one row along a line; guests swipe through them, or use the arrows.',
+        layoutPhotoCount: 0,
+        backgrounds: onColour,
+        options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' }],
+      }, () => import('~/components/sections/about/AboutTimelineCards.vue')),
+      layout({
+        key: 'timeline-polaroids',
+        name: 'Timeline: polaroids',
+        description: 'Instant photos pinned along a string, each chapter as its caption.',
+        layoutPhotoCount: 0,
+        backgrounds: onPaper,
+        options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'center' }],
+      }, () => import('~/components/sections/about/AboutTimelinePolaroids.vue')),
+      layout({
+        key: 'timeline-compact',
+        name: 'Timeline: compact',
+        description: 'Text-only chapters down a thin line, no photos. Great for long timelines or tributes.',
+        layoutPhotoCount: 0,
+        backgrounds: onColour,
+        options: [{ key: 'textAlign', label: 'Text', choices: alignChoices, default: 'start' }],
+      }, () => import('~/components/sections/about/AboutTimelineCompact.vue')),
+    ],
+  },
 }
 
 export function getSectionType<T extends SectionType>(type: T): SectionTypeDefinition<T> {
@@ -296,17 +566,25 @@ export function getSectionLayout(type: SectionType, layoutKey: string): SectionL
   return sectionRegistry[type]?.layouts.find(layout => layout.key === layoutKey)
 }
 
-/** A section with a different layout: its options reset to that layout's defaults, and the background kept if the layout supports it. */
+/**
+ * A section with a different layout: its options reset to that layout's defaults. The background follows the
+ * layout while it is still the old layout's default (e.g. Full starts on the photo, Split on light), and is kept
+ * when the host picked it and the new layout supports it.
+ */
 export function changeSectionLayout<S extends Section>(section: S, layoutKey: string): S {
   const next = getSectionLayout(section.type, layoutKey)
   if (!next)
     return section
 
+  const current = getSectionLayout(section.type, section.layout)
+  const isDefault = current?.backgrounds[0] === section.background
+  const keep = !isDefault && next.backgrounds.includes(section.background)
+
   return {
     ...section,
     layout: next.key,
     options: resolveLayoutOptions(next.options, undefined),
-    background: next.backgrounds.includes(section.background) ? section.background : next.backgrounds[0]!,
+    background: keep ? section.background : next.backgrounds[0]!,
   }
 }
 

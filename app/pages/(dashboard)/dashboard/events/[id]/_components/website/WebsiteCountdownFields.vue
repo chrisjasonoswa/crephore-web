@@ -8,7 +8,7 @@ const content = defineModel<CountdownContent>('content', { required: true })
 const id = useId()
 
 // Optional fields are removed when emptied, so the layout leaves them out
-function set(key: 'eyebrow' | 'title', value: string | number) {
+function set(key: 'eyebrow' | 'heading', value: string | number) {
   content.value = { ...content.value, [key]: String(value) || undefined }
 }
 </script>
@@ -21,8 +21,8 @@ function set(key: 'eyebrow' | 'title', value: string | number) {
     </div>
 
     <div class="flex flex-col gap-2">
-      <Label :for="`${id}-title`">Title</Label>
-      <Input :id="`${id}-title`" :model-value="content.title ?? ''" placeholder="e.g. Ana & Marco's wedding" @update:model-value="set('title', $event)" />
+      <Label :for="`${id}-heading`">Heading</Label>
+      <Input :id="`${id}-heading`" :model-value="content.heading ?? ''" placeholder="e.g. Ana & Marco's wedding" @update:model-value="set('heading', $event)" />
     </div>
 
     <div class="flex items-center justify-between gap-3">

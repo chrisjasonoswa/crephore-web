@@ -22,10 +22,10 @@ const layoutPhoto = 'https://example.com/couple.jpg'
 
 const content: CountdownContent = {
   eyebrow: 'Counting down to',
-  title: 'Bea & Carlo\'s wedding',
+  heading: 'Bea & Carlo\'s wedding',
   showSeconds: true,
   backgroundPhoto,
-  layoutPhoto,
+  layoutPhotos: [layoutPhoto],
   cta: { label: 'Save the date', href: '#details' },
 }
 
@@ -92,7 +92,7 @@ describe.each(layouts)('countdown layout $key', ({ key, date }) => {
     }
   })
 
-  it('renders the eyebrow, title and button', async () => {
+  it('renders the eyebrow, heading and button', async () => {
     const wrapper = await mountLayout(key)
 
     expect(wrapper.text()).toContain('Counting down to')
@@ -140,7 +140,7 @@ describe.each(layouts)('countdown layout $key', ({ key, date }) => {
   })
 
   it('renders only the countdown when the optional content is missing', async () => {
-    const wrapper = await mountLayout(key, { content: { showSeconds: true } })
+    const wrapper = await mountLayout(key, { content: { showSeconds: true, layoutPhotos: [] } })
 
     expect(wrapper.find('h2').exists()).toBe(false)
     expect(wrapper.find('a').exists()).toBe(false)
@@ -158,7 +158,7 @@ describe('countdown layouts', () => {
     expect(Number(ring.attributes('stroke-dashoffset'))).toBeCloseTo(circumference * (1 - 6 / 24))
   })
 
-  it('sentence: writes the countdown as a sentence, the title after it', async () => {
+  it('sentence: writes the countdown as a sentence, the heading after it', async () => {
     const wrapper = await mountLayout('sentence')
 
     expect(wrapper.find('[role="timer"]').text()).toBe('112 days, 6 hours, 45 minutes and 20 seconds')
@@ -196,7 +196,7 @@ describe('countdown layouts', () => {
     expect(wrapper.find('[data-countdown-photo]').classes()).toContain('@3xl:col-start-2')
     expect(wrapper.find('[data-countdown-text]').classes()).toContain('@3xl:col-start-1')
 
-    const withoutPhoto = await mountLayout('split', { content: { ...content, layoutPhoto: undefined } })
+    const withoutPhoto = await mountLayout('split', { content: { ...content, layoutPhotos: [] } })
     expect(withoutPhoto.find('[data-photo-placeholder]').exists()).toBe(true)
   })
 
@@ -214,7 +214,7 @@ describe('countdown layouts', () => {
     expect((await mountLayout('calendar')).find('section > div').classes()).not.toContain('@3xl:flex-row-reverse')
   })
 
-  it('strip: puts the date on dateSide, keeping the title for screen readers', async () => {
+  it('strip: puts the date on dateSide, keeping the heading for screen readers', async () => {
     const left = await mountLayout('strip')
     expect(left.find('[data-countdown-date]').classes()).toContain('@3xl:order-1')
     expect(left.find('h2').classes()).toContain('sr-only')

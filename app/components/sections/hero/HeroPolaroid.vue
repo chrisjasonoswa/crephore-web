@@ -4,7 +4,7 @@ import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
 import HeroText from './HeroText.vue'
 
-// Layout `polaroid`: two tilted instant photos beside the title (`photoSide`); on phones they sit above it.
+// Layout `polaroid`: two tilted instant photos beside the heading (`photoSide`); on phones they sit above it.
 // The white print borders are part of the look (like real instant photos), not a theme colour.
 const props = defineProps<SectionLayoutProps<'hero'>>()
 

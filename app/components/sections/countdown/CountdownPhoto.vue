@@ -8,7 +8,7 @@ import CountdownButton from './CountdownButton.vue'
 import CountdownDividedNumbers from './CountdownDividedNumbers.vue'
 import CountdownHeading from './CountdownHeading.vue'
 
-// Layout `photo` ("Over a photo"): the background photo fills the section under a soft overlay, with the eyebrow, title,
+// Layout `photo` ("Over a photo"): the background photo fills the section under a soft overlay, with the eyebrow, heading,
 // the date ("14 · 02 · 2027") and light numbers at `textPosition`. Primary colour without a photo.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 

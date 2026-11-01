@@ -20,7 +20,7 @@ const date = computed(() => formatOccasionDate(props.occasion))
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="grid @3xl:min-h-[34rem] @3xl:grid-cols-2">
     <SectionPhoto
       data-countdown-photo
-      :src="content.layoutPhoto"
+      :src="content.layoutPhotos[0]"
       class="aspect-16/9 w-full @3xl:row-start-1 @3xl:aspect-auto @3xl:h-full"
       :class="photoOnLeft ? '@3xl:col-start-1' : '@3xl:col-start-2'"
     />

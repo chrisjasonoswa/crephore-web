@@ -5,7 +5,7 @@ import { formatOccasionDate, useCountdown } from '~/features/sections/countdown'
 import CountdownButton from './CountdownButton.vue'
 
 // Layout `strip` ("Slim strip"): a thin band with the date ("14 · 02 · 2027") and the countdown inline, to sit
-// between other sections. The date on `dateSide`; stacked and centred on phones. The title is for screen readers.
+// between other sections. The date on `dateSide`; stacked and centred on phones. The heading is for screen readers.
 const props = defineProps<SectionLayoutProps<'countdown'>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
@@ -16,8 +16,8 @@ const dateOnRight = computed(() => props.options.dateSide === 'right')
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
     <div class="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-6 text-center @3xl:flex-row @3xl:justify-center @3xl:gap-8 @3xl:py-5">
-      <h2 v-if="content.title" class="sr-only">
-        {{ content.title }}
+      <h2 v-if="content.heading" class="sr-only">
+        {{ content.heading }}
       </h2>
 
       <div data-countdown-date class="flex flex-col items-center" :class="dateOnRight ? '@3xl:order-3 @3xl:items-end @3xl:text-end' : '@3xl:order-1 @3xl:items-start @3xl:text-start'">

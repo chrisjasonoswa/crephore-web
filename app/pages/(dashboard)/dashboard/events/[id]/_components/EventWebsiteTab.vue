@@ -10,6 +10,7 @@ import {
   isSameWebsite,
   mapWebsiteToRequest,
   websiteFromApi,
+  websiteProblem,
   withSavedIds,
 } from '~/features/event-websites/event-website'
 import {
@@ -84,6 +85,12 @@ async function save(): Promise<boolean> {
   const sent = website.value
   if (!sent)
     return false
+  // The editor disables saving then; this covers every other way here (e.g. publishing, leaving the page)
+  const problem = websiteProblem(sent)
+  if (problem) {
+    cToast({ title: problem, type: 'error' })
+    return false
+  }
 
   isSaving.value = true
   try {

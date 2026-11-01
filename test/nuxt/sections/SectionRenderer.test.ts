@@ -17,7 +17,7 @@ describe('SectionRenderer', () => {
       type: 'hero',
       layout: 'split',
       background: 'primary',
-      content: { title: 'Ana & Marco', layoutPhotos: [] },
+      content: { heading: 'Ana & Marco', layoutPhotos: [] },
     })
 
     expect(wrapper.find('section h1').text()).toBe('Ana & Marco')
@@ -29,7 +29,7 @@ describe('SectionRenderer', () => {
       layout: 'split',
       options: { photoSide: 'left' },
       background: 'light',
-      content: { title: 'Ana & Marco', layoutPhotos: [] },
+      content: { heading: 'Ana & Marco', layoutPhotos: [] },
     })
 
     // photoSide as stored, textPosition from the default ("left")
@@ -41,7 +41,7 @@ describe('SectionRenderer', () => {
       type: 'hero',
       layout: 'does-not-exist',
       background: 'primary',
-      content: { title: 'Ana & Marco', layoutPhotos: [] },
+      content: { heading: 'Ana & Marco', layoutPhotos: [] },
     })
 
     expect(wrapper.find('section').exists()).toBe(false)
@@ -54,7 +54,7 @@ describe('SectionRenderer hero layouts', () => {
       type: 'hero',
       layout,
       background: 'light',
-      content: { title: 'Ana & Marco', layoutPhotos: [] },
+      content: { heading: 'Ana & Marco', layoutPhotos: [] },
     })
 
     expect(wrapper.find('section h1').text()).toBe('Ana & Marco')
@@ -62,7 +62,7 @@ describe('SectionRenderer hero layouts', () => {
 })
 
 describe('SectionRenderer occasion', () => {
-  const countdown: Section = { type: 'countdown', layout: 'boxes', background: 'light', content: { showSeconds: true } }
+  const countdown: Section = { type: 'countdown', layout: 'boxes', background: 'light', content: { showSeconds: true, layoutPhotos: [] } }
 
   it('passes the page\'s occasion to the layout', async () => {
     const wrapper = await mountSection(countdown, { startsAt: '2027-02-13T16:00:00Z', timezone: 'Asia/Manila' })

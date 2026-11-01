@@ -30,8 +30,8 @@ function set(key: 'eyebrow' | 'date' | 'venue', value: string | number) {
     </div>
 
     <div class="flex flex-col gap-2">
-      <Label :for="`${id}-title`">Title</Label>
-      <Input :id="`${id}-title`" :model-value="content.title" placeholder="e.g. Ana & Marco" @update:model-value="content = { ...content, title: String($event) }" />
+      <Label :for="`${id}-heading`">Heading</Label>
+      <Input :id="`${id}-heading`" :model-value="content.heading" placeholder="e.g. Ana & Marco" @update:model-value="content = { ...content, heading: String($event) }" />
     </div>
 
     <div class="flex flex-col gap-2">
