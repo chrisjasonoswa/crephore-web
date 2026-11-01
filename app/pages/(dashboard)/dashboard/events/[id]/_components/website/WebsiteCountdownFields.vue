@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CountdownContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import WebsiteButtonField from './WebsiteButtonField.vue'
 
 // The countdown's text and settings. It always counts down to the event's start (set in Details).

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import { calendarMonth, calendarWeekdays, formatOccasionDate, useCountdown } from '~/features/sections/countdown'
+import { calendarMonth, calendarWeekdays, formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import CountdownButton from './CountdownButton.vue'
 import CountdownDividedNumbers from './CountdownDividedNumbers.vue'
 import CountdownHeading from './CountdownHeading.vue'

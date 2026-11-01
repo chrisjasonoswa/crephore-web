@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { HeroContent } from '~/features/sections/section.content.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { SectionBackground } from '~/features/sections/section.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'

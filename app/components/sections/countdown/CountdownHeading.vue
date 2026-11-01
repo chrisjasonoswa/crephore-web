@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { CountdownContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import type { Align } from '~/features/sections/section.options'
 import { alignClasses } from '~/features/sections/section.options'
 

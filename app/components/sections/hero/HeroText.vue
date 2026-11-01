@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { HeroContent } from '~/features/sections/section.content.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
 import { safeHref } from '~/features/sections/section.links'
 
 // The hero's text (eyebrow, heading, date · venue, RSVP button). Not a layout: every hero layout renders it,

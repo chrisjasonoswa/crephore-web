@@ -2,7 +2,11 @@
 // A section type has one or more layouts (visual variations); each layout is one component
 // in `components/sections/<type>/` and is registered in `section.registry.ts`.
 
-import type { AboutContent, CountdownContent, HeroContent, MessageContent } from './section.content.type'
+import type { AboutContent } from './about/about.type'
+import type { CountdownContent } from './countdown/countdown.type'
+import type { HeroContent } from './hero/hero.type'
+import type { MessageContent } from './message/message.type'
+import type { PeopleContent } from './people/people.type'
 
 /**
  * The background a section sits on. Each background maps to site-theme variables
@@ -28,12 +32,17 @@ export const sectionBackgroundLabels: Record<SectionBackground, string> = {
   accent: 'Accent',
 }
 
-/** Content shape per section type. Add new section types here. */
+/**
+ * Content shape per section type, each in its folder (`<type>/<type>.type.ts`). Add new section
+ * types here. Text uses the same names in every type: `eyebrow` (the small label above), `heading` (the section's main
+ * line, its h1/h2) and `body` (running text, when the type has any). `title` is kept for page titles.
+ */
 export interface SectionContentMap {
   hero: HeroContent
   countdown: CountdownContent
   message: MessageContent
   about: AboutContent
+  people: PeopleContent
 }
 
 export type SectionType = keyof SectionContentMap

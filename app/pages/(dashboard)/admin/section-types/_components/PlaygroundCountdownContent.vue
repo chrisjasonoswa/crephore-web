@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CountdownContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import PlaygroundOptionalPhoto from './PlaygroundOptionalPhoto.vue'
 
 // A countdown's settings: seconds, the optional button, the background photo and the layout photo.

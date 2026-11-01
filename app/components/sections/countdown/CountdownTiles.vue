@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { CountdownUnit } from '~/features/sections/countdown'
+import type { CountdownUnit } from '~/features/sections/countdown/countdown.helpers'
 
 // One outlined tile per unit (boxes, split). Two per row on phones when there are four.
 // Tiles are drawn in the text colour at low strength, so they work on every background.

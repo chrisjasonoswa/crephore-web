@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MessageContent } from '~/features/sections/section.content.type'
+import type { MessageContent } from '~/features/sections/message/message.type'
 
 // The message section's text: a small label (eyebrow), the heading, the message (body) and the signature.
 const content = defineModel<MessageContent>('content', { required: true })

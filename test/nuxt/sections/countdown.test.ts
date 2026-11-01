@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calendarMonth, countdownParts, countdownUnits, formatOccasionDate } from '~/features/sections/countdown'
+import { calendarMonth, countdownParts, countdownUnits, formatOccasionDate } from '~/features/sections/countdown/countdown.helpers'
 import { sampleOccasion } from '~/features/sections/section.type'
 
 const now = Date.parse('2026-10-27T00:00:00Z')

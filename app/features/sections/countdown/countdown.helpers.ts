@@ -1,4 +1,4 @@
-import type { SectionOccasion } from './section.type'
+import type { SectionOccasion } from '../section.type'
 import { computed, onBeforeUnmount, onMounted, ref, toValue, type MaybeRefOrGetter } from 'vue'
 
 // The countdown sections' time maths and date formats. The target is the occasion's start (a UTC instant),

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { AboutTimelineItem } from '~/features/sections/section.content.type'
+import type { AboutTimelineItem } from '~/features/sections/about/about.type'
 import type { Align } from '~/features/sections/section.options'
 import { alignClasses } from '~/features/sections/section.options'
 

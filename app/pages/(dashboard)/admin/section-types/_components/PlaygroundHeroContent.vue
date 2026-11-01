@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HeroContent } from '~/features/sections/section.content.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
 import { Plus } from '@lucide/vue'
 import PlaygroundOptionalPhoto from './PlaygroundOptionalPhoto.vue'
 import PlaygroundPhotoField from './PlaygroundPhotoField.vue'

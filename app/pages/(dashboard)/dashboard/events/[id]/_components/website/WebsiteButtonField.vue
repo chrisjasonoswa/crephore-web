@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionCta } from '~/features/sections/section.content.type'
+import type { SectionCta } from '~/features/sections/section.cta.type'
 
 // A section's optional button: a switch, and its text when on. Turning it on uses `defaultCta` (its link too).
 const props = defineProps<{

@@ -1,4 +1,4 @@
-import type { AboutContent } from '~/features/sections/section.content.type'
+import type { AboutContent } from '~/features/sections/about/about.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
 import { getSectionType } from '~/features/sections/section.registry'

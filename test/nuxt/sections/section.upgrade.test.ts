@@ -1,4 +1,5 @@
-import type { CountdownContent, HeroContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { UpgradeSteps } from '~/features/sections/section.upgrade'
 import { describe, expect, it, vi } from 'vitest'
 import { getSectionType } from '~/features/sections/section.registry'

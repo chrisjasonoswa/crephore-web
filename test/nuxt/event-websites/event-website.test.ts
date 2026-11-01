@@ -1,6 +1,6 @@
 import type { EventWebsite } from '~/features/event-websites/event-website.type'
 import type { Event } from '~/features/events/event.type'
-import type { CountdownContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 // Passes content through; a test checks that loading goes through it
 const { upgradeSectionContent } = vi.hoisted(() => ({ upgradeSectionContent: vi.fn((_type: string, content: unknown) => content) }))

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { MessageContent } from '~/features/sections/section.content.type'
+import type { MessageContent } from '~/features/sections/message/message.type'
 import type { Align } from '~/features/sections/section.options'
 import { alignClasses } from '~/features/sections/section.options'
 import MessageHeading from './MessageHeading.vue'

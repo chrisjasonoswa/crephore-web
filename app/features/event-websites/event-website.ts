@@ -3,7 +3,7 @@ import type { Event } from '~/features/events/event.type'
 import type { SectionContentMap, SectionOccasion, SectionType } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { toRaw } from 'vue'
-import { formatOccasionDate } from '~/features/sections/countdown'
+import { formatOccasionDate } from '~/features/sections/countdown/countdown.helpers'
 import { createDefaultSection, getSectionType } from '~/features/sections/section.registry'
 import { upgradeSectionContent } from '~/features/sections/section.upgrade'
 import { fontPairings } from '~/site-theme/fontPairings'
@@ -40,6 +40,7 @@ const eventDetails: { [T in SectionType]: (event: Event) => Partial<SectionConte
   // Generic text that suits any event; hosts sign it themselves
   message: () => ({}),
   about: () => ({}),
+  people: () => ({}),
 }
 
 /** A new section for the event's page: the type's first layout and default content, with the event's details filled in. */

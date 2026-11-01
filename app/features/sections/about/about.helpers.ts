@@ -1,4 +1,4 @@
-import type { AboutTimelineItem } from './section.content.type'
+import type { AboutTimelineItem } from './about.type'
 
 // The about section's layouts come in two kinds: story layouts (the body and photos) and timeline layouts (the
 // chapters), keyed `timeline-…`. The editor shows each kind's fields.

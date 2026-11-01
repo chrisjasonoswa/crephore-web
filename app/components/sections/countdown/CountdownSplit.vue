@@ -2,7 +2,7 @@
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
-import { formatOccasionDate, useCountdown } from '~/features/sections/countdown'
+import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import CountdownButton from './CountdownButton.vue'
 import CountdownHeading from './CountdownHeading.vue'
 import CountdownTiles from './CountdownTiles.vue'

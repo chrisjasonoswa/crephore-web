@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { CountdownUnit } from '~/features/sections/countdown'
+import type { CountdownUnit } from '~/features/sections/countdown/countdown.helpers'
 import type { Align } from '~/features/sections/section.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import { useCountdown } from '~/features/sections/countdown'
+import { useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 import CountdownHeading from './CountdownHeading.vue'

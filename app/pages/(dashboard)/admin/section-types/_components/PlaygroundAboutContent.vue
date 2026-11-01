@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AboutContent } from '~/features/sections/section.content.type'
+import type { AboutContent } from '~/features/sections/about/about.type'
 import { Plus } from '@lucide/vue'
 import { getSectionType } from '~/features/sections/section.registry'
 import PlaygroundOptionalPhoto from './PlaygroundOptionalPhoto.vue'

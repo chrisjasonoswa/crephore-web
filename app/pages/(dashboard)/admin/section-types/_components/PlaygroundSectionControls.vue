@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import type { AboutContent, CountdownContent, HeroContent, MessageContent } from '~/features/sections/section.content.type'
+import type { AboutContent } from '~/features/sections/about/about.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
+import type { MessageContent } from '~/features/sections/message/message.type'
+import type { PeopleContent } from '~/features/sections/people/people.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { Section, SectionBackground } from '~/features/sections/section.type'
 import { positions, resolveLayoutOptions } from '~/features/sections/section.options'
@@ -9,10 +13,11 @@ import PlaygroundCountdownContent from './PlaygroundCountdownContent.vue'
 import PlaygroundHeroContent from './PlaygroundHeroContent.vue'
 import PlaygroundAboutContent from './PlaygroundAboutContent.vue'
 import PlaygroundMessageContent from './PlaygroundMessageContent.vue'
+import PlaygroundPeopleContent from './PlaygroundPeopleContent.vue'
 
 // Settings of one section on the page: layout, its placement options, background, and its content
 // (per section type: the hero's background and layout photos; the countdown's seconds, button, background and layout photo;
-// the message's signature, background and layout photo; the about section's photos, story length and chapters).
+// the message's signature, background and layout photo; the about section's photos, story length and chapters; the people section's count and photos).
 const section = defineModel<Section>('section', { required: true })
 
 const id = useId()
@@ -48,6 +53,10 @@ const heroContent = computed({
 })
 const countdownContent = computed({
   get: () => section.value.content as CountdownContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const peopleContent = computed({
+  get: () => section.value.content as PeopleContent,
   set: content => (section.value = { ...section.value, content }),
 })
 const aboutContent = computed({
@@ -128,5 +137,6 @@ const messageContent = computed({
     <PlaygroundCountdownContent v-else-if="section.type === 'countdown'" v-model:content="countdownContent" />
     <PlaygroundMessageContent v-else-if="section.type === 'message'" v-model:content="messageContent" />
     <PlaygroundAboutContent v-else-if="section.type === 'about'" v-model:content="aboutContent" />
+    <PlaygroundPeopleContent v-else-if="section.type === 'people'" v-model:content="peopleContent" />
   </div>
 </template>

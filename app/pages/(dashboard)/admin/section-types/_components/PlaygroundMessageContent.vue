@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MessageContent } from '~/features/sections/section.content.type'
+import type { MessageContent } from '~/features/sections/message/message.type'
 import PlaygroundOptionalPhoto from './PlaygroundOptionalPhoto.vue'
 
 // A message's settings: the signature, the background photo and the layout photo.

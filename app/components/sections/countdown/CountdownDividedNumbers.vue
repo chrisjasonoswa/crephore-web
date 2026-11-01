@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CountdownUnit } from '~/features/sections/countdown'
+import type { CountdownUnit } from '~/features/sections/countdown/countdown.helpers'
 import type { Align } from '~/features/sections/section.options'
 
 // Big numbers divided by thin lines, no boxes (minimal, over a photo, calendar). On phones the large sizes

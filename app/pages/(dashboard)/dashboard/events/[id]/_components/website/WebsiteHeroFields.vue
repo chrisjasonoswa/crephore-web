@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Event } from '~/features/events/event.type'
-import type { HeroContent } from '~/features/sections/section.content.type'
+import type { HeroContent } from '~/features/sections/hero/hero.type'
 import { eventOccasion } from '~/features/event-websites/event-website'
-import { formatOccasionDate } from '~/features/sections/countdown'
+import { formatOccasionDate } from '~/features/sections/countdown/countdown.helpers'
 import WebsiteButtonField from './WebsiteButtonField.vue'
 
 // The hero's text: label, names, date, place and the RSVP button. The date and place start as the event's;

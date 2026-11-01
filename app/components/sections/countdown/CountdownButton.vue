@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { SectionCta } from '~/features/sections/section.content.type'
+import type { SectionCta } from '~/features/sections/section.cta.type'
 import { safeHref } from '~/features/sections/section.links'
 
 // The countdown's optional button (e.g. "Save the date"), in the background's button colours.

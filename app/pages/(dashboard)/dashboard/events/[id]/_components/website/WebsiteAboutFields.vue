@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { AboutContent, AboutTimelineItem } from '~/features/sections/section.content.type'
+import type { AboutContent, AboutTimelineItem } from '~/features/sections/about/about.type'
 import { ArrowDown, ArrowUp, Plus, Trash2 } from '@lucide/vue'
-import { aboutTimelineMaxItems, blankTimelineItem } from '~/features/sections/about'
+import { aboutTimelineMaxItems, blankTimelineItem } from '~/features/sections/about/about.helpers'
 import { moveItem } from '~/features/event-websites/event-website'
 import WebsitePhotoField from './WebsitePhotoField.vue'
 

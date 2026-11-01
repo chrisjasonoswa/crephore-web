@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { CountdownContent } from '~/features/sections/section.content.type'
+import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import type { SectionBackground } from '~/features/sections/section.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'

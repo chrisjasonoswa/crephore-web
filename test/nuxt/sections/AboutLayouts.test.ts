@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { AboutContent } from '~/features/sections/section.content.type'
+import type { AboutContent } from '~/features/sections/about/about.type'
 import type { SectionBackground } from '~/features/sections/section.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'

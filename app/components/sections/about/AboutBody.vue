@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AboutContent } from '~/features/sections/section.content.type'
+import type { AboutContent } from '~/features/sections/about/about.type'
 import type { Align } from '~/features/sections/section.options'
 
 // The about section's story: one paragraph per blank-line-separated block (single line breaks kept). Not a layout.

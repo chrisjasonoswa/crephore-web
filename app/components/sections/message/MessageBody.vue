@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
-import type { MessageContent } from '~/features/sections/section.content.type'
+import type { MessageContent } from '~/features/sections/message/message.type'
 import type { Align } from '~/features/sections/section.options'
 
 // The message's text (line breaks kept) and signature. Not a layout. The default slot goes just before the
