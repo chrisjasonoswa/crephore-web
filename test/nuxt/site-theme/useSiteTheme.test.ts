@@ -1,7 +1,7 @@
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { describe, expect, it } from 'vitest'
 import { contrastRatio, LIGHT_TEXT, MIN_CONTRAST, mixOklch, mixSrgb } from '~/site-theme/color'
-import { fontPairings, siteFontFamilies } from '~/site-theme/fontPairings'
+import { fontPairingGroups, fontPairings, siteFontFamilies } from '~/site-theme/fontPairings'
 import { backgroundPresets, colorPresets } from '~/site-theme/presets'
 import { lightBackground, siteThemeVars, siteThemeWarnings } from '~/site-theme/useSiteTheme'
 
@@ -198,5 +198,37 @@ describe('siteThemeVars fonts', () => {
 
     expect(names).toEqual(expect.arrayContaining(['Great Vibes', 'Raleway', 'Luxurious Script', 'Jost']))
     expect(new Set(fontPairings.map(pairing => pairing.key)).size).toBe(fontPairings.length)
+  })
+})
+
+describe('font pairings', () => {
+  it('offers about fifty pairings, each in a group, with unique keys', () => {
+    expect(fontPairings.length).toBeGreaterThanOrEqual(45)
+    expect(new Set(fontPairings.map(pairing => pairing.key)).size).toBe(fontPairings.length)
+    for (const group of fontPairingGroups)
+      expect(fontPairings.filter(pairing => pairing.group === group.key).length, group.key).toBeGreaterThanOrEqual(4)
+    expect(fontPairings.every(pairing => fontPairingGroups.some(group => group.key === pairing.group))).toBe(true)
+  })
+
+  it('keeps the first pairing, the default for new websites', () => {
+    expect(fontPairings[0]!.key).toBe('serif_classic')
+  })
+
+  it('registers each family once, with every weight and style its pairings use', () => {
+    const names = siteFontFamilies.map(font => font.name)
+    expect(new Set(names).size).toBe(names.length)
+
+    // Montserrat is a heading (500–700) in one pairing and the body (400–600) in others
+    expect(siteFontFamilies.find(font => font.name === 'Montserrat')).toMatchObject({ weights: [400, 500, 600, 700], styles: ['normal'] })
+    // Lora is an italic heading in one pairing and the body in another
+    expect(siteFontFamilies.find(font => font.name === 'Lora')!.styles).toEqual(['normal', 'italic'])
+  })
+
+  it('keeps headings to the weights sections use (400), with a body that has semibold or bold', () => {
+    for (const pairing of fontPairings) {
+      expect(pairing.heading.weights, pairing.key).toContain(pairing.heading.weights.includes(400) ? 400 : pairing.heading.weights[0])
+      expect(pairing.body.weights, pairing.key).toContain(400)
+      expect(pairing.body.weights.some(weight => weight >= 600), pairing.key).toBe(true)
+    }
   })
 })

@@ -2,7 +2,7 @@
 import type { CornerStyle, SiteTheme } from '~/site-theme/useSiteTheme'
 import { TriangleAlert } from '@lucide/vue'
 import { normalizeHex } from '~/site-theme/color'
-import { fontPairings } from '~/site-theme/fontPairings'
+import { fontPairingGroups, fontPairings, fontStack } from '~/site-theme/fontPairings'
 import { backgroundPresets, colorPresets } from '~/site-theme/presets'
 import { lightBackground, siteThemeWarnings } from '~/site-theme/useSiteTheme'
 import ColorInput from './ColorInput.vue'
@@ -122,10 +122,14 @@ function setCornerStyle(next: unknown) {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="pairing in fontPairings" :key="pairing.key" :value="pairing.key">
-            {{ pairing.name }}
-            <span class="text-xs text-muted-foreground">{{ pairing.heading.family }} + {{ pairing.body.family }}</span>
-          </SelectItem>
+          <!-- By the events each suits; each name in its own heading font (the fonts load when the list opens) -->
+          <SelectGroup v-for="group in fontPairingGroups" :key="group.key">
+            <SelectLabel>{{ group.label }}</SelectLabel>
+            <SelectItem v-for="pairing in fontPairings.filter(item => item.group === group.key)" :key="pairing.key" :value="pairing.key">
+              <span :style="{ fontFamily: fontStack(pairing.heading) }" class="text-base">{{ pairing.name }}</span>
+              <span class="text-xs text-muted-foreground">{{ pairing.heading.family }} + {{ pairing.body.family }}</span>
+            </SelectItem>
+          </SelectGroup>
         </SelectContent>
       </Select>
     </div>

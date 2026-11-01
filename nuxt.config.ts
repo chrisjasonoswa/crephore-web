@@ -47,8 +47,9 @@ export default defineNuxtConfig({
     componentDir: './app/components/ui',
   },
   colorMode: { classSuffix: '' },
-  // Event-site fonts are only referenced through CSS variables, so register them explicitly.
-  fonts: { families: siteFontFamilies },
+  // Event-site fonts are only referenced through CSS variables, so register them explicitly. Latin only: every family's
+  // @font-face rules are in every page, so other scripts (Cyrillic, Greek, Vietnamese…) would multiply them.
+  fonts: { families: siteFontFamilies, defaults: { subsets: ['latin'] } },
   // `/` is rendered per request, not prerendered: event websites (<subdomain>.<site domain>) are served at `/` of
   // their own host (app/router.options.ts), so one prerendered page would answer for every event's address.
   routeRules: {
