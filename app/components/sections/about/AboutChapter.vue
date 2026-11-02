@@ -20,7 +20,7 @@ withDefaults(defineProps<{
     <p v-if="item.eyebrow" class="text-[0.65rem] font-semibold tracking-[0.2em] uppercase @2xl:text-[0.7rem]" :class="styles.eyebrow">
       {{ item.eyebrow }}
     </p>
-    <h3 class="font-(family-name:--site-font-heading) text-xl leading-snug text-balance @2xl:text-2xl" :class="item.eyebrow && 'mt-1.5'">
+    <h3 class="font-(family-name:--site-font-heading) text-xl leading-snug text-balance @2xl:text-2xl" :class="[item.eyebrow && 'mt-1.5', styles.brandText]">
       {{ item.heading }}
     </h3>
     <p v-if="item.body" data-chapter-body class="mt-2 text-sm leading-relaxed text-pretty whitespace-pre-line" :class="styles.muted">

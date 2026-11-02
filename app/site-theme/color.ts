@@ -43,12 +43,31 @@ export function contrastRatio(a: string, b: string): number {
 
 const byContrastOn = (bg: string) => (a: string, b: string) => contrastRatio(b, bg) - contrastRatio(a, bg)
 
-/** White or near-black, whichever reads better; pure black if neither reaches AA. */
-export function readableTextOn(bg: string): string {
+/*
+ * White text wins whenever it reaches this contrast, even where near-black would contrast more: white on a colour
+ * usually looks better. Lower it for more white (e.g. 3 on mid-tone colours like gold); below MIN_CONTRAST, white text
+ * can fall short of WCAG AA, and the contrast tests in useSiteTheme.test.ts will say so.
+ */
+export const PREFER_WHITE_FROM = 2.2
+
+/** The least contrast text from `readableTextOn` has: PREFER_WHITE_FROM for white, MIN_CONTRAST (AA) otherwise. */
+export function textContrastFloor(text: string): number {
+  return normalizeHex(text) === LIGHT_TEXT ? Math.min(PREFER_WHITE_FROM, MIN_CONTRAST) : MIN_CONTRAST
+}
+
+/** White or near-black, whichever contrasts more; pure black if neither reaches AA. No preference for white. */
+function bestContrastOn(bg: string): string {
   const best = [LIGHT_TEXT, DARK_TEXT].sort(byContrastOn(bg))[0]!
   if (contrastRatio(best, bg) >= MIN_CONTRAST)
     return best
   return [LIGHT_TEXT, DARK_TEXT, '#000000'].sort(byContrastOn(bg))[0]!
+}
+
+/** Text on a colour: white when it reaches PREFER_WHITE_FROM, else whichever of white and near-black reads better. */
+export function readableTextOn(bg: string): string {
+  if (contrastRatio(LIGHT_TEXT, bg) >= PREFER_WHITE_FROM)
+    return LIGHT_TEXT
+  return bestContrastOn(bg)
 }
 
 /** `a` at `weight` (0–1) over `b`, as alpha compositing does it (sRGB). */
@@ -132,7 +151,8 @@ export function ensureContrast(color: string, bgs: string[], min = MIN_CONTRAST)
   if (passes(normalized))
     return normalized
 
-  const target = readableTextOn(bgs[0]!)
+  // Towards whichever end reads best (not the white preference): a brand colour used as text always reaches `min`
+  const target = bestContrastOn(bgs[0]!)
   const step = target === LIGHT_TEXT ? 0.02 : -0.02
   const [lightness, chroma, hue] = toOklch(normalized)
   for (let l = lightness + step; l > 0 && l < 1; l += step) {

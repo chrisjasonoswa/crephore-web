@@ -81,6 +81,8 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
   const tint50 = mixOklch(primary, LIGHT_TEXT, TINTS[50] / 100)
   // Light backgrounds text is checked against: the page background and the soft primary tint
   const lightBgs = [bg, tint50]
+  // A soft accent surface (e.g. initials on a white card in an accent section), mirrored by `--site-accent-100`
+  const accentTint = mixOklch(accent, LIGHT_TEXT, TINTS[100] / 100)
   const soft = darker(bg, tint50) // darkest light background
   const primary900 = tonalShade(primary, DARK_LIGHTNESS, DARK_MIN_CHROMA)
   const onPrimary = readableTextOn(primary)
@@ -104,6 +106,12 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
     // Any colour a host picks then still works (e.g. a pale main colour, a navy accent).
     '--site-primary-text': ensureContrast(primary, lightBgs),
     '--site-accent-on-photo': ensureContrast(accent, [photoWorst, primary900]),
+    // The other brand colour as text on each background (labels and headings; see
+    // section.background.ts `eyebrow` / `brandText`)
+    '--site-accent-text': ensureContrast(accent, [...lightBgs, accentTint]),
+    '--site-accent-100': `color-mix(in oklch, var(--site-accent) ${pct(TINTS[100])}, white)`,
+    '--site-accent-on-primary': ensureContrast(accent, [primary]),
+    '--site-primary-on-accent': ensureContrast(primary, [accent]),
     '--site-on-photo-muted': `color-mix(in srgb, ${LIGHT_TEXT} ${pct(ON_PHOTO_MUTED * 100)}, transparent)`,
     '--site-photo-overlay': `color-mix(in srgb, var(--site-primary-900) ${pct(overlayStrength)}, transparent)`,
     '--site-bg': bg,

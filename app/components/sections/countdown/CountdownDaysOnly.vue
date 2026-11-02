@@ -35,7 +35,7 @@ const justify = { start: 'justify-start', center: 'justify-center', end: 'justif
       </p>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="[justify[align], styles.muted]">
-        <h2 v-if="content.heading">
+        <h2 v-if="content.heading" :class="styles.brandText">
           {{ content.heading }}
         </h2>
         <span v-if="content.heading" aria-hidden="true">·</span>

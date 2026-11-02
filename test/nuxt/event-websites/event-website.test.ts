@@ -38,7 +38,6 @@ const event = {
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
   eventGroup: null,
-  timeline: [],
 } satisfies Event
 
 describe('event website', () => {
@@ -151,6 +150,24 @@ describe('event website', () => {
 
       expect(upgradeSectionContent).toHaveBeenCalledWith('countdown', saved.sections[1]!.content, 1)
       expect(website.sections[0]!.content).toBe(upgraded)
+    })
+
+    it('saves without the photos a section doesn\'t show, keeping them in the draft for switching back', () => {
+      const photo = 'https://example.com/a.jpg'
+      const hero = { ...createWebsiteSection('hero', event), background: 'light' as const, content: { ...createWebsiteSection('hero', event).content, backgroundPhoto: photo } }
+      const draft = { ...createBlankWebsite(), sections: [hero] }
+
+      expect(mapWebsiteToRequest(draft).sections[0]!.content).not.toHaveProperty('backgroundPhoto')
+      // The draft still has it, so switching back to the photo background shows it without a new upload
+      expect(draft.sections[0]!.content.backgroundPhoto).toBe(photo)
+      expect(mapWebsiteToRequest({ ...draft, sections: [{ ...hero, background: 'photo' }] }).sections[0]!.content).toMatchObject({ backgroundPhoto: photo })
+    })
+
+    it('counts a website with only unused photos added as unchanged', () => {
+      const hero = { ...createWebsiteSection('hero', event), background: 'light' as const }
+      const withUnused = { ...hero, content: { ...hero.content, backgroundPhoto: 'https://example.com/a.jpg' } }
+
+      expect(isSameWebsite({ ...createBlankWebsite(), sections: [hero] }, { ...createBlankWebsite(), sections: [withUnused] })).toBe(true)
     })
 
     it('saves the whole website in page order: saved sections by id, new ones without, no editor keys', () => {

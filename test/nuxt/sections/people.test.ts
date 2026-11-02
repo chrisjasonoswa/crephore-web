@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blankPerson, groupPeopleByRole, peopleLayoutShowsBio, peopleLayoutShowsPhotos } from '~/features/sections/people/people.helpers'
+import { blankPerson, groupPeopleByRole, peopleLayoutShowsBio, peopleLayoutShowsPhotos, personInitials } from '~/features/sections/people/people.helpers'
 import { layoutPhotosOf, withLayoutPhoto } from '~/features/sections/section.photos'
 import { createDefaultSection } from '~/features/sections/section.registry'
 
@@ -18,6 +18,18 @@ describe('people helpers', () => {
       [undefined, ['C', 'D']],
       ['Sponsors', ['E']],
     ])
+  })
+
+  it('makes up to two initials from the first and last names, skipping titles', () => {
+    expect(personInitials('Bea Santos')).toBe('BS')
+    expect(personInitials('Ana Maria de la Cruz')).toBe('AC')
+    expect(personInitials('Lucas')).toBe('L')
+    expect(personInitials('Mr. & Mrs. Jose Santos')).toBe('JS')
+    expect(personInitials('Atty. Luis Cruz')).toBe('LC')
+    expect(personInitials('tita lorna')).toBe('TL')
+    expect(personInitials('Ñoño Ábalos')).toBe('ÑÁ')
+    expect(personInitials('')).toBe('')
+    expect(personInitials('  &  ')).toBe('')
   })
 
   it('tells which layouts show photos and bios', () => {

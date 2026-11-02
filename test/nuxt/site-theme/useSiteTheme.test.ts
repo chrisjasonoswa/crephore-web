@@ -1,6 +1,6 @@
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { describe, expect, it } from 'vitest'
-import { contrastRatio, LIGHT_TEXT, MIN_CONTRAST, mixOklch, mixSrgb } from '~/site-theme/color'
+import { contrastRatio, LIGHT_TEXT, MIN_CONTRAST, mixOklch, mixSrgb, textContrastFloor } from '~/site-theme/color'
 import { fontPairingGroups, fontPairings, siteFontFamilies } from '~/site-theme/fontPairings'
 import { backgroundPresets, colorPresets } from '~/site-theme/presets'
 import { lightBackground, siteThemeVars, siteThemeWarnings } from '~/site-theme/useSiteTheme'
@@ -32,6 +32,16 @@ describe('siteThemeVars contrast', () => {
     const soft = mixOklch(primary, LIGHT_TEXT, 0.07)
     const primary900 = vars['--site-primary-900']!
 
+    // Text on a colour is white once white reaches PREFER_WHITE_FROM (its muted shade fades only as far as that allows),
+    // so its floor follows the text colour chosen
+    const onPrimaryFloor = textContrastFloor(vars['--site-on-primary']!)
+    const onAccentFloor = textContrastFloor(vars['--site-on-accent']!)
+    const floors: Record<string, number> = {
+      'on-primary on primary': onPrimaryFloor,
+      'on-primary-muted on primary': onPrimaryFloor,
+      'on-accent on accent': onAccentFloor,
+      'on-accent-muted on accent': onAccentFloor,
+    }
     const pairs: [string, string, string][] = [
       ['on-primary on primary', vars['--site-on-primary']!, primary],
       ['on-primary-muted on primary', vars['--site-on-primary-muted']!, primary],
@@ -41,10 +51,14 @@ describe('siteThemeVars contrast', () => {
       ['primary-text on light background', vars['--site-primary-text']!, soft],
       ['accent-on-photo on primary-900', vars['--site-accent-on-photo']!, primary900],
       ['muted on light background', vars['--site-muted']!, soft],
+      ['accent-text on light background', vars['--site-accent-text']!, soft],
+      ['accent-text on the soft accent tint', vars['--site-accent-text']!, mixOklch(accent, LIGHT_TEXT, 0.14)],
+      ['accent-on-primary on primary', vars['--site-accent-on-primary']!, primary],
+      ['primary-on-accent on accent', vars['--site-primary-on-accent']!, accent],
     ]
 
     for (const [name, text, background] of pairs)
-      expect(contrastRatio(text, background), name).toBeGreaterThanOrEqual(MIN_CONTRAST)
+      expect(contrastRatio(text, background), name).toBeGreaterThanOrEqual(floors[name] ?? MIN_CONTRAST)
   })
 
   it.each(extremeThemes)('keeps the accent readable on the brightest photo under the overlay (%s)', (_, theme) => {
@@ -91,7 +105,8 @@ describe('siteThemeVars buttons', () => {
       const button = vars[`--site-button-${name}`]!
       for (const hex of backgrounds[name])
         expect(contrastRatio(button, hex), `${name} button vs background`).toBeGreaterThanOrEqual(3)
-      expect(contrastRatio(vars[`--site-on-button-${name}`]!, button), `${name} button text`).toBeGreaterThanOrEqual(MIN_CONTRAST)
+      const text = vars[`--site-on-button-${name}`]!
+      expect(contrastRatio(text, button), `${name} button text`).toBeGreaterThanOrEqual(textContrastFloor(text))
     }
   })
 
@@ -164,7 +179,8 @@ describe('siteThemeVars light background', () => {
       expect(contrastRatio(vars['--site-primary-text']!, bg), `${name}: primary-text`).toBeGreaterThanOrEqual(MIN_CONTRAST)
       expect(contrastRatio(vars['--site-muted']!, bg), `${name}: muted`).toBeGreaterThanOrEqual(MIN_CONTRAST)
       expect(contrastRatio(vars['--site-button-light']!, bg), `${name}: light button`).toBeGreaterThanOrEqual(3)
-      expect(contrastRatio(vars['--site-on-button-light']!, vars['--site-button-light']!), `${name}: light button text`).toBeGreaterThanOrEqual(MIN_CONTRAST)
+      const buttonText = vars['--site-on-button-light']!
+      expect(contrastRatio(buttonText, vars['--site-button-light']!), `${name}: light button text`).toBeGreaterThanOrEqual(textContrastFloor(buttonText))
     }
   })
 

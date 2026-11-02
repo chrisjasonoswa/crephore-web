@@ -14,7 +14,8 @@ export interface HeroContent {
   backgroundPhoto?: string
   // The photos inside the layout, in order. Each layout shows as many as it has room for (its registry
   // `layoutPhotoCount`: split 1, polaroid 2, collage 3, filmstrip 5); a missing photo shows a soft placeholder so the
-  // layout keeps its shape. Extra photos are kept, so switching back to a layout with more room shows them again.
+  // layout keeps its shape. While editing, extra photos are kept, so switching back to a layout with more room shows
+  // them again; saving drops them (`withoutUnusedPhotos`).
   layoutPhotos: string[]
   // The RSVP button
   cta?: SectionCta

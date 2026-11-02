@@ -216,11 +216,11 @@ describe('placement options', () => {
     expect(wrapper.find('[data-hero-text]').classes()).toContain('@3xl:col-start-2')
   })
 
-  it('framed: puts the photo on photoSide and the eyebrow under the names', async () => {
+  it('framed: puts the photo on photoSide and the eyebrow above the names, like every hero', async () => {
     const wrapper = await mountLayout('framed', { options: { photoSide: 'right' } })
 
     expect(wrapper.find('[data-hero-photo]').classes()).toContain('@3xl:col-start-2')
-    expect(comesBefore(wrapper, '<h1', 'Together with their families')).toBe(true)
+    expect(comesBefore(wrapper, 'Together with their families', '<h1')).toBe(true)
   })
 
   it('offset-frame: puts the block and photo on photoSide, the text in the other column', async () => {

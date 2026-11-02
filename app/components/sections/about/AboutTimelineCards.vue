@@ -2,6 +2,7 @@
 import type { Align } from '~/features/sections/section.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
+import SectionScrollHint from '~/components/sections/SectionScrollHint.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import { useDragScroll } from '~/features/sections/useDragScroll'
 import AboutChapter from './AboutChapter.vue'
@@ -15,7 +16,7 @@ const props = defineProps<SectionLayoutProps<'about'>>()
 const align = computed(() => props.options.textAlign as Align)
 
 const row = useTemplateRef<HTMLOListElement>('row')
-const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.timeline.length)
+const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.timeline.length)
 </script>
 
 <template>
@@ -48,5 +49,6 @@ const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } 
         <AboutChapter :item="item" :styles="styles" class="mt-4" />
       </li>
     </ol>
+    <SectionScrollHint v-if="canScroll" :thumb="thumb" :styles="styles" class="mt-8" />
   </SectionFrame>
 </template>

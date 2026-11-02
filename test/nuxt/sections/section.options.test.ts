@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { overlayFor, positionClasses, positionChoices, resolveLayoutOptions } from '~/features/sections/section.options'
+import { groupedChoices, overlayFor, positionClasses, positionChoices, resolveLayoutOptions } from '~/features/sections/section.options'
 
 describe('resolveLayoutOptions', () => {
   const options = [
@@ -14,6 +14,23 @@ describe('resolveLayoutOptions', () => {
   it('keeps stored values the layout offers, and drops the rest', () => {
     expect(resolveLayoutOptions(options, { photoSide: 'left', textPosition: 'nowhere', other: 'x' }))
       .toEqual({ photoSide: 'left', textPosition: 'center' })
+  })
+})
+
+describe('groupedChoices', () => {
+  it('puts choices without a group first, then each group in the order it first appears', () => {
+    const groups = groupedChoices([
+      { value: 'a', label: 'A', group: 'One' },
+      { value: 'none', label: 'None' },
+      { value: 'b', label: 'B', group: 'Two' },
+      { value: 'c', label: 'C', group: 'One' },
+    ])
+
+    expect(groups.map(group => [group.group, group.choices.map(choice => choice.value)])).toEqual([
+      [undefined, ['none']],
+      ['One', ['a', 'c']],
+      ['Two', ['b']],
+    ])
   })
 })
 

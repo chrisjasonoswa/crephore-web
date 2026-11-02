@@ -5,7 +5,8 @@ import type { Align } from '~/features/sections/section.options'
 import { alignClasses } from '~/features/sections/section.options'
 
 // A person's name and role (in small capitals), and their bio when `showBio` is on. Not a layout: the people layouts
-// share it. `roleFirst` puts the role above the name (the credits).
+// share it. `roleFirst` puts the role above the name (the credits). The name and bio use the background's brand text
+// colour and the role its brand label colour (e.g. primary and accent on light, accent and a soft primary on primary).
 withDefaults(defineProps<{
   person: PersonItem
   styles: BackgroundStyles
@@ -32,13 +33,13 @@ const nameSizes = {
     <p v-if="roleFirst && person.role" data-person-role class="mb-1 text-[0.65rem] font-semibold tracking-[0.18em] uppercase @2xl:text-[0.7rem]" :class="styles.eyebrow">
       {{ person.role }}
     </p>
-    <p data-person-name class="font-(family-name:--site-font-heading) leading-snug text-balance" :class="nameSizes[size]">
+    <p data-person-name class="font-(family-name:--site-font-heading) leading-snug text-balance" :class="[nameSizes[size], styles.brandText]">
       {{ person.name }}
     </p>
-    <p v-if="!roleFirst && person.role" data-person-role class="mt-1 text-[0.65rem] font-semibold tracking-[0.18em] uppercase @2xl:text-[0.7rem]" :class="styles.muted">
+    <p v-if="!roleFirst && person.role" data-person-role class="mt-1 text-[0.65rem] font-semibold tracking-[0.18em] uppercase @2xl:text-[0.7rem]" :class="styles.eyebrow">
       {{ person.role }}
     </p>
-    <p v-if="showBio && person.bio" data-person-bio class="mt-2 text-sm leading-relaxed text-pretty whitespace-pre-line" :class="styles.muted">
+    <p v-if="showBio && person.bio" data-person-bio class="mt-2 text-sm leading-relaxed text-pretty whitespace-pre-line" :class="styles.brandText">
       {{ person.bio }}
     </p>
   </div>

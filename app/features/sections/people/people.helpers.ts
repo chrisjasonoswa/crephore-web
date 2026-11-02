@@ -50,3 +50,19 @@ export const peopleRowWidths: Record<string, string> = {
   4: '@3xl:w-[calc((100%-4.5rem)/4)]',
   5: '@3xl:w-[calc((100%-6rem)/5)]',
 }
+
+// Titles left out of initials ("Mr. & Mrs. Jose Santos" → "JS")
+const titles = new Set(['mr', 'mrs', 'ms', 'miss', 'dr', 'atty', 'engr', 'hon', 'rev', 'fr', 'sr', 'jr', 'sis', 'bro'])
+
+/** Up to two initials for a person without a photo: the first and last name's ("Bea Santos" → "BS"), skipping titles. */
+export function personInitials(name: string): string {
+  const words = name
+    .split(/\s+/)
+    .map(word => word.replace(/[^\p{L}]/gu, ''))
+    .filter(word => word && !titles.has(word.toLowerCase()))
+  if (!words.length)
+    return ''
+  const first = words[0]!.charAt(0)
+  const last = words.length > 1 ? words.at(-1)!.charAt(0) : ''
+  return (first + last).toUpperCase()
+}

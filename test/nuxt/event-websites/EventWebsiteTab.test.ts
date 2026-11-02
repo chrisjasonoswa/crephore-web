@@ -41,7 +41,6 @@ const event = {
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
   eventGroup: null,
-  timeline: [],
 } satisfies Event
 
 const saved = {

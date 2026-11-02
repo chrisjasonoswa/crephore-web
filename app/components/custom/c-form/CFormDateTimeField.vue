@@ -79,7 +79,7 @@ const formatDate = (date: string) =>
           :aria-invalid="!!errors.length"
           :disabled="!splitValue(value).date"
           :model-value="splitValue(value).time"
-          class="w-28 flex-none"
+          class="w-36 flex-none"
           @update:model-value="(time: string | number) => handleChange(`${splitValue(value).date}T${time}`, !!errors.length)"
           @blur="handleBlur"
         />

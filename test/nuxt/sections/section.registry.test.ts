@@ -62,11 +62,11 @@ describe('section registry', () => {
     expect(inPickerOrder(getSectionLayout('message', 'card')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
     expect(inPickerOrder(getSectionLayout('countdown', 'strip')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
     expect(inPickerOrder(getSectionLayout('hero', 'fullscreen')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
-    expect(inPickerOrder(getSectionLayout('hero', 'overlay-card')!.backgrounds)).toEqual(['photo'])
+    expect(inPickerOrder(getSectionLayout('hero', 'overlay-card')!.backgrounds)).toEqual(['light', 'primary', 'accent', 'photo'])
   })
 
   it('puts the countdown over a photo on the photo background only, and the strip on a colour band by default', () => {
-    expect(getSectionLayout('countdown', 'photo')!.backgrounds).toEqual(['photo'])
+    expect(getSectionLayout('countdown', 'photo')!.backgrounds).toEqual(['photo', 'light', 'primary', 'accent'])
     expect(getSectionLayout('countdown', 'strip')!.backgrounds).toEqual(['primary', 'accent', 'light', 'photo'])
     expect(getSectionLayout('countdown', 'boxes')!.backgrounds).toEqual(['light', 'primary', 'accent', 'photo'])
   })
@@ -83,7 +83,7 @@ describe('section registry', () => {
   it('finds a layout by section type and key', () => {
     const layout = getSectionLayout('hero', 'overlay-card')
 
-    expect(layout?.name).toBe('Photo + card')
+    expect(layout?.name).toBe('Floating card')
     expect(layout?.component).toBeTruthy()
   })
 
@@ -114,7 +114,7 @@ describe('section registry', () => {
     }
   })
 
-  it('starts only Full and Photo + card on the photo; layouts with their own photos never do', () => {
+  it('starts only Full and Floating card on the photo; layouts with their own photos never do', () => {
     for (const definition of Object.values(sectionRegistry)) {
       for (const layout of definition.layouts) {
         if (layout.layoutPhotoCount > 0)
@@ -125,9 +125,16 @@ describe('section registry', () => {
       .toEqual(['fullscreen', 'overlay-card'])
   })
 
-  it('puts photo-backed layouts on the photo background only, Full on the photo first, and the rest on a colour first', () => {
+  it('offers all four backgrounds on every layout', () => {
+    for (const type of Object.values(sectionRegistry)) {
+      for (const layout of type.layouts)
+        expect([...layout.backgrounds].sort(), `${type.type}/${layout.key}`).toEqual(['accent', 'light', 'photo', 'primary'])
+    }
+  })
+
+  it('starts Full and Floating card on the photo, and the rest on a colour first', () => {
     expect(getSectionLayout('hero', 'fullscreen')!.backgrounds).toEqual(['photo', 'light', 'primary', 'accent'])
-    expect(getSectionLayout('hero', 'overlay-card')!.backgrounds).toEqual(['photo'])
+    expect(getSectionLayout('hero', 'overlay-card')!.backgrounds).toEqual(['photo', 'light', 'primary', 'accent'])
     expect(getSectionLayout('hero', 'collage')!.backgrounds).toEqual(['light', 'primary', 'accent', 'photo'])
   })
 
@@ -188,12 +195,13 @@ describe('changeSectionLayout', () => {
     expect(changeSectionLayout({ ...createDefaultSection('message'), layout: 'card', background: 'accent' }, 'stacked').background).toBe('light')
   })
 
-  it('keeps a background the host picked when the new layout supports it, else uses its default', () => {
+  it('keeps a background the host picked', () => {
     const full = createDefaultSection('hero')
 
     expect(changeSectionLayout({ ...full, layout: 'arch', background: 'accent' }, 'collage').background).toBe('accent')
     expect(changeSectionLayout({ ...full, layout: 'split', background: 'photo' }, 'banner').background).toBe('photo')
-    expect(changeSectionLayout({ ...full, background: 'light' }, 'overlay-card').background).toBe('photo')
+    // Every layout offers every background, so a picked one always carries over
+    expect(changeSectionLayout({ ...full, background: 'light' }, 'overlay-card').background).toBe('light')
   })
 
   it('leaves the section alone for an unknown layout', () => {

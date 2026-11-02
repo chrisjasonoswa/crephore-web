@@ -6,12 +6,13 @@ import type { CountdownContent } from '~/features/sections/countdown/countdown.t
 import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { MessageContent } from '~/features/sections/message/message.type'
 import type { PeopleContent } from '~/features/sections/people/people.type'
+import type { ProgramContent } from '~/features/sections/program/program.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { SectionBackground, SectionOccasion } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { ArrowLeft, Eye, EyeOff } from '@lucide/vue'
 import SectionThumbnail from '~/components/sections/SectionThumbnail.vue'
-import { positions, resolveLayoutOptions } from '~/features/sections/section.options'
+import { groupedChoices, positions, resolveLayoutOptions } from '~/features/sections/section.options'
 import { backgroundPhotoOf, layoutPhotosOf, withBackgroundPhoto, withLayoutPhoto } from '~/features/sections/section.photos'
 import { changeSectionLayout, getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 import WebsiteBackgroundPicker from './WebsiteBackgroundPicker.vue'
@@ -24,6 +25,7 @@ import WebsitePositionPicker from './WebsitePositionPicker.vue'
 import WebsiteMessageFields from './WebsiteMessageFields.vue'
 import WebsiteAboutFields from './WebsiteAboutFields.vue'
 import WebsitePeopleFields from './WebsitePeopleFields.vue'
+import WebsiteProgramFields from './WebsiteProgramFields.vue'
 import { peopleLayoutShowsBio, peopleLayoutShowsPhotos } from '~/features/sections/people/people.helpers'
 import { aboutTimelineShowsPhotos, isAboutTimelineLayout } from '~/features/sections/about/about.helpers'
 
@@ -96,6 +98,10 @@ const messageContent = computed({
   get: () => section.value.content as MessageContent,
   set: content => (section.value = { ...section.value, content }),
 })
+const programContent = computed({
+  get: () => section.value.content as ProgramContent,
+  set: content => (section.value = { ...section.value, content }),
+})
 </script>
 
 <template>
@@ -151,6 +157,29 @@ const messageContent = computed({
           :choices="option.choices"
           @update:model-value="setOption(option.key, $event)"
         />
+        <!-- A long list (e.g. the program's markers) is a dropdown, under headings when its choices have a `group` -->
+        <Select
+          v-else-if="option.control === 'select'"
+          :model-value="options[option.key]!"
+          @update:model-value="setOption(option.key, String($event))"
+        >
+          <SelectTrigger :data-option-select="option.key" :aria-label="option.label" class="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <template v-for="(group, groupIndex) in groupedChoices(option.choices)" :key="group.group ?? ''">
+              <SelectSeparator v-if="groupIndex > 0" />
+              <SelectGroup>
+                <SelectLabel v-if="group.group">
+                  {{ group.group }}
+                </SelectLabel>
+                <SelectItem v-for="choice in group.choices" :key="choice.value" :value="choice.value">
+                  {{ choice.label }}
+                </SelectItem>
+              </SelectGroup>
+            </template>
+          </SelectContent>
+        </Select>
         <WebsiteChoiceGroup
           v-else
           :model-value="options[option.key]!"
@@ -223,6 +252,7 @@ const messageContent = computed({
         :show-photos="peopleLayoutShowsPhotos(section.layout)"
         :show-bio="peopleLayoutShowsBio(section.layout)"
       />
+      <WebsiteProgramFields v-else-if="section.type === 'program'" v-model:content="programContent" :event="event" />
     </section>
 
     <WebsiteLayoutPickerDialog

@@ -18,9 +18,6 @@ const dateTime = (label: string) => z
 const endsAfterStart = (value: { startsAt: string, endsAt: string }) =>
   !value.startsAt || !value.endsAt || new Date(value.endsAt) >= new Date(value.startsAt)
 
-// One timeline item, e.g. "Opening"
-const timelineItem = z.string().trim().min(1, 'Item is required.').max(150, 'Item must be 150 characters or fewer.')
-
 export const eventFormSchema = z.object({
   name: z.string().trim().min(1, 'Name is required.').max(150, 'Name must be 150 characters or fewer.'),
   description: z.string().max(2000, 'Description must be 2000 characters or fewer.'),
@@ -38,7 +35,6 @@ export const eventFormSchema = z.object({
     // pipe: only check the format once the field is filled in (one error at a time)
     .pipe(z.string().regex(SUBDOMAIN_PATTERN, 'Use 3–63 lowercase letters, numbers and hyphens (not at the start or end).')),
   eventGroupId: z.number().nullable(),
-  timeline: z.array(timelineItem),
 }).refine(endsAfterStart, { path: ['endsAt'], message: 'End must be after the start.' })
 
 export type EventFormValues = z.infer<typeof eventFormSchema>
@@ -56,7 +52,6 @@ export const eventFormInitialValues: EventFormValues = {
   timezone: browserTimeZone(),
   subdomain: '',
   eventGroupId: null,
-  timeline: [],
 }
 
 // Edit form: times back to wall-clock values in the event's timezone
@@ -71,7 +66,6 @@ export const mapEventToFormValues = (event: Event): EventFormValues => ({
   timezone: event.timezone,
   subdomain: event.subdomain,
   eventGroupId: event.eventGroup?.id ?? null,
-  timeline: [...event.timeline],
 })
 
 // Create and update send the same request
@@ -90,5 +84,4 @@ export const mapFormValuesToEventRequest = (values: EventFormValues): CreateEven
   timezone: values.timezone,
   subdomain: values.subdomain.trim().toLowerCase(),
   eventGroupId: values.eventGroupId,
-  timeline: values.timeline.map(item => item.trim()),
 })

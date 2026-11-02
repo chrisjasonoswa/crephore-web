@@ -1,6 +1,6 @@
 import type { SectionTypeDefinition } from '../section.registry.type'
 import { alignChoices, positionChoices, sideChoices } from '../section.options'
-import { layout, onColour, onPhoto } from '../section.layout'
+import { colours, layout, onColour } from '../section.layout'
 
 // The countdown section type and its layouts, in picker order (see section.registry.ts).
 export const countdownSection: SectionTypeDefinition<'countdown'> = {
@@ -34,10 +34,11 @@ export const countdownSection: SectionTypeDefinition<'countdown'> = {
     }, () => import('~/components/sections/countdown/CountdownMinimal.vue')),
     layout({
       key: 'photo',
-      name: 'Over a photo',
-      description: 'Full photo with a soft overlay and light numbers. Best with a striking photo of the couple or celebrant.',
+      name: 'Full',
+      description: 'Big numbers and the date fill the section, placed anywhere in it. Striking over a photo of the couple or celebrant, or on a colour.',
+      // On the background photo by default, like the hero's Full; the colours work too
       layoutPhotoCount: 0,
-      backgrounds: onPhoto,
+      backgrounds: ['photo', ...colours],
       options: [{ key: 'textPosition', label: 'Text position', choices: positionChoices, default: 'center' }],
     }, () => import('~/components/sections/countdown/CountdownPhoto.vue')),
     layout({

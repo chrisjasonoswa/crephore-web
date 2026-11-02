@@ -26,7 +26,6 @@ const event = {
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
   eventGroup: null,
-  timeline: [],
 } satisfies Event
 
 interface SaveState {
@@ -187,7 +186,7 @@ describe('website editor', () => {
     await settle()
 
     expect([...document.body.querySelectorAll('[data-add-section]')].map(el => el.getAttribute('data-add-section')))
-      .toEqual(['hero', 'countdown', 'message', 'about', 'people'])
+      .toEqual(['hero', 'countdown', 'message', 'about', 'people', 'program'])
   })
 
   it('adds a hero with the event\'s details, shows it in the preview and opens its settings', async () => {

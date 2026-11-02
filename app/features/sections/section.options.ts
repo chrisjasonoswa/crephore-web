@@ -4,6 +4,8 @@
 export interface SectionLayoutOptionChoice {
   value: string
   label: string
+  // The heading it's listed under in a dropdown (`control: 'select'`); choices without one come first, with no heading
+  group?: string
 }
 
 export interface SectionLayoutOption {
@@ -11,6 +13,21 @@ export interface SectionLayoutOption {
   label: string
   choices: SectionLayoutOptionChoice[]
   default: string
+  // How editors offer it: cards side by side (the default, for a few choices) or a dropdown (for a long list)
+  control?: 'cards' | 'select'
+}
+
+/** A dropdown's choices under their headings: those without a `group` first (no heading), then each group in order. */
+export function groupedChoices(choices: SectionLayoutOptionChoice[]): { group?: string, choices: SectionLayoutOptionChoice[] }[] {
+  const groups: { group?: string, choices: SectionLayoutOptionChoice[] }[] = []
+  for (const choice of choices) {
+    const existing = groups.find(group => group.group === choice.group)
+    if (existing)
+      existing.choices.push(choice)
+    else
+      groups.push({ group: choice.group, choices: [choice] })
+  }
+  return groups.sort((a, b) => Number(a.group !== undefined) - Number(b.group !== undefined))
 }
 
 // Nine positions on a 3×3 grid, in picker order (row by row)

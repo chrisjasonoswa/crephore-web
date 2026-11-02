@@ -58,8 +58,6 @@ export interface Event {
   // The current user's access and their own group (groups are personal)
   access: EventAccess[]
   eventGroup: EventGroupSummary | null
-  // The program in order, e.g. ["Opening", "Dinner"]
-  timeline: string[]
 }
 
 /* API Request Types */
@@ -84,8 +82,7 @@ export interface CreateEventRequest {
   timezone: string
   subdomain: string
   eventGroupId: number | null
-  timeline: string[]
 }
 
-// Same fields as create; replaces them all, including the timeline and the user's group
+// Same fields as create; replaces them all, including the user's group
 export type UpdateEventRequest = CreateEventRequest

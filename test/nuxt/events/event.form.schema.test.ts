@@ -54,12 +54,6 @@ describe('eventFormSchema', () => {
   it('accepts an uppercase subdomain (it is lowercased)', () => {
     expect(eventFormSchema.safeParse({ ...validValues, subdomain: 'Ana-And-Marco' }).success).toBe(true)
   })
-
-  it('validates each timeline item', () => {
-    const paths = issuePaths({ ...validValues, timeline: ['Opening', ' ', 'a'.repeat(151)] })
-
-    expect(paths).toEqual(['timeline.1', 'timeline.2'])
-  })
 })
 
 describe('mapFormValuesToEventRequest', () => {
@@ -70,7 +64,6 @@ describe('mapFormValuesToEventRequest', () => {
       description: '   ',
       subdomain: ' Ana-And-Marco ',
       eventGroupId: 3,
-      timeline: [' Opening ', 'Dinner'],
     })
 
     expect(request).toEqual({
@@ -88,7 +81,6 @@ describe('mapFormValuesToEventRequest', () => {
       timezone: 'Asia/Manila',
       subdomain: 'ana-and-marco',
       eventGroupId: 3,
-      timeline: ['Opening', 'Dinner'],
     })
   })
 })
@@ -112,7 +104,6 @@ describe('mapEventToFormValues', () => {
       createdAt: '2026-10-26T00:00:00+00:00',
       access: ['Owner'],
       eventGroup: { id: 3, name: 'Family' },
-      timeline: ['Opening', 'Dinner'],
     })
 
     expect(values).toEqual({
@@ -127,7 +118,6 @@ describe('mapEventToFormValues', () => {
       timezone: 'Asia/Manila',
       subdomain: 'ana-and-marco',
       eventGroupId: 3,
-      timeline: ['Opening', 'Dinner'],
     })
   })
 })

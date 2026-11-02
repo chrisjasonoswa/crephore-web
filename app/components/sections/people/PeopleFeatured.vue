@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import { personPhotoShapes } from '~/features/sections/people/people.helpers'
 import PeopleHeading from './PeopleHeading.vue'
 import PersonCaption from './PersonCaption.vue'
+import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `featured` ("Featured pair"): the first two people as large portraits (`photoShape`) joined by an ampersand,
 // for the couple or the hosts; everyone else as small round photos below, a row that isn't full centred. On phones the
@@ -29,19 +29,19 @@ const others = computed(() => props.content.people.slice(2))
           :class="styles.eyebrow"
         >&amp;</span>
         <div data-person class="flex flex-col items-center gap-4">
-          <SectionPhoto data-person-photo :data-shape="options.photoShape" :src="person.photo" :variant="index" class="w-40 @2xl:w-56" :class="shape" />
+          <PersonPhoto data-person-photo :data-shape="options.photoShape" :person="person" :styles="styles" class="w-40 @2xl:w-56" :class="shape" />
           <PersonCaption :person="person" :styles="styles" size="medium" />
         </div>
       </template>
     </div>
     <ul v-if="others.length" data-people class="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-x-6 gap-y-8">
       <li
-        v-for="(person, index) in others"
+        v-for="person in others"
         :key="person.id"
         data-person
         class="flex w-[calc((100%-1.5rem)/2)] flex-col items-center gap-2 @2xl:w-[calc((100%-3rem)/3)] @3xl:w-[calc((100%-4.5rem)/4)]"
       >
-        <SectionPhoto data-person-photo :src="person.photo" :variant="index + 2" class="aspect-square w-20 rounded-full" />
+        <PersonPhoto data-person-photo :person="person" :styles="styles" class="aspect-square w-20 rounded-full" />
         <PersonCaption :person="person" :styles="styles" />
       </li>
     </ul>

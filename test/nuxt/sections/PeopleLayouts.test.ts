@@ -86,11 +86,13 @@ describe.each(layouts)('people layout $key', ({ key, photos, bios }) => {
   })
 
   if (photos) {
-    it('shows a placeholder for a missing photo', async () => {
+    it('shows the person\'s initials for a missing photo', async () => {
       const wrapper = await mountLayout(key, { content: { ...content, backgroundPhoto: undefined, people: people.map(({ photo: _, ...person }) => person) } })
 
       expect(wrapper.find('img').exists()).toBe(false)
-      expect(wrapper.findAll('[data-photo-placeholder]')).toHaveLength(people.length)
+      expect(wrapper.findAll('[data-person-initials]').map(initials => initials.text())).toEqual(['BS', 'CR', 'JS', 'RR', 'AL'])
+      // In the avatar colours of the layout's background (the polaroid wall starts on accent)
+      expect(wrapper.find('[data-person-initials]').classes()).toEqual(expect.arrayContaining(backgroundStyles[definitionOf(key).backgrounds[0]!].avatar.split(' ')))
     })
   }
 
@@ -112,6 +114,60 @@ describe.each(layouts)('people layout $key', ({ key, photos, bios }) => {
     expect(wrapper.find('h2').text()).toBe('Meet our people')
     expect(wrapper.find('[data-people]').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('The entourage')
+  })
+})
+
+describe('people colours', () => {
+  // On each background the name (and bio) use its brand text colour and the role its brand label colour: the primary
+  // and accent on light, the accent and a soft primary on primary, the primary and a soft accent on accent
+  it.each(['light', 'primary', 'accent', 'photo'] as const)('uses the brand colours for names, bios and roles on %s', async (background) => {
+    const wrapper = await mountLayout('spotlight', { background })
+    const styles = backgroundStyles[background]
+
+    expect(wrapper.find('[data-person-name]').classes()).toContain(styles.brandText)
+    expect(wrapper.find('[data-person-bio]').classes()).toContain(styles.brandText)
+    expect(wrapper.find('[data-person-role]').classes()).toContain(styles.eyebrow)
+  })
+
+  // The initials switch with the background: a soft tint of the section's colour with that colour's text
+  // People without photos; the background photo stays, so the photo background renders as itself
+  const withoutPhotos = { ...content, people: people.map(({ photo: _, ...person }) => person) }
+  it.each(['light', 'primary', 'accent', 'photo'] as const)('fills the initials with the avatar colours of %s', async (background) => {
+    const initials = (await mountLayout('grid', { background, content: withoutPhotos })).find('[data-person-initials]')
+
+    for (const className of backgroundStyles[background].avatar.split(' '))
+      expect(initials.classes(), background).toContain(className)
+  })
+
+  it('uses the same avatar colours on white cards and prints as in the other layouts, while their text stays light', async () => {
+    for (const key of ['cards', 'polaroids']) {
+      for (const background of ['primary', 'accent'] as const) {
+        const wrapper = await mountLayout(key, { background, content: withoutPhotos })
+        for (const className of backgroundStyles[background].avatar.split(' '))
+          expect(wrapper.find('[data-person-initials]').classes(), `${key} on ${background}`).toContain(className)
+        expect(wrapper.find('[data-person-name]').classes(), `${key} on ${background}`).toContain(backgroundStyles.light.brandText)
+      }
+    }
+  })
+
+  it('uses a soft tint of the section\'s colour: the primary\'s, the accent\'s on accent', () => {
+    for (const background of ['light', 'primary', 'photo'] as const)
+      expect(backgroundStyles[background].avatar, background).toBe('bg-(--site-primary-50) text-(--site-primary-text)')
+    expect(backgroundStyles.accent.avatar).toBe('bg-(--site-accent-100) text-(--site-accent-text)')
+  })
+
+  it('uses them in the entourage list too', async () => {
+    const wrapper = await mountLayout('entourage', { background: 'primary' })
+
+    expect(wrapper.find('[data-people-group] ul').classes()).toContain(backgroundStyles.primary.brandText)
+    expect(wrapper.find('[data-person-role]').classes()).toContain(backgroundStyles.primary.eyebrow)
+  })
+
+  it('uses the light colours on the light cards, whatever the background', async () => {
+    const card = (await mountLayout('cards', { background: 'primary' })).find('[data-person]')
+
+    expect(card.find('[data-person-name]').classes()).toContain(backgroundStyles.light.brandText)
+    expect(card.find('[data-person-role]').classes()).toContain(backgroundStyles.light.eyebrow)
   })
 })
 
@@ -178,8 +234,8 @@ describe('placement options', () => {
 
     expect(wrapper.find('[data-person-polaroid]').classes()).toContain('-rotate-3')
     expect(wrapper.find('[data-person-polaroid] figcaption').text()).toBe('Bea Santos')
-    // The name is on the white print, so it uses the light text colour on every background
-    expect(wrapper.find('figcaption').classes()).toContain('text-(--site-text)')
+    // The name is on the white print, so it uses the light background's brand colour on every background
+    expect(wrapper.find('figcaption').classes()).toContain('text-(--site-primary-text)')
     expect(await classesOf('polaroids', '[data-person-polaroid]', { tilt: 'off' })).not.toContain('-rotate-3')
   })
 

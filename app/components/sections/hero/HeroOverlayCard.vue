@@ -6,8 +6,8 @@ import { backgroundStyles } from '~/features/sections/section.background'
 import { positionClasses } from '~/features/sections/section.options'
 import HeroText from './HeroText.vue'
 
-// Layout `overlay-card`: the background photo fills the section; the details sit in a solid card at `cardPosition`,
-// so the text is readable on any photo (no overlay). Without a photo it renders on the primary background.
+// Layout `overlay-card` ("Floating card"): the details sit in a solid light card at `cardPosition`, so the text is
+// readable on any photo (no overlay) or colour.
 const props = defineProps<SectionLayoutProps<'hero'>>()
 
 const place = computed(() => positionClasses(props.options.cardPosition as Position))

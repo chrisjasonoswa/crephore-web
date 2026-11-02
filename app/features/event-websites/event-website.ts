@@ -4,6 +4,8 @@ import type { SectionContentMap, SectionOccasion, SectionType } from '~/features
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { toRaw } from 'vue'
 import { formatOccasionDate } from '~/features/sections/countdown/countdown.helpers'
+import { occasionDate, sampleProgramItems } from '~/features/sections/program/program.helpers'
+import { withoutUnusedPhotos } from '~/features/sections/section.photos'
 import { createDefaultSection, getSectionType } from '~/features/sections/section.registry'
 import { upgradeSectionContent } from '~/features/sections/section.upgrade'
 import { fontPairings } from '~/site-theme/fontPairings'
@@ -41,6 +43,8 @@ const eventDetails: { [T in SectionType]: (event: Event) => Partial<SectionConte
   message: () => ({}),
   about: () => ({}),
   people: () => ({}),
+  // The sample program on the event's day, the after-party on the next
+  program: event => ({ items: sampleProgramItems(occasionDate(eventOccasion(event))) }),
 }
 
 /** A new section for the event's page: the type's first layout and default content, with the event's details filled in. */
@@ -102,7 +106,10 @@ export function websiteFromApi(website: EventWebsite): EventWebsiteDraft {
   }
 }
 
-/** The save request: the whole website, sections in page order (saved ones by id). */
+/**
+ * The save request: the whole website, sections in page order (saved ones by id), without the photos a section
+ * doesn't show (`withoutUnusedPhotos`): the editor keeps them while editing, the saved website doesn't.
+ */
 export function mapWebsiteToRequest(website: EventWebsiteDraft): UpdateEventWebsiteRequest {
   const { theme } = website
   return {
@@ -113,7 +120,7 @@ export function mapWebsiteToRequest(website: EventWebsiteDraft): UpdateEventWebs
       fontPairingKey: theme.fontPairingKey,
       cornerStyle: theme.cornerStyle,
     },
-    sections: website.sections.map(section => ({
+    sections: website.sections.map(withoutUnusedPhotos).map(section => ({
       id: section.id ?? null,
       type: section.type,
       layout: section.layout,

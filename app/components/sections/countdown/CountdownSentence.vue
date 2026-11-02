@@ -42,7 +42,7 @@ const joiner = (index: number) => (index === 0 ? '' : index === parts.value.leng
       <h2
         v-if="content.heading"
         class="font-(family-name:--site-font-heading) text-2xl [font-style:var(--site-font-heading-italic)] text-balance @2xl:text-4xl"
-        :class="styles.eyebrow"
+        :class="styles.brandText"
       >
         {{ content.heading }}
       </h2>

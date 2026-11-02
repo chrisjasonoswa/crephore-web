@@ -52,9 +52,10 @@ function setDevice(next: unknown) {
       </ToggleGroup>
     </div>
 
+    <!-- Clipped, not hidden, so sticky elements in sections (the photo cards' photo) still stick while the page scrolls -->
     <div
       data-preview-frame
-      class="mx-auto w-full overflow-hidden rounded-xl border transition-[max-width] duration-300"
+      class="mx-auto w-full overflow-clip rounded-xl border transition-[max-width] duration-300"
       :style="{ maxWidth: activeDevice.width ? `${activeDevice.width}px` : undefined }"
     >
       <slot />

@@ -12,15 +12,11 @@ const props = withDefaults(defineProps<{
   align?: 'start' | 'center' | 'end'
   // Heading size: display for full-width layouts, large for half-width, medium for cards and narrow columns
   size?: 'display' | 'large' | 'medium'
-  // The eyebrow under the heading instead of above it ("Bea & Carlo / are getting married")
-  eyebrowBelow?: boolean
   // Details and button on one row from 768px (editorial)
   inlineCta?: boolean
   // The button first, then the date and venue as labelled columns ("Date", "Location"), stacked on phones
   // under a thin line (offset-frame)
   labelledDetails?: boolean
-  // Extra classes for the heading, e.g. a brand text colour on the light background
-  headingClass?: string
 }>(), {
   align: 'center',
   size: 'large',
@@ -50,7 +46,7 @@ const headingSizes = {
     <slot name="before-heading" />
 
     <p
-      v-if="content.eyebrow && !eyebrowBelow"
+      v-if="content.eyebrow"
       class="text-[0.7rem] font-semibold tracking-[0.25em] uppercase @2xl:text-xs"
       :class="styles.eyebrow"
     >
@@ -59,14 +55,10 @@ const headingSizes = {
 
     <h1
       class="font-(family-name:--site-font-heading) leading-[1.05] text-balance"
-      :class="[headingSizes[size], content.eyebrow && !eyebrowBelow && 'mt-4', headingClass]"
+      :class="[headingSizes[size], content.eyebrow && 'mt-4', styles.brandText]"
     >
       {{ content.heading }}
     </h1>
-
-    <p v-if="content.eyebrow && eyebrowBelow" class="mt-3 text-sm @2xl:text-base" :class="styles.muted">
-      {{ content.eyebrow }}
-    </p>
 
     <slot name="after-heading" />
 

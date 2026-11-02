@@ -75,7 +75,7 @@ const storyChapters = ['Getting Ready', 'Ceremony', 'Reception', 'First Dance', 
         <LandingFeatureCard
           :icon="QrCode"
           title="QR photo uploads"
-          description="Guests scan and upload. Photos sort themselves by time and by your event timeline."
+          description="Guests scan and upload. Photos sort themselves by time."
         />
         <LandingFeatureCard
           :icon="SquarePlay"

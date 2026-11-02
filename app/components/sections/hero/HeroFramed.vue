@@ -4,8 +4,8 @@ import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
 import HeroText from './HeroText.vue'
 
-// Layout `framed`: the first photo in a wide mat border like a printed invitation, the names beside it in
-// large serif with the eyebrow underneath ("are getting married"). `photoSide` and `textAlign` place them;
+// Layout `framed`: the first photo in a wide mat border like a printed invitation, the eyebrow and names beside it in
+// large serif. `photoSide` and `textAlign` place them;
 // on phones the photo goes on top. The white mat is part of the look, not a theme colour.
 const props = defineProps<SectionLayoutProps<'hero'>>()
 
@@ -28,7 +28,6 @@ const photoOnLeft = computed(() => props.options.photoSide !== 'right')
           :styles="styles"
           :align="options.textAlign === 'center' ? 'center' : 'start'"
           size="large"
-          eyebrow-below
         />
       </div>
     </div>

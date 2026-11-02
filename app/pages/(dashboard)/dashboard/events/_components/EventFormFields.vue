@@ -2,9 +2,6 @@
 import type { FormContext } from 'vee-validate'
 import type { EventFormValues } from './event.form.schema'
 import type { CFormSelectOption } from '~/components/custom/c-form/CFormSelectField.vue'
-import { GripVertical, Plus, Trash2 } from '@lucide/vue'
-import { useFieldArray } from 'vee-validate'
-import { useDraggable } from 'vue-draggable-plus'
 import CFormSelectField from '~/components/custom/c-form/CFormSelectField.vue'
 import CFormTextareaField from '~/components/custom/c-form/CFormTextareaField.vue'
 import CFormDateTimeField from '~/components/custom/c-form/CFormDateTimeField.vue'
@@ -13,7 +10,7 @@ import { listEventGroups } from '~/features/event-groups/event-group.api'
 import { eventTypeLabels, eventTypes } from '~/features/events/event.type'
 import { timeZoneOptions } from '~/lib/date'
 
-const props = defineProps<{
+defineProps<{
   form?: FormContext<EventFormValues>
   viewOnly?: boolean
 }>()
@@ -29,37 +26,6 @@ onMounted(async () => {
 
 // The event's start and end are entered in this timezone
 const timezoneOptions: CFormSelectOption[] = timeZoneOptions()
-
-// The event's programme, in order (e.g. Opening → Dinner → First dance); drag the handles to reorder.
-const { fields: timeline, push, remove, move } = useFieldArray<string>('timeline')
-
-// Drag with vue-draggable-plus (SortableJS; mouse and touch). The rows are vee-validate fields,
-// so instead of letting the library change the list, put Sortable's DOM move back and let `move` re-render.
-const timelineList = useTemplateRef<HTMLElement>('timelineList')
-useDraggable(timelineList, timeline, {
-  handle: '[data-timeline-handle]',
-  animation: 150,
-  ghostClass: 'opacity-40',
-  disabled: props.viewOnly,
-  customUpdate: ({ from, item, oldIndex, newIndex }) => {
-    if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex)
-      return
-    item.remove()
-    from.insertBefore(item, from.children[oldIndex] ?? null)
-    move(oldIndex, newIndex)
-  },
-})
-
-// Keyboard: Arrow Up/Down on a focused handle moves the item, and focus follows it
-async function onHandleKeydown(event: KeyboardEvent, index: number) {
-  const to = event.key === 'ArrowUp' ? index - 1 : event.key === 'ArrowDown' ? index + 1 : null
-  if (to === null || to < 0 || to >= timeline.value.length)
-    return
-  event.preventDefault()
-  move(index, to)
-  await nextTick()
-  timelineList.value?.querySelectorAll<HTMLElement>('[data-timeline-handle]')[to]?.focus()
-}
 
 // Event websites are subdomains of this, e.g. jane-and-john.crephore.com
 const siteDomain = useSiteAddress().domain
@@ -114,59 +80,5 @@ const siteDomain = useSiteAddress().domain
         clear-label="No group"
       />
     </div>
-
-    <section class="flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <h3 class="text-sm font-medium">
-          Timeline
-        </h3>
-        <Button
-          v-if="!viewOnly"
-          type="button"
-          variant="outline"
-          size="sm"
-          @click="push('')"
-        >
-          <Plus />
-          Add item
-        </Button>
-      </div>
-
-      <p v-if="!timeline.length" class="text-sm text-muted-foreground">
-        No timeline items yet. Add the programme, e.g. Opening, Dinner, First dance.
-      </p>
-
-      <div ref="timelineList" class="flex flex-col gap-3">
-        <div
-          v-for="(entry, index) in timeline"
-          :key="entry.key"
-          class="flex items-start gap-2 rounded-lg bg-background"
-        >
-          <button
-            v-if="!viewOnly"
-            type="button"
-            data-timeline-handle
-            :aria-label="`Reorder timeline item ${index + 1} (Arrow Up/Down)`"
-            class="mt-1 flex size-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none active:cursor-grabbing"
-            @keydown="onHandleKeydown($event, index)"
-          >
-            <GripVertical class="size-4" />
-          </button>
-          <span class="mt-2 w-5 text-sm text-muted-foreground tabular-nums">{{ index + 1 }}.</span>
-          <CFormTextField :name="`timeline[${index}]`" placeholder="e.g. Opening" class="flex-1" />
-          <Button
-            v-if="!viewOnly"
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            class="mt-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            :aria-label="`Remove timeline item ${index + 1}`"
-            @click="remove(index)"
-          >
-            <Trash2 />
-          </Button>
-        </div>
-      </div>
-    </section>
   </div>
 </template>

@@ -2,6 +2,7 @@
 import type { Align } from '~/features/sections/section.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
+import SectionScrollHint from '~/components/sections/SectionScrollHint.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { useDragScroll } from '~/features/sections/useDragScroll'
@@ -21,7 +22,7 @@ const captionStyles = backgroundStyles.light
 const tilts = ['-rotate-5', 'rotate-4', '-rotate-3', 'rotate-5']
 
 const row = useTemplateRef<HTMLOListElement>('row')
-const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.timeline.length)
+const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.timeline.length)
 </script>
 
 <template>
@@ -68,6 +69,8 @@ const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } 
           />
         </li>
       </ol>
+      <!-- The row's bottom padding already spaces it from the prints -->
+      <SectionScrollHint v-if="canScroll" :thumb="thumb" :styles="styles" />
     </div>
   </SectionFrame>
 </template>

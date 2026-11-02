@@ -21,6 +21,12 @@ describe('upgradeSectionContent', () => {
     vi.restoreAllMocks()
   })
 
+  it('gives program content saved at version 1 its layout photos', () => {
+    const saved = { heading: 'Program', items: [] } as never
+
+    expect(upgradeSectionContent('program', saved, 1)).toEqual({ heading: 'Program', items: [], layoutPhotos: [] })
+  })
+
   it('leaves content at the current version as it is', () => {
     const hero: HeroContent = { heading: 'Bea & Carlo', layoutPhotos: [] }
 

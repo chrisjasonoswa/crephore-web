@@ -3,6 +3,7 @@ import type { AboutContent } from '~/features/sections/about/about.type'
 import type { SectionBackground } from '~/features/sections/section.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import AboutDivider from '~/components/sections/about/AboutDivider.vue'
 import AboutMagazine from '~/components/sections/about/AboutMagazine.vue'
 import AboutMosaic from '~/components/sections/about/AboutMosaic.vue'
@@ -261,6 +262,19 @@ describe('placement options', () => {
     expect(await sides({ firstPhotoSide: 'right' })).toEqual(['right', 'left', 'right'])
   })
 
+  it('timeline-zigzag: draws the centre line and dots, or leaves them out when line is hidden', async () => {
+    const shown = await mountLayout('timeline-zigzag')
+    expect(shown.find('[data-about-line]').exists()).toBe(true)
+    expect(shown.findAll('[data-about-dot]')).toHaveLength(3)
+    expect(shown.find('[data-about-chapter]').classes()).toContain('ps-8')
+
+    const hidden = await mountLayout('timeline-zigzag', { options: { line: 'hide' } })
+    expect(hidden.find('[data-about-line]').exists()).toBe(false)
+    expect(hidden.find('[data-about-dot]').exists()).toBe(false)
+    // No room kept for the line on phones
+    expect(hidden.find('[data-about-chapter]').classes()).not.toContain('ps-8')
+  })
+
   it('timeline-list: puts each photo on photoSide', async () => {
     expect(await classesOf('timeline-list', '[data-about-chapter]')).toContain('@2xl:grid-cols-[1fr_14rem]')
     expect(await classesOf('timeline-list', '[data-about-chapter]', { photoSide: 'left' })).toContain('@2xl:grid-cols-[14rem_1fr]')
@@ -292,6 +306,21 @@ describe('placement options', () => {
 
     await timeline.trigger('pointerup', { pointerType: 'mouse' })
     expect(timeline.classes()).toContain('snap-mandatory')
+  })
+
+  it.each(['timeline-cards', 'timeline-polaroids'])('%s: shows a swipe indicator under the row once it overflows, its thumb following the scroll', async (key) => {
+    const wrapper = await mountLayout(key)
+    expect(wrapper.find('[data-scroll-hint]').exists()).toBe(false)
+
+    const row = wrapper.find('[data-about-timeline]').element as HTMLOListElement
+    Object.defineProperties(row, { clientWidth: { value: 600 }, scrollWidth: { value: 1200 }, scrollLeft: { value: 600, writable: true } })
+    row.dispatchEvent(new Event('scroll'))
+    await nextTick()
+
+    const hint = wrapper.find('[data-scroll-hint]')
+    expect(hint.attributes('aria-hidden')).toBe('true')
+    // Half the row shows, scrolled to its end
+    expect(hint.find('[data-scroll-thumb]').attributes('style')).toBe('width: 50%; left: 50%;')
   })
 
   it.each(['timeline-cards', 'timeline-polaroids'])('%s: leaves touch and pen to scroll natively', async (key) => {

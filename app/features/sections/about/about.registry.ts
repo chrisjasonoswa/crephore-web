@@ -105,10 +105,18 @@ export const aboutSection: SectionTypeDefinition<'about'> = {
     layout({
       key: 'timeline-zigzag',
       name: 'Timeline: zigzag',
-      description: 'The chapters alternate sides along a centre line, each with its photo across from it.',
+      description: 'The chapters alternate sides, each with its photo across from it, along a centre line or without one.',
       layoutPhotoCount: 0,
       backgrounds: onColour,
-      options: [{ key: 'firstPhotoSide', label: 'First photo', choices: sideChoices, default: 'left' }],
+      options: [
+        { key: 'firstPhotoSide', label: 'First photo', choices: sideChoices, default: 'left' },
+        {
+          key: 'line',
+          label: 'Line',
+          choices: [{ value: 'show', label: 'Show' }, { value: 'hide', label: 'Hide' }],
+          default: 'show',
+        },
+      ],
     }, () => import('~/components/sections/about/AboutTimelineZigzag.vue')),
     layout({
       key: 'timeline-list',

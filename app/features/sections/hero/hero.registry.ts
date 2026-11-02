@@ -1,6 +1,6 @@
 import type { SectionTypeDefinition } from '../section.registry.type'
 import { aboveBelowChoices, alignChoices, positionChoices, sideChoices } from '../section.options'
-import { colours, layout, onColour, onPhoto } from '../section.layout'
+import { colours, layout, onColour } from '../section.layout'
 
 // The hero section type and its layouts, in picker order (see section.registry.ts).
 export const heroSection: SectionTypeDefinition<'hero'> = {
@@ -67,10 +67,11 @@ export const heroSection: SectionTypeDefinition<'hero'> = {
     }, () => import('~/components/sections/hero/HeroEditorial.vue')),
     layout({
       key: 'overlay-card',
-      name: 'Photo + card',
-      description: 'Full photo with the details in a solid card, so the text is always readable. Best for busy or bright photos, outdoor events.',
+      name: 'Floating card',
+      description: 'The details in a solid card placed anywhere in the section, so the text is always readable. Best over busy or bright photos, or on a colour.',
+      // On the background photo by default; the colours work too
       layoutPhotoCount: 0,
-      backgrounds: onPhoto,
+      backgrounds: ['photo', ...colours],
       options: [{ key: 'cardPosition', label: 'Card position', choices: positionChoices, default: 'bottom-left' }],
     }, () => import('~/components/sections/hero/HeroOverlayCard.vue')),
     layout({

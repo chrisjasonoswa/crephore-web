@@ -34,7 +34,7 @@ const headingSizes = {
     <h2
       v-if="content.heading"
       class="font-(family-name:--site-font-heading) leading-tight text-balance"
-      :class="[headingSizes[size], content.eyebrow && 'mt-3']"
+      :class="[headingSizes[size], content.eyebrow && 'mt-3', styles.brandText]"
     >
       {{ content.heading }}
     </h2>

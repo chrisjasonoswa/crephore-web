@@ -30,7 +30,7 @@ describe('event api', () => {
     expect(get).toHaveBeenCalledWith('/events/7')
   })
 
-  it('creates an event with its timeline', () => {
+  it('creates an event', () => {
     const payload = {
       name: 'Ana & Marco',
       description: null,
@@ -45,7 +45,6 @@ describe('event api', () => {
       timezone: 'Asia/Manila',
       subdomain: 'ana-and-marco',
       eventGroupId: null,
-      timeline: ['Opening', 'Dinner'],
     }
 
     addEvent(payload)
@@ -74,7 +73,6 @@ describe('event api', () => {
       timezone: 'Asia/Manila',
       subdomain: 'ana-and-marco',
       eventGroupId: null,
-      timeline: ['Opening'],
     }
 
     updateEvent(7, payload)

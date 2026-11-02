@@ -5,6 +5,7 @@ import { countdownSection } from './countdown/countdown.registry'
 import { heroSection } from './hero/hero.registry'
 import { messageSection } from './message/message.registry'
 import { peopleSection } from './people/people.registry'
+import { programSection } from './program/program.registry'
 import { resolveLayoutOptions } from './section.options'
 
 // Every section type the builder offers, in the order the add dialog lists them. Each type and its layouts live in
@@ -17,6 +18,7 @@ export const sectionRegistry: SectionRegistry = {
   message: messageSection,
   about: aboutSection,
   people: peopleSection,
+  program: programSection,
 }
 
 export function getSectionType<T extends SectionType>(type: T): SectionTypeDefinition<T> {

@@ -4,9 +4,10 @@ import type { CountdownContent } from '~/features/sections/countdown/countdown.t
 import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { MessageContent } from '~/features/sections/message/message.type'
 import type { PeopleContent } from '~/features/sections/people/people.type'
+import type { ProgramContent } from '~/features/sections/program/program.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
-import type { Section, SectionBackground } from '~/features/sections/section.type'
-import { positions, resolveLayoutOptions } from '~/features/sections/section.options'
+import type { Section, SectionBackground, SectionOccasion } from '~/features/sections/section.type'
+import { groupedChoices, positions, resolveLayoutOptions } from '~/features/sections/section.options'
 import { changeSectionLayout, getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 import { inPickerOrder, sectionBackgroundLabels } from '~/features/sections/section.type'
 import PlaygroundCountdownContent from './PlaygroundCountdownContent.vue'
@@ -14,10 +15,14 @@ import PlaygroundHeroContent from './PlaygroundHeroContent.vue'
 import PlaygroundAboutContent from './PlaygroundAboutContent.vue'
 import PlaygroundMessageContent from './PlaygroundMessageContent.vue'
 import PlaygroundPeopleContent from './PlaygroundPeopleContent.vue'
+import PlaygroundProgramContent from './PlaygroundProgramContent.vue'
 
 // Settings of one section on the page: layout, its placement options, background, and its content
 // (per section type: the hero's background and layout photos; the countdown's seconds, button, background and layout photo;
-// the message's signature, background and layout photo; the about section's photos, story length and chapters; the people section's count and photos).
+// the message's signature, background and layout photo; the about section's photos, story length and chapters; the people section's count and photos; the program's items and days, which follow the page's `occasion`).
+defineProps<{
+  occasion: SectionOccasion
+}>()
 const section = defineModel<Section>('section', { required: true })
 
 const id = useId()
@@ -53,6 +58,10 @@ const heroContent = computed({
 })
 const countdownContent = computed({
   get: () => section.value.content as CountdownContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const programContent = computed({
+  get: () => section.value.content as ProgramContent,
   set: content => (section.value = { ...section.value, content }),
 })
 const peopleContent = computed({
@@ -95,7 +104,30 @@ const messageContent = computed({
     <!-- The layout's placement options -->
     <div v-for="option in layout?.options ?? []" :key="option.key" class="flex flex-col gap-2">
       <Label>{{ option.label }}</Label>
+      <Select
+        v-if="option.control === 'select'"
+        :model-value="options[option.key]"
+        @update:model-value="setOption(option.key, String($event))"
+      >
+        <SelectTrigger :aria-label="option.label" class="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <template v-for="(group, groupIndex) in groupedChoices(option.choices)" :key="group.group ?? ''">
+            <SelectSeparator v-if="groupIndex > 0" />
+            <SelectGroup>
+              <SelectLabel v-if="group.group">
+                {{ group.group }}
+              </SelectLabel>
+              <SelectItem v-for="choice in group.choices" :key="choice.value" :value="choice.value">
+                {{ choice.label }}
+              </SelectItem>
+            </SelectGroup>
+          </template>
+        </SelectContent>
+      </Select>
       <ToggleGroup
+        v-else
         type="single"
         variant="outline"
         :model-value="options[option.key]"
@@ -138,5 +170,6 @@ const messageContent = computed({
     <PlaygroundMessageContent v-else-if="section.type === 'message'" v-model:content="messageContent" />
     <PlaygroundAboutContent v-else-if="section.type === 'about'" v-model:content="aboutContent" />
     <PlaygroundPeopleContent v-else-if="section.type === 'people'" v-model:content="peopleContent" />
+    <PlaygroundProgramContent v-else-if="section.type === 'program'" v-model:content="programContent" :occasion="occasion" />
   </div>
 </template>

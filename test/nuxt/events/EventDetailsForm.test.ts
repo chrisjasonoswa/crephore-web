@@ -34,7 +34,6 @@ const event: Event = {
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
   eventGroup: null,
-  timeline: ['Opening', 'Dinner'],
 }
 
 const mountForm = async (props: { event: Event } = { event }) => {
@@ -55,7 +54,6 @@ describe('EventDetailsForm', () => {
     const wrapper = await mountForm()
 
     expect((wrapper.find('input[id="name"]').element as HTMLInputElement).value).toBe('Ana & Marco')
-    expect((wrapper.find('input[id="timeline[1]"]').element as HTMLInputElement).value).toBe('Dinner')
     expect(saveButton(wrapper).attributes('disabled')).toBeDefined()
   })
 
@@ -76,7 +74,6 @@ describe('EventDetailsForm', () => {
       name: 'Ana & Marco 2027',
       startsAt: '2027-06-12T15:00',
       timezone: 'Asia/Manila',
-      timeline: ['Opening', 'Dinner'],
     }))
     expect(wrapper.emitted('saved')).toEqual([[saved]])
     expect(cToast).toHaveBeenCalledWith({ title: 'Event updated.', type: 'success' })

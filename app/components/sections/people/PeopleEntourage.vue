@@ -5,7 +5,8 @@ import { groupPeopleByRole } from '~/features/sections/people/people.helpers'
 import PeopleHeading from './PeopleHeading.vue'
 
 // Layout `entourage` ("Entourage list"): names only, no photos. People next to each other with the same role share one
-// heading ("Principal sponsors"), in up to `columns` columns (one on phones).
+// heading ("Principal sponsors"), in up to `columns` columns (one on phones). Names in the background's brand text
+// colour, roles in its brand label colour.
 const props = defineProps<SectionLayoutProps<'people'>>()
 
 const groups = computed(() => groupPeopleByRole(props.content.people))
@@ -24,7 +25,7 @@ const columns: Record<string, string> = {
         <h3 v-if="group.role" data-person-role class="mb-2 text-[0.65rem] font-semibold tracking-[0.2em] uppercase @2xl:text-[0.7rem]" :class="styles.eyebrow">
           {{ group.role }}
         </h3>
-        <ul>
+        <ul :class="styles.brandText">
           <li v-for="person in group.people" :key="person.id" data-person class="font-(family-name:--site-font-heading) text-lg leading-snug @2xl:text-xl">
             {{ person.name }}
           </li>

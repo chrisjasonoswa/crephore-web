@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import { personPhotoShapes } from '~/features/sections/people/people.helpers'
 import { useDragScroll } from '~/features/sections/useDragScroll'
 import PeopleHeading from './PeopleHeading.vue'
 import PersonCaption from './PersonCaption.vue'
+import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `carousel`: one row of tall portraits (`photoShape`) with names, that scrolls sideways on every screen: guests
 // swipe (touch, trackpad) or drag it with the mouse. Fits a big group in little space; portraits that all fit stay
@@ -36,12 +36,12 @@ const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } 
     >
       <!-- Auto margins centre the portraits while they all fit, and don't hide any once they overflow -->
       <li
-        v-for="(person, index) in content.people"
+        v-for="person in content.people"
         :key="person.id"
         data-person
         class="flex w-36 shrink-0 snap-start flex-col items-center gap-3 first:ms-auto last:me-auto @2xl:w-44"
       >
-        <SectionPhoto data-person-photo :data-shape="options.photoShape" :src="person.photo" :variant="index" class="w-full" :class="shape" />
+        <PersonPhoto data-person-photo :data-shape="options.photoShape" :person="person" :styles="styles" class="w-full" :class="shape" />
         <PersonCaption :person="person" :styles="styles" />
       </li>
     </ul>

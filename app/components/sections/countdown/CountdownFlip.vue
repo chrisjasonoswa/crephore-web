@@ -53,7 +53,7 @@ const justifyWide = { start: '@2xl:justify-start', center: '@2xl:justify-center'
       </div>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="justify[align]">
-        <h2 v-if="content.heading" class="font-medium">
+        <h2 v-if="content.heading" class="font-medium" :class="styles.brandText">
           {{ content.heading }}
         </h2>
         <span v-if="content.heading" aria-hidden="true" :class="styles.muted">·</span>

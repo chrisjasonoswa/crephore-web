@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import PeopleHeading from './PeopleHeading.vue'
 import PersonCaption from './PersonCaption.vue'
+import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `spotlight`: one person per row with a large photo and their role, name and bio beside it; the photo
 // alternates sides from row to row (`alternate`) or stays on the left. On phones the photo goes on top.
@@ -25,10 +25,10 @@ const photoOnRight = (index: number) => props.options.alternate === 'yes' && ind
           class="grid items-center gap-6 @2xl:gap-10"
           :class="photoOnRight(index) ? '@2xl:grid-cols-[1fr_14rem]' : '@2xl:grid-cols-[14rem_1fr]'"
         >
-          <SectionPhoto
+          <PersonPhoto
             data-person-photo
-            :src="person.photo"
-            :variant="index"
+            :person="person"
+            :styles="styles"
             class="aspect-4/5 w-full max-w-56 rounded-(--site-radius) @2xl:row-start-1"
             :class="photoOnRight(index) ? '@2xl:col-start-2 @2xl:justify-self-end' : '@2xl:col-start-1'"
           />

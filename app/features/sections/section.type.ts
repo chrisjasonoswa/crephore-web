@@ -7,6 +7,7 @@ import type { CountdownContent } from './countdown/countdown.type'
 import type { HeroContent } from './hero/hero.type'
 import type { MessageContent } from './message/message.type'
 import type { PeopleContent } from './people/people.type'
+import type { ProgramContent } from './program/program.type'
 
 /**
  * The background a section sits on. Each background maps to site-theme variables
@@ -43,6 +44,7 @@ export interface SectionContentMap {
   message: MessageContent
   about: AboutContent
   people: PeopleContent
+  program: ProgramContent
 }
 
 export type SectionType = keyof SectionContentMap

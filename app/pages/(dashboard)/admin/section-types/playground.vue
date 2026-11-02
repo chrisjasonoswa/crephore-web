@@ -23,7 +23,7 @@ const theme = ref<SiteTheme>({
 })
 
 // One section of each type, in page order
-const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown'), createDefaultSection('message'), createDefaultSection('about'), createDefaultSection('people')])
+const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown'), createDefaultSection('message'), createDefaultSection('about'), createDefaultSection('people'), createDefaultSection('program')])
 
 // The event's start, for the countdown: try a far date, the last hour, and one that has passed
 const occasionChoices = [
@@ -97,6 +97,7 @@ function setOccasion(next: unknown) {
               v-for="(_, index) in sections"
               :key="index"
               v-model:section="sections[index]!"
+              :occasion="occasion"
             />
           </section>
         </CardContent>

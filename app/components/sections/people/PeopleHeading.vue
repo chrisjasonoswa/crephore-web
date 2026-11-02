@@ -26,7 +26,7 @@ withDefaults(defineProps<{
     <h2
       v-if="content.heading"
       class="font-(family-name:--site-font-heading) text-3xl leading-tight text-balance @2xl:text-4xl"
-      :class="content.eyebrow && 'mt-3'"
+      :class="[content.eyebrow && 'mt-3', styles.brandText]"
     >
       {{ content.heading }}
     </h2>

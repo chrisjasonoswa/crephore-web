@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MIN_CONTRAST, colorDistance, contrastRatio, ensureContrast, ensureLight, relativeLuminance, tonalShade } from '~/site-theme/color'
+import { DARK_TEXT, LIGHT_TEXT, MIN_CONTRAST, PREFER_WHITE_FROM, colorDistance, contrastRatio, ensureContrast, ensureLight, readableTextOn, relativeLuminance, textContrastFloor, tonalShade } from '~/site-theme/color'
 
 describe('ensureContrast', () => {
   it('keeps a colour that is already readable', () => {
@@ -97,5 +97,30 @@ describe('ensureLight', () => {
     expect(colorDistance(tint, '#FFFFFF')).toBeLessThan(colorDistance('#FF4FA3', '#FFFFFF'))
     // Still pink (red channel highest)
     expect(Number.parseInt(tint.slice(1, 3), 16)).toBeGreaterThanOrEqual(Number.parseInt(tint.slice(3, 5), 16))
+  })
+})
+
+describe('readableTextOn', () => {
+  it('uses white whenever it reaches PREFER_WHITE_FROM, even where near-black contrasts more', () => {
+    // A muted rose and a gold: near-black contrasts more on both, but white is preferred once it is readable enough
+    for (const background of ['#B4596A', '#C4A55A']) {
+      expect(contrastRatio(LIGHT_TEXT, background), background).toBeGreaterThanOrEqual(PREFER_WHITE_FROM)
+      expect(readableTextOn(background), background).toBe(LIGHT_TEXT)
+    }
+  })
+
+  it('uses near-black where white falls short, e.g. on a pastel or white', () => {
+    for (const background of ['#E8A598', '#FFE600', '#FFFFFF']) {
+      expect(contrastRatio(LIGHT_TEXT, background), background).toBeLessThan(PREFER_WHITE_FROM)
+      expect(readableTextOn(background), background).toBe(DARK_TEXT)
+    }
+  })
+
+  it('always reaches its floor: PREFER_WHITE_FROM for white, AA for near-black', () => {
+    for (const background of ['#000000', '#1E2A44', '#B4596A', '#7A8B99', '#C4A55A', '#E8A598', '#FFE600', '#FFFFFF']) {
+      const text = readableTextOn(background)
+      expect(contrastRatio(text, background), background).toBeGreaterThanOrEqual(textContrastFloor(text))
+    }
+    expect(textContrastFloor(DARK_TEXT)).toBe(MIN_CONTRAST)
   })
 })

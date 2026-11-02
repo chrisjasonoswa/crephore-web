@@ -7,9 +7,12 @@ import { getSectionType } from './section.registry'
 export type UpgradeStep = (content: Record<string, unknown>) => Record<string, unknown>
 export type UpgradeSteps = { [T in SectionType]?: Record<number, UpgradeStep> }
 
-// Every type is at version 1 (nothing was saved before the current fields), so there are no steps yet. A step looks like
+// A step looks like
 //   countdown: { 1: ({ title, ...content }) => ({ ...content, heading: title }) }   // 1 → 2: `title` became `heading`
-const upgrades: UpgradeSteps = {}
+const upgrades: UpgradeSteps = {
+  // 1 → 2: the program got layout photos (the vertical title's and photo cards' photo)
+  program: { 1: content => ({ ...content, layoutPhotos: content.layoutPhotos ?? [] }) },
+}
 
 /** Saved content brought up to the type's current content version (`steps` only for tests). */
 export function upgradeSectionContent<T extends SectionType>(

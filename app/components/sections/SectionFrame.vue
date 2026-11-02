@@ -37,7 +37,9 @@ const overlayClasses: Record<NonNullable<typeof props.overlay>, string> = {
 </script>
 
 <template>
-  <section class="relative isolate overflow-hidden" :class="styles.root">
+  <!-- Clipped, not hidden: overflow-hidden would make the section a scroll container and stop sticky children (the
+       photo cards' photo) from sticking -->
+  <section class="relative isolate overflow-clip" :class="styles.root">
     <template v-if="photoUrl">
       <img :src="photoUrl" alt="" class="absolute inset-0 -z-20 size-full object-cover">
       <div v-if="overlay !== 'none'" class="absolute inset-0 -z-10" :class="overlayClasses[overlay]" />
