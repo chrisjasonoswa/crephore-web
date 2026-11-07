@@ -15,10 +15,11 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="grid @3xl:min-h-[40rem] @3xl:grid-cols-2">
+  <!-- Stacked on phones, the photo takes the height the text leaves (at least 14rem), so the hero fills the screen -->
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="grid min-h-[max(var(--site-screen-height),36rem)] grid-rows-[minmax(0,1fr)_auto] @3xl:grid-cols-2 @3xl:grid-rows-none">
     <SectionPhoto
       :src="content.layoutPhotos[0]"
-      class="aspect-4/3 w-full @3xl:row-start-1 @3xl:aspect-auto @3xl:h-full"
+      class="size-full min-h-56 @3xl:row-start-1"
       :class="photoOnLeft ? '@3xl:col-start-1' : '@3xl:col-start-2'"
     />
     <div

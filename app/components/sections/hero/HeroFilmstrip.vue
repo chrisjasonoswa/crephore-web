@@ -18,7 +18,7 @@ const stripSlot = computed(() => (props.options.photoPosition === 'above' ? 'bef
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="py-14 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col justify-center py-14 @2xl:py-20">
     <HeroText :content="content" :occasion="occasion" :styles="styles" :align="align" size="large" class="mx-auto max-w-6xl px-6 @2xl:px-10">
       <template #[stripSlot]>
         <div

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Section, SectionOccasion } from '~/features/sections/section.type'
+import { sectionPriorityKey } from '~/features/sections/section.loading'
 import { resolveLayoutOptions } from '~/features/sections/section.options'
 import { getSectionLayout } from '~/features/sections/section.registry'
 import { sampleOccasion } from '~/features/sections/section.type'
@@ -9,7 +10,10 @@ const props = defineProps<{
   section: Section
   // The page's event; previews without one get a sample (112 days away)
   occasion?: SectionOccasion
+  // Load its photos right away (the page's first section); the others load theirs as guests scroll near them
+  priority?: boolean
 }>()
+provide(sectionPriorityKey, props.priority ?? false)
 
 const fallbackOccasion = sampleOccasion()
 

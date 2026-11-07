@@ -131,6 +131,12 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
   const overlayStrength = photoOverlayStrength(primary900)
   // Brightest a photo can get under the overlay (a white pixel), i.e. the worst case for light text.
   const photoWorst = mixSrgb(primary900, LIGHT_TEXT, overlayStrength / 100)
+  // Headings and names on a photo are light, like all text there: the secondary as picked when it reads on the
+  // overlay (3:1 against its dark) and stands apart from the brightest spot of the photo under it (3:1, or clearly a
+  // different colour, as buttons: a vivid pink on a grey-olive), else lightened until it does. Never darkened: dark
+  // text vanishes in the photo's dark parts.
+  const secondaryOnPhoto = lightenUntil(secondary, color => contrastRatio(color, primary900) >= MIN_CONTRAST
+    && (contrastRatio(color, photoWorst) >= MIN_CONTRAST || colorDistance(color, photoWorst) >= MIN_BUTTON_DISTANCE))
 
   const vars: Record<string, string> = {
     '--site-primary': primary,
@@ -151,12 +157,12 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
     // Brand colours used as text: kept as chosen when readable, otherwise nudged until they pass AA.
     // Any colour a host picks then still works (e.g. a pale main colour, a navy secondary).
     '--site-primary-text': ensureContrast(primary, lightBgs),
-    // Headings and names on a photo are light, like all text there: the secondary as picked when it reads on the
-    // overlay (3:1 against its dark) and stands apart from the brightest spot of the photo under it (3:1, or clearly a
-    // different colour, as buttons: a vivid pink on a grey-olive), else lightened until it does. Never darkened: dark
-    // text vanishes in the photo's dark parts.
-    '--site-secondary-on-photo': lightenUntil(secondary, color => contrastRatio(color, primary900) >= MIN_CONTRAST
-      && (contrastRatio(color, photoWorst) >= MIN_CONTRAST || colorDistance(color, photoWorst) >= MIN_BUTTON_DISTANCE)),
+    '--site-secondary-on-photo': secondaryOnPhoto,
+    // The solid colour a photo fades into at the text's edge (the Full hero, text off-centre): the primary itself when
+    // the light text and headings there read on it, else the overlay's dark shade (a pale primary would wash them out)
+    '--site-photo-edge': contrastRatio(LIGHT_TEXT, primary) >= MIN_CONTRAST && contrastRatio(secondaryOnPhoto, primary) >= MIN_CONTRAST
+      ? primary
+      : primary900,
     // The other brand colour as text on each background (labels and headings; see
     // section.background.ts `eyebrow` / `brandText`)
     '--site-secondary-text': ensureContrast(secondary, [...lightBgs, secondaryTint]),

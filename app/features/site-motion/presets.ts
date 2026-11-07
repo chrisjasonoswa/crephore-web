@@ -44,7 +44,7 @@ export const introPresets: Record<PageIntroKey, IntroPreset> = {
   'bloom': { duration: 2300 },
   'meet': { duration: 2500 },
   'light-leak': { duration: 2200 },
-  'pages': { duration: 2200 },
+  'pages': { duration: 2500 },
   'ribbon': { duration: 4200 },
   'polaroid': { duration: 2800 },
   'toast': { duration: 2700 },

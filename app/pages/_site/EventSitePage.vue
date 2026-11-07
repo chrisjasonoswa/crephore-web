@@ -73,7 +73,7 @@ useHead({
 <template>
   <SiteThemeScope v-if="site && theme && occasion" :theme="theme" intro-on-load :intro-content="introContent" class="min-h-svh">
     <main>
-      <SectionRenderer v-for="(section, index) in sections" :key="index" :section="section" :occasion="occasion" />
+      <SectionRenderer v-for="(section, index) in sections" :key="index" :section="section" :occasion="occasion" :priority="index === 0" />
     </main>
   </SiteThemeScope>
 

@@ -23,8 +23,12 @@ const props = withDefaults(defineProps<{
   introKey?: number
   // What the intros show (introContentFor): the event's name, date and venue, the program's numbers…
   introContent?: IntroContent
+  // The screen's height for sections that fill it (the hero, `--site-screen-height`): the visible screen (`svh`, so a
+  // phone's browser bars don't push its bottom off) on the site and in previews, a fixed one in thumbnails
+  screenHeight?: string
 }>(), {
   introKey: 0,
+  screenHeight: '100svh',
   introContent: () => ({ title: '', initials: '', firstName: '', programTitles: [], stats: [], kind: 'any' }),
 })
 
@@ -73,7 +77,7 @@ watch(() => props.introKey, (key) => {
   <div
     ref="root"
     class="crephore-site @container relative bg-(--site-bg) font-(family-name:--site-font-body) text-(--site-text) antialiased"
-    :style="[themeVars, motionStyle]"
+    :style="[themeVars, motionStyle, { '--site-screen-height': screenHeight }]"
   >
     <PageIntroScene
       v-if="introPlaying && sceneKind"

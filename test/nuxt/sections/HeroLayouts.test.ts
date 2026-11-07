@@ -288,3 +288,52 @@ describe('placement options', () => {
     expect((await mountLayout('offset-frame', { background: 'primary' })).find('[data-offset-block]').classes()).toContain('bg-(--site-button-primary)')
   })
 })
+
+describe('screen height', () => {
+  // The site sets --site-screen-height (the visible screen); never under 36rem, for short phones
+  it.each(layouts.map(layout => layout.key))('%s fills the screen\'s height, and at least 36rem', async (key) => {
+    const wrapper = await mountLayout(key)
+
+    expect(wrapper.find('section').classes()).toContain('min-h-[max(var(--site-screen-height),36rem)]')
+  })
+
+  it('lets the banner\'s photo take the height the text leaves', async () => {
+    const photo = (await mountLayout('banner')).find('[data-photo-placeholder], img')
+
+    expect(photo.classes()).toEqual(expect.arrayContaining(['flex-1', 'min-h-52']))
+  })
+})
+
+describe('full: the photo\'s edge', () => {
+  // `photo` null: no background photo
+  const edgeOf = async (textPosition: string, background: SectionBackground = 'photo', photo: string | null = backgroundPhoto) =>
+    (await mountLayout('fullscreen', { background, options: { textPosition }, content: { ...content, backgroundPhoto: photo ?? undefined } })).find('[data-photo-edge]')
+
+  it('fades the photo into the edge colour from the text\'s side, over the overlay', async () => {
+    expect((await edgeOf('bottom-left')).classes()).toEqual(expect.arrayContaining(['bg-linear-to-t', 'from-(--site-photo-edge)']))
+    expect((await edgeOf('bottom')).classes()).toContain('bg-linear-to-t')
+    expect((await edgeOf('top-right')).classes()).toContain('bg-linear-to-b')
+    expect((await edgeOf('left')).classes()).toContain('bg-linear-to-r')
+    expect((await edgeOf('right')).classes()).toContain('bg-linear-to-l')
+  })
+
+  it('fades by 45% of the way across, and keeps the overlay near the text so the far side stays clear', async () => {
+    const wrapper = await mountLayout('fullscreen', { background: 'photo', options: { textPosition: 'bottom-left' } })
+
+    expect(wrapper.find('[data-photo-edge]').classes()).toContain('to-45%')
+    expect(wrapper.find('[data-photo-overlay]').classes()).toEqual(expect.arrayContaining(['bg-linear-to-t', 'from-40%', 'to-65%']))
+  })
+
+  it('places the text across the full width, near its edge', async () => {
+    const text = (await mountLayout('fullscreen', { options: { textPosition: 'bottom-right' } })).find('section > div:not([class*="absolute"])')
+
+    expect(text.classes()).not.toContain('max-w-6xl')
+    expect(text.classes()).toEqual(expect.arrayContaining(['w-full', '@5xl:px-20']))
+  })
+
+  it('keeps the even overlay for centred text, and draws no edge without a photo', async () => {
+    expect((await edgeOf('center')).exists()).toBe(false)
+    expect((await edgeOf('bottom-left', 'photo', null)).exists()).toBe(false)
+    expect((await edgeOf('bottom-left', 'light')).exists()).toBe(false)
+  })
+})

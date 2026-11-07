@@ -30,7 +30,7 @@ const blockColours: Record<SectionBackground, string> = {
     :background="background"
     :image-url="content.backgroundPhoto"
     :overlay="photoOnLeft ? 'end' : 'start'"
-    class="grid @3xl:min-h-[44rem] @3xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
+    class="grid min-h-[max(var(--site-screen-height),36rem)] @3xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
   >
     <div
       data-hero-photo

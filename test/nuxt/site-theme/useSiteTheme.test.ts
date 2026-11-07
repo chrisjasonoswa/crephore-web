@@ -326,9 +326,26 @@ describe('siteThemeVars fonts', () => {
       expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: pairing.key })['--site-font-heading-italic'], pairing.key).toBe('italic')
   })
 
+  it('fades a photo into the primary itself when light text reads on it, else into its dark shade', () => {
+    const dark = siteThemeVars(themeWith('#1F3A2E', '#E8D9B5'))
+    expect(dark['--site-photo-edge']).toBe(dark['--site-primary'])
+
+    // Blush: light text wouldn't read on it
+    const pale = siteThemeVars(themeWith('#F4C7D0', '#7A4E5A'))
+    expect(pale['--site-photo-edge']).toBe(pale['--site-primary-900'])
+  })
+
   it('keeps a script heading in its own case, and lets the others be set in capitals', () => {
     for (const pairing of fontPairings)
       expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: pairing.key })['--site-font-heading-case'], pairing.key).toBe(pairing.heading.script ? 'none' : 'uppercase')
+  })
+
+  it('registers the Fontshare families with their provider, the rest from Google Fonts', () => {
+    const byName = Object.fromEntries(siteFontFamilies.map(font => [font.name, font]))
+
+    expect(byName.Boska).toMatchObject({ provider: 'fontshare', weights: [300], styles: ['normal', 'italic'] })
+    expect(byName.Switzer).toMatchObject({ provider: 'fontshare', weights: [400, 500, 600] })
+    expect(byName.Inter).not.toHaveProperty('provider')
   })
 
   it('registers every pairing\'s fonts so they load on event websites', () => {

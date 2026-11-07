@@ -5,6 +5,8 @@ export interface SiteFont {
   italic?: boolean
   // A handwritten or script face: it already flows, so text that would be italic stays upright (slanted, it looks wrong)
   script?: boolean
+  // Where @nuxt/fonts gets it: Google Fonts unless set (Fontshare for ITF's free faces, e.g. Boska and Switzer)
+  provider?: 'fontshare'
 }
 
 // Groups in the font picker, by the events each suits (script and modern ones suit any event), in title case
@@ -35,7 +37,8 @@ const cursive = 'cursive'
 /*
  * Headings use one weight (400; sections never make them bold), plus italic when the face has one (the message's
  * signature, the countdown sentence). Body text uses 400, 500 and 600 (labels and buttons are semibold); faces without
- * those weights list the ones they have. Every family is a Google Font, by its exact name, served from the app.
+ * those weights list the ones they have. Every family is a Google Font (or a Fontshare one, `provider`), by its exact
+ * name, served from the app.
  */
 const heading = (family: string, fallback: string, extra: Partial<SiteFont> = {}): SiteFont =>
   ({ family, fallback, weights: [400], ...extra })
@@ -108,6 +111,15 @@ export const fontPairings: FontPairing[] = [
   { key: 'studio', name: 'Studio', group: 'modern', heading: heading('Syne', sans), body: body('Inter') },
   { key: 'art_deco', name: 'Art deco', group: 'modern', heading: heading('Poiret One', sans), body: body('Josefin Sans') },
   { key: 'journal', name: 'Journal', group: 'modern', heading: heading('Newsreader', serif, { italic: true }), body: body('Inter') },
+  // From Fontshare: a sharp editorial serif over a clean neo-grotesk. Boska in its Light (300), its thin strokes are the
+  // look; it's the only weight loaded, so headings (which ask for 400) use it
+  {
+    key: 'modern_editorial',
+    name: 'Modern editorial',
+    group: 'modern',
+    heading: heading('Boska', serif, { weights: [300], italic: true, provider: 'fontshare' }),
+    body: { ...body('Switzer'), provider: 'fontshare' },
+  },
 
   // Birthdays & parties: bold, rounded and handwritten faces
   {
@@ -156,8 +168,8 @@ export function fontStack(font: SiteFont): string {
 export const siteFontFamilies = Object.values(
   fontPairings
     .flatMap(pairing => [pairing.heading, pairing.body])
-    .reduce<Record<string, { name: string, weights: number[], styles: ('normal' | 'italic')[], global: true }>>((families, font) => {
-      const family = families[font.family] ?? { name: font.family, weights: [], styles: ['normal'], global: true }
+    .reduce<Record<string, { name: string, weights: number[], styles: ('normal' | 'italic')[], global: true, provider?: 'fontshare' }>>((families, font) => {
+      const family = families[font.family] ?? { name: font.family, weights: [], styles: ['normal'], global: true, ...(font.provider && { provider: font.provider }) }
       family.weights = [...new Set([...family.weights, ...font.weights])].sort((a, b) => a - b)
       if (font.italic && !family.styles.includes('italic'))
         family.styles = [...family.styles, 'italic']

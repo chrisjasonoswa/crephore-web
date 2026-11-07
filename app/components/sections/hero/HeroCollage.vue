@@ -20,7 +20,7 @@ const align = computed(() => (props.options.textPosition === 'center' ? 'center'
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col justify-center px-6 py-14 @2xl:px-10 @2xl:py-20">
     <div class="mx-auto grid max-w-6xl items-center gap-8 @3xl:min-h-[30rem] @3xl:gap-6" :class="order.columns">
       <div data-hero-text class="@3xl:px-4" :class="order.text">
         <HeroText :content="content" :occasion="occasion" :styles="styles" :align="align" size="medium" />

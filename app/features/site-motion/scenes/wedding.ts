@@ -310,7 +310,8 @@ const lightLeak: Scene = async ({ layer, content }, { A, el, reveal }) => {
 
 // Open the book: a closed gatefold invitation. The cover's design (a double frame around the eyebrow, the names and the
 // date) spans both covers, each showing its half, so it reads as one centred piece; then the covers swing open from the
-// spine and part it down the middle
+// spine towards the guest (outwards, out of the page) and part it down the middle, all the way round until they lie
+// flat beyond the screen's edges, out of view
 const pages: Scene = async ({ layer, content }, { A, el, wait, reveal }) => {
   const couple = namesOf(content.title)
   // Sized by the longest line: a name of a couple on its own line, else the whole title
@@ -326,19 +327,22 @@ const pages: Scene = async ({ layer, content }, { A, el, wait, reveal }) => {
        <div style="font-family:var(--f-display);font-style:italic;font-size:${size}px;line-height:1.05;margin:14px 0;overflow-wrap:anywhere;text-wrap:balance">${names}</div>
        ${content.dateNumeric ? `<div style="font-family:var(--f-display);font-size:13px;letter-spacing:.2em;opacity:.85">${esc(content.dateNumeric)}</div>` : ''}
      </div></div>`
-  // Each cover is half the page wide and shows its half of the full-width design
-  const cover = (side: 'left' | 'right') => `<div class="pg" style="position:absolute;top:0;bottom:0;${side}:0;width:50%;overflow:hidden;background:var(--p);transform-origin:${side} center;box-shadow:inset ${side === 'left' ? '-14px' : '14px'} 0 24px rgba(0,0,0,.22)">
-     <div style="position:absolute;top:0;bottom:0;${side}:0;width:200%">${design}</div></div>`
-  const book = el(`<div class="fill" style="perspective:1200px">${cover('left')}${cover('right')}<div style="position:absolute;left:50%;top:0;bottom:0;width:1px;margin-left:-.5px;background:rgba(0,0,0,.25)"></div></div>`)
+  // Each cover is half the page wide and shows its half of the full-width design; its back (seen once it swings past
+  // upright) is plain cover, like a real booklet's
+  const cover = (side: 'left' | 'right') => `<div class="pg" style="position:absolute;top:0;bottom:0;${side}:0;width:50%;overflow:hidden;background:var(--p);transform-origin:${side} center">
+     <div style="position:absolute;top:0;bottom:0;${side}:0;width:200%;backface-visibility:hidden">${design}</div></div>`
+  // No shadow or line down the spine: the closed covers read as one clean piece. The perspective is deeper than the
+  // screen is wide, so a cover swinging towards the guest never reaches the eye (it would break apart there)
+  const book = el(`<div class="fill" style="perspective:calc(100vw + 600px)">${cover('left')}${cover('right')}</div>`)
   layer.append(book)
   const [left, right] = book.querySelectorAll('.pg')
   await A(book, [{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 500 })
   await wait(700)
   reveal()
   await Promise.all([
-    A(left!, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(100deg)' }], { duration: 1100, easing: EASE }),
-    A(right!, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(-100deg)' }], { duration: 1100, easing: EASE }),
-    A(book.lastElementChild!, [{ opacity: 1 }, { opacity: 0 }], { duration: 300 }),
+    // Towards the guest and all the way open, flat beyond the screen's edges
+    A(left!, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(-180deg)' }], { duration: 1300, easing: EASE }),
+    A(right!, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(180deg)' }], { duration: 1300, easing: EASE }),
   ])
 }
 

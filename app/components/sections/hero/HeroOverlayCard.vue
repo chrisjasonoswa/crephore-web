@@ -20,7 +20,7 @@ const cardStyles = backgroundStyles.light
     :background="background"
     :image-url="content.backgroundPhoto"
     overlay="none"
-    class="flex min-h-[36rem] flex-col @2xl:min-h-[44rem]"
+    class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col"
   >
     <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 py-10 @2xl:px-10 @2xl:py-16" :class="[place.justify, place.items]">
       <div data-hero-card class="w-full max-w-md rounded-(--site-radius) p-7 shadow-xl @2xl:p-10" :class="cardStyles.root">

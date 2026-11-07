@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePhotoLoading } from '~/features/sections/section.loading'
 import SectionPhoto from './SectionPhoto.vue'
 
 // One photo spot that turns into a slideshow when it has several photos: they crossfade every few seconds, with
@@ -16,6 +17,8 @@ const props = withDefaults(defineProps<{
 })
 
 const slides = computed(() => props.photos.filter((photo): photo is string => !!photo))
+// The first slide like any section photo; the rest only as guests come near (they show later anyway)
+const loading = usePhotoLoading()
 const current = ref(0)
 const isPaused = ref(false)
 
@@ -58,6 +61,8 @@ onBeforeUnmount(() => clearInterval(timer))
       :key="`${i}-${src}`"
       :src="src"
       alt=""
+      :loading="i === 0 ? loading : 'lazy'"
+      decoding="async"
       :aria-hidden="i !== current"
       class="absolute inset-0 size-full object-cover transition-opacity duration-700 motion-reduce:transition-none"
       :class="i === current ? 'opacity-100' : 'opacity-0'"

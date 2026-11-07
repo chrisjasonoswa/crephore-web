@@ -14,7 +14,7 @@ const photoOnLeft = computed(() => props.options.photoSide !== 'right')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col justify-center px-6 py-14 @2xl:px-10 @2xl:py-20">
     <div class="mx-auto grid max-w-5xl items-center gap-10 @3xl:grid-cols-2 @3xl:gap-16">
       <div
         data-hero-photo

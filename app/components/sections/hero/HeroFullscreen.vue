@@ -7,7 +7,7 @@ import HeroText from './HeroText.vue'
 
 // Layout `fullscreen` ("Full"): the text fills the section at `textPosition`. On the photo background the
 // background photo fills it under an overlay (primary without a photo, see SectionFrame); on light, primary or secondary it's
-// just the colour.
+// just the colour. With the text off-centre, the photo also fades into a solid colour at the text's edge (`edge`).
 const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'textPosition'>>>()
 
 const position = computed(() => props.options.textPosition)
@@ -20,9 +20,11 @@ const place = computed(() => positionClasses(position.value))
     :background="background"
     :image-url="content.backgroundPhoto"
     :overlay="overlayFor(position)"
-    class="flex min-h-[36rem] flex-col @2xl:min-h-[44rem]"
+    :edge="position !== 'center'"
+    class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col"
   >
-    <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 py-16 @2xl:px-10 @2xl:py-24" :class="[place.justify, place.items]">
+    <!-- The full width, so text placed left or right sits near that edge (padding grows with the screen) -->
+    <div class="flex w-full flex-1 flex-col px-6 py-16 @2xl:px-12 @2xl:py-24 @5xl:px-20" :class="[place.justify, place.items]">
       <HeroText :content="content" :occasion="occasion" :styles="styles" :align="place.align" size="display" class="max-w-2xl" />
     </div>
   </SectionFrame>

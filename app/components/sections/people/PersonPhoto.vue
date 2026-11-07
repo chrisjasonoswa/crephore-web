@@ -2,6 +2,7 @@
 import type { PersonItem } from '~/features/sections/people/people.type'
 import type { BackgroundStyles } from '~/features/sections/section.background'
 import { personInitials } from '~/features/sections/people/people.helpers'
+import { usePhotoLoading } from '~/features/sections/section.loading'
 
 // A person's photo, or their initials when they have none ("BS"), so every person is recognisable while the host
 // collects photos. Layouts pass the shape and size classes. The initials use the section background's `avatar` colours
@@ -13,10 +14,11 @@ const props = defineProps<{
 }>()
 
 const initials = computed(() => personInitials(props.person.name))
+const loading = usePhotoLoading()
 </script>
 
 <template>
-  <img v-if="person.photo" :src="person.photo" alt="" class="object-cover">
+  <img v-if="person.photo" :src="person.photo" alt="" :loading="loading" decoding="async" class="object-cover">
   <div
     v-else
     aria-hidden="true"

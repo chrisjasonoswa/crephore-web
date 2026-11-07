@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ImageIcon, LoaderCircle, Upload, X } from '@lucide/vue'
 import { uploadPhoto } from '~/features/media/media.api'
+import { shrinkPhoto } from '~/features/media/photo'
 import { photoContentTypes, photoMaxBytes } from '~/features/media/media.type'
 import { cToast } from '~/lib/cToast'
 
@@ -37,12 +38,14 @@ async function onFileChange(event: globalThis.Event) {
   // Checked here too, so a wrong file gets an answer without uploading it
   if (!photoContentTypes.includes(file.type))
     return cToast({ title: 'Choose a JPG, PNG, WebP or GIF photo.', type: 'error' })
-  if (file.size > photoMaxBytes)
-    return cToast({ title: 'The photo must be 10 MB or smaller.', type: 'error' })
 
   isUploading.value = true
   try {
-    url.value = (await uploadPhoto(props.eventId, file)).data.url
+    // Scaled down first (`shrinkPhoto`), so a large camera photo fits the limit and guests download far less
+    const photo = await shrinkPhoto(file)
+    if (photo.size > photoMaxBytes)
+      return cToast({ title: 'The photo must be 10 MB or smaller.', type: 'error' })
+    url.value = (await uploadPhoto(props.eventId, photo)).data.url
   }
   catch {
     // The API client already showed its message

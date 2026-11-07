@@ -13,8 +13,9 @@ const align = computed(() => (props.options.textAlign === 'start' ? 'start' : 'c
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="flex flex-col" :class="options.photoPosition === 'below' && 'flex-col-reverse'">
-    <SectionPhoto :src="content.layoutPhotos[0]" class="h-52 w-full @2xl:h-80" />
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col" :class="options.photoPosition === 'below' && 'flex-col-reverse'">
+    <!-- Takes the height the text leaves, so the hero fills the screen -->
+    <SectionPhoto :src="content.layoutPhotos[0]" class="min-h-52 w-full flex-1 @2xl:min-h-80" />
     <div class="mx-auto w-full max-w-5xl px-6 py-12 @2xl:px-10 @2xl:py-16">
       <HeroText :content="content" :occasion="occasion" :styles="styles" :align="align" size="large" />
     </div>
