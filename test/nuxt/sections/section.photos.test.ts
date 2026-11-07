@@ -43,7 +43,7 @@ describe('withoutUnusedPhotos', () => {
 
     expect(hero.background).toBe('photo')
     expect(backgroundPhotoOf(withoutUnusedPhotos(hero))).toBe(photo)
-    for (const background of ['light', 'primary', 'accent'] as const)
+    for (const background of ['light', 'primary', 'secondary'] as const)
       expect(withoutUnusedPhotos({ ...hero, background }).content, background).not.toHaveProperty('backgroundPhoto')
   })
 

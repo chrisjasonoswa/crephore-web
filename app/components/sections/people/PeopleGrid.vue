@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { peopleRowWidths, personPhotoShapes } from '~/features/sections/people/people.helpers'
@@ -8,10 +9,10 @@ import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `grid` ("Photo grid"): each person's photo (`photoShape`) with the name and role underneath, `columns` a row
 // from 768px (two on phones, three in between); a row that isn't full is centred.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'columns' | 'photoShape'>>>()
 
-const shape = computed(() => personPhotoShapes[props.options.photoShape as keyof typeof personPhotoShapes])
-const width = computed(() => peopleRowWidths[props.options.columns!])
+const shape = computed(() => personPhotoShapes[props.options.photoShape])
+const width = computed(() => peopleRowWidths[props.options.columns])
 </script>
 
 <template>

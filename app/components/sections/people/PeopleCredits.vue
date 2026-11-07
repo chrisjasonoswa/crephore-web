@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import PeopleHeading from './PeopleHeading.vue'
@@ -6,7 +7,7 @@ import PersonCaption from './PersonCaption.vue'
 
 // Layout `credits`: like the end credits of a film, one person after another, centred: the role in small capitals
 // above the name in large type (`roleFirst`), or below it. Text only.
-defineProps<SectionLayoutProps<'people'>>()
+defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'roleFirst'>>>()
 </script>
 
 <template>

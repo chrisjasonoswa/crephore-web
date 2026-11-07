@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
@@ -6,7 +7,7 @@ import HeroText from './HeroText.vue'
 
 // Layout `polaroid`: two tilted instant photos beside the heading (`photoSide`); on phones they sit above it.
 // The white print borders are part of the look (like real instant photos), not a theme colour.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'photoSide'>>>()
 
 const photosOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
@@ -15,7 +16,7 @@ const photosOnLeft = computed(() => props.options.photoSide === 'left')
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
     <div class="mx-auto grid max-w-6xl items-center gap-12 @3xl:grid-cols-2">
       <div data-hero-text class="@3xl:row-start-1" :class="photosOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1'">
-        <HeroText :content="content" :styles="styles" align="start" size="large" />
+        <HeroText :content="content" :occasion="occasion" :styles="styles" align="start" size="large" />
       </div>
       <div
         data-polaroids

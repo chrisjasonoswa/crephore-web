@@ -4,13 +4,13 @@ import { defaultWebsiteTheme } from '~/features/event-websites/event-website'
 import WebsiteBackgroundPicker from '~/pages/(dashboard)/dashboard/events/[id]/_components/website/WebsiteBackgroundPicker.vue'
 
 describe('website background picker', () => {
-  it('lists the backgrounds as Light, Primary, Accent, Photo, even when the layout starts on another one', async () => {
+  it('lists the backgrounds as Light, Primary, Secondary, Photo, even when the layout starts on another one', async () => {
     const wrapper = await mountSuspended(WebsiteBackgroundPicker, {
-      props: { backgrounds: ['accent', 'light', 'primary', 'photo'], theme: defaultWebsiteTheme(), modelValue: 'accent' },
+      props: { backgrounds: ['secondary', 'light', 'primary', 'photo'], theme: defaultWebsiteTheme(), modelValue: 'secondary' },
     })
 
-    expect(wrapper.findAll('[data-choice]').map(item => item.text())).toEqual(['Light', 'Primary', 'Accent', 'Photo'])
-    expect(wrapper.findAll('[data-choice]').find(item => item.text() === 'Accent')!.attributes('data-state')).toBe('on')
+    expect(wrapper.findAll('[data-choice]').map(item => item.text())).toEqual(['Light', 'Primary', 'Secondary', 'Photo'])
+    expect(wrapper.findAll('[data-choice]').find(item => item.text() === 'Secondary')!.attributes('data-state')).toBe('on')
   })
 
   it('only lists the backgrounds the layout supports', async () => {

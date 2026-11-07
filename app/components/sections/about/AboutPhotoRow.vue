@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -9,11 +9,11 @@ import AboutText from './AboutText.vue'
 
 // Layout `photo-row`: the story with three photos in a row below or above it (`photoPosition`). The heading and story
 // are stacked (`textAlign`) or side by side, heading on the left (`textLayout`).
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'photoPosition' | 'textAlign' | 'textLayout'>>>()
 
 const photosAbove = computed(() => props.options.photoPosition === 'above')
 const isSideBySide = computed(() => props.options.textLayout === 'side')
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 </script>
 
 <template>

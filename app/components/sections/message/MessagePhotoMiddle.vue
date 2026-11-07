@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -9,9 +9,9 @@ import MessageBody from './MessageBody.vue'
 
 // Layout `photo-middle`: the heading above, a landscape photo in the middle, the message and signature below
 // (`textAlign`).
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'textAlign'>>>()
 
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 </script>
 
 <template>

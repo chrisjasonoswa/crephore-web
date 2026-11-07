@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import MessageText from './MessageText.vue'
 // Layout `overlap`: a large photo (`photoSide`) with the note on a light panel overlapping its edge, editorial style.
 // On phones the panel overlaps the photo's bottom edge. The panel has its own solid surface, so the background photo
 // needs no overlay.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 // The panel is always light, whatever the background

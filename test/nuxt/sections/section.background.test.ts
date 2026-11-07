@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { resolveBackground, backgroundStyles } from '~/features/sections/section.background'
+import { backgroundColours, resolveBackground, backgroundStyles } from '~/features/sections/section.background'
 import { sectionBackgrounds } from '~/features/sections/section.type'
 
 describe('backgroundStyles', () => {
@@ -8,13 +8,23 @@ describe('backgroundStyles', () => {
   })
 
   it('only uses site-theme variables, never the Crephore app theme', () => {
-    const appThemeClass = /\b(?:bg|text|border)-(?:primary|secondary|accent|muted|foreground|background|card)\b/
+    const appThemeClass = /\b(?:bg|text|border)-(?:primary|secondary|secondary|muted|foreground|background|card)\b/
 
     for (const styles of Object.values(backgroundStyles)) {
       for (const classes of Object.values(styles)) {
         expect(classes).not.toMatch(appThemeClass)
         expect(classes).toContain('(--site-')
       }
+    }
+  })
+})
+
+describe('backgroundColours', () => {
+  it('are the same colours as the classes: the background\'s own and its headings\'', () => {
+    for (const background of sectionBackgrounds) {
+      const { background: colour, heading } = backgroundColours[background]
+      expect(backgroundStyles[background].root, background).toContain(`bg-(${colour.slice(4, -1)})`)
+      expect(backgroundStyles[background].brandText, background).toBe(`text-(${heading.slice(4, -1)})`)
     }
   })
 })

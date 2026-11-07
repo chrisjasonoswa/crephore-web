@@ -115,6 +115,11 @@ async function onSave(values: EventGroupFormValues) {
       </div>
     </div>
 
+    <!-- Right under the title, so it's read before the list -->
+    <p data-groups-note class="px-4 pt-1 text-sm text-muted-foreground">
+      A group keeps every occasion of the same event together, like a yearly reunion.
+    </p>
+
     <div class="px-4 pt-3">
       <Input v-model="search" placeholder="Search groups..." aria-label="Search groups" />
     </div>
@@ -198,10 +203,6 @@ async function onSave(values: EventGroupFormValues) {
         </DropdownMenu>
       </div>
     </nav>
-
-    <p class="border-t px-4 py-3 text-sm text-muted-foreground">
-      A group keeps every occasion of the same event together, like a yearly reunion.
-    </p>
 
     <CDataTableFormDialog
       :form="form"

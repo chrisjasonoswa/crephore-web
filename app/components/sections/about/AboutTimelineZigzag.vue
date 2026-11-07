@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import AboutText from './AboutText.vue'
 // Layout `timeline-zigzag`: the heading and intro, then the chapters alternating sides: each chapter's photo on one
 // side, its text on the other, swapping every chapter (`firstPhotoSide` for the first). A centre line with a dot per
 // chapter joins them, unless `line` is off. On phones the line runs down the left with each photo above its text.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'firstPhotoSide' | 'line'>>>()
 
 const showLine = computed(() => props.options.line !== 'hide')
 const photoOnLeft = (index: number) => (index % 2 === 0) === (props.options.firstPhotoSide === 'left')
@@ -27,7 +28,7 @@ const photoOnLeft = (index: number) => (index % 2 === 0) === (props.options.firs
         class="relative grid gap-4 @3xl:grid-cols-2 @3xl:items-center @3xl:gap-16"
         :class="showLine && 'ps-8 @3xl:ps-0'"
       >
-        <span v-if="showLine" aria-hidden="true" data-about-dot class="absolute start-0 top-1 size-3 rounded-full bg-current @3xl:start-1/2 @3xl:top-1/2 @3xl:-translate-x-1/2 @3xl:-translate-y-1/2" />
+        <span v-if="showLine" aria-hidden="true" data-about-dot class="absolute start-0 top-1 size-3 rounded-full bg-current @3xl:start-1/2 @3xl:top-1/2 @3xl:-translate-x-1/2 @3xl:-translate-y-1/2" :class="styles.accent" />
         <SectionPhoto
           data-chapter-photo
           :src="item.photo"

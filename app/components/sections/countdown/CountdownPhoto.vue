@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Position } from '~/features/sections/section.options'
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
@@ -10,10 +10,10 @@ import CountdownHeading from './CountdownHeading.vue'
 
 // Layout `photo` ("Full"): the eyebrow, heading, date ("14 · 02 · 2027") and big numbers fill the section at
 // `textPosition`, over the background photo (under an overlay where the text sits) or on a colour.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'textPosition'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
-const position = computed(() => props.options.textPosition as Position)
+const position = computed(() => props.options.textPosition)
 const place = computed(() => positionClasses(position.value))
 const date = computed(() => formatOccasionDate(props.occasion, 'numeric'))
 </script>
@@ -32,7 +32,7 @@ const date = computed(() => formatOccasionDate(props.occasion, 'numeric'))
       :class="[place.justify, alignClasses[place.align]]"
     >
       <div class="flex flex-col gap-3" :class="place.items">
-        <CountdownHeading :content="content" :styles="styles" :align="place.align" />
+        <CountdownHeading :content="content" :occasion="occasion" :styles="styles" :align="place.align" />
         <p data-countdown-date class="font-(family-name:--site-font-heading) text-2xl @2xl:text-4xl">
           {{ date }}
         </p>

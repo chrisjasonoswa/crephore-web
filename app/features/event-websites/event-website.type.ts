@@ -27,8 +27,9 @@ export interface EventWebsiteDraft {
 }
 
 /* API (crephore-backend EventWebsiteDto) */
-// The theme as the API sends it: no background colour is null
-export type WebsiteTheme = Omit<SiteTheme, 'backgroundColor'> & { backgroundColor: string | null }
+// The theme as the API sends it: an optional colour that isn't set is null
+type OptionalColor = 'secondaryColor' | 'accentColor' | 'backgroundColor'
+export type WebsiteTheme = Omit<SiteTheme, OptionalColor> & { [K in OptionalColor]: string | null }
 
 export interface WebsiteSectionResponse {
   id: number

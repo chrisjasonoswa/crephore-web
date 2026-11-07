@@ -7,7 +7,8 @@ import type { CountdownContent } from './countdown/countdown.type'
 import type { HeroContent } from './hero/hero.type'
 import type { MessageContent } from './message/message.type'
 import type { PeopleContent } from './people/people.type'
-import type { ProgramContent } from './program/program.type'
+import type { ProgramContent, SectionProgram } from './program/program.type'
+import { occasionDate, sampleProgramItems, sampleProgramVenues } from './program/program.helpers'
 
 /**
  * The background a section sits on. Each background maps to site-theme variables
@@ -15,10 +16,10 @@ import type { ProgramContent } from './program/program.type'
  * Each layout lists the backgrounds it supports (registry `backgrounds`).
  * These keys are stored on saved sections: never rename one.
  */
-export type SectionBackground = 'light' | 'photo' | 'primary' | 'accent'
+export type SectionBackground = 'light' | 'photo' | 'primary' | 'secondary'
 
 // Order used in pickers, whatever a layout's default
-export const sectionBackgrounds: SectionBackground[] = ['light', 'primary', 'accent', 'photo']
+export const sectionBackgrounds: SectionBackground[] = ['light', 'primary', 'secondary', 'photo']
 
 /** The given backgrounds in picker order (a layout lists its default first, which may not be Light). */
 export function inPickerOrder(backgrounds: SectionBackground[]): SectionBackground[] {
@@ -30,7 +31,7 @@ export const sectionBackgroundLabels: Record<SectionBackground, string> = {
   light: 'Light',
   photo: 'Photo',
   primary: 'Primary',
-  accent: 'Accent',
+  secondary: 'Secondary',
 }
 
 /**
@@ -62,28 +63,52 @@ export interface Section<T extends SectionType = SectionType> {
 }
 
 /**
- * The event the page belongs to, for sections that show its details (e.g. the countdown's target).
- * Comes from the event, never from the section content, so it follows the event when it changes.
+ * The event the page belongs to, for sections that show its details (the hero's names, date and place, the countdown's
+ * heading and target). Comes from the event, never from the section content, so it follows the event when it changes.
  */
 export interface SectionOccasion {
+  // The event's name, e.g. "Bea & Carlo" (the hero's and the countdown's heading)
+  name: string
+  // The event's venue name, e.g. "Manila Cathedral"
+  venue: string
   // UTC instant (ISO), e.g. the event's startsAt
   startsAt: string
   // IANA timezone its date is shown in, e.g. "Asia/Manila"
   timezone: string
+  // The event's program (the program sections' venue and items)
+  program: SectionProgram
+  // A memorial's dates of birth and passing ("1948-02-14"), when known (the hero's life dates, the intros' years)
+  bornOn?: string
+  diedOn?: string
 }
 
-/** Previews without an event (playground, thumbnails): an occasion 112 days, 6 hours and 45 minutes away. */
+/** When the occasion is, for the date helpers. */
+export type OccasionTime = Pick<SectionOccasion, 'startsAt' | 'timezone'>
+
+/**
+ * Previews without an event (playground, thumbnails): an occasion 112 days, 6 hours and 45 minutes away, with the
+ * sample program on its day, and life dates for the heroes and intros that show them.
+ */
 export function sampleOccasion(now = Date.now()): SectionOccasion {
   const away = ((112 * 24 + 6) * 60 + 45) * 60_000 + 20_000
-  return { startsAt: new Date(now + away).toISOString(), timezone: 'Asia/Manila' }
+  const time = { startsAt: new Date(now + away).toISOString(), timezone: 'Asia/Manila' }
+  return {
+    name: 'Bea & Carlo',
+    venue: 'Manila Cathedral',
+    ...time,
+    program: { venue: 'Manila Cathedral', items: sampleProgramItems(occasionDate(time)), venues: sampleProgramVenues() },
+    bornOn: '1938-05-01',
+    diedOn: '2026-10-03',
+  }
 }
 
 /** Props every layout component of a section type receives. */
-export interface SectionLayoutProps<T extends SectionType> {
+// `O`: the layout's options, typed from the keys it picks (`ProgramLayoutOptions<'titleAlign' | 'showTime'>`, …)
+export interface SectionLayoutProps<T extends SectionType, O extends Record<string, string> = Record<string, string>> {
   content: SectionContentMap[T]
   background: SectionBackground
   // Every option the layout declares, defaults filled in (SectionRenderer resolves them)
-  options: Record<string, string>
+  options: O
   // The page's event (a sample one in previews)
   occasion: SectionOccasion
 }

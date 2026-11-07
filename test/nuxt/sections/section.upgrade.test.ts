@@ -21,25 +21,48 @@ describe('upgradeSectionContent', () => {
     vi.restoreAllMocks()
   })
 
-  it('gives program content saved at version 1 its layout photos', () => {
-    const saved = { heading: 'Program', items: [] } as never
+  it('gives program content saved at version 1 its layout photos, drops the venue and items at version 2, and gives the venues a heading at version 3', () => {
+    const atVersion1 = { heading: 'Program', venue: 'Manila Cathedral', items: [{ id: 'a', date: '', title: 'Ceremony' }] } as never
+    const atVersion2 = { eyebrow: 'The day', heading: 'Program', venue: 'Manila Cathedral', items: [], layoutPhotos: ['https://example.com/a.jpg'] } as never
 
-    expect(upgradeSectionContent('program', saved, 1)).toEqual({ heading: 'Program', items: [], layoutPhotos: [] })
+    expect(upgradeSectionContent('program', atVersion1, 1)).toEqual({ heading: 'Program', layoutPhotos: [], venuesHeading: 'Getting there' })
+    expect(upgradeSectionContent('program', atVersion2, 2)).toEqual({ eyebrow: 'The day', heading: 'Program', layoutPhotos: ['https://example.com/a.jpg'], venuesHeading: 'Getting there' })
+    expect(upgradeSectionContent('program', { heading: 'Program', layoutPhotos: [] } as never, 3)).toEqual({ heading: 'Program', layoutPhotos: [], venuesHeading: 'Getting there' })
+  })
+
+  it('drops the heading, date and venue a hero saved at version 1, which now come from the event', () => {
+    const saved = { eyebrow: 'Together', heading: 'Bea & Carlo', date: 'Sunday, 14 February 2027', venue: 'Manila Cathedral', layoutPhotos: [] } as never
+
+    expect(upgradeSectionContent('hero', saved, 1)).toEqual({ eyebrow: 'Together', layoutPhotos: [] })
+  })
+
+  it('drops the heading a countdown saved at version 1, which now comes from the event', () => {
+    const saved = { eyebrow: 'Counting down to', heading: 'Bea & Carlo\'s wedding', showSeconds: true, layoutPhotos: [] } as never
+
+    expect(upgradeSectionContent('countdown', saved, 1)).toEqual({ eyebrow: 'Counting down to', showSeconds: true, layoutPhotos: [] })
   })
 
   it('leaves content at the current version as it is', () => {
-    const hero: HeroContent = { heading: 'Bea & Carlo', layoutPhotos: [] }
+    const hero: HeroContent = { eyebrow: 'Together', layoutPhotos: [] }
 
     expect(upgradeSectionContent('hero', hero, getSectionType('hero').contentVersion)).toBe(hero)
   })
 
-  it('starts every type at content version 1, with eyebrow, heading and layout photos in its default content', () => {
-    for (const type of ['hero', 'countdown', 'message', 'about'] as const) {
+  it('has eyebrow and layout photos in every default content, and a heading where it isn\'t the event\'s name', () => {
+    for (const type of ['message', 'about'] as const) {
       const definition = getSectionType(type)
       expect(definition.contentVersion, type).toBe(1)
       expect(definition.defaultContent, type).toMatchObject({ eyebrow: expect.any(String), heading: expect.any(String), layoutPhotos: [] })
       expect(definition.defaultContent, type).not.toHaveProperty('title')
     }
+    for (const type of ['hero', 'countdown'] as const) {
+      const definition = getSectionType(type)
+      expect(definition.contentVersion, type).toBe(2)
+      expect(definition.defaultContent, type).toMatchObject({ eyebrow: expect.any(String), layoutPhotos: [] })
+      expect(definition.defaultContent, type).not.toHaveProperty('heading')
+    }
+    expect(getSectionType('hero').defaultContent).not.toHaveProperty('date')
+    expect(getSectionType('hero').defaultContent).not.toHaveProperty('venue')
     expect(getSectionType('message').defaultContent.body).toBeTruthy()
   })
 })

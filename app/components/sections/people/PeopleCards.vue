@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
@@ -9,9 +10,9 @@ import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `cards` ("Cards with bio"): each person on a light card with their photo, name, role and bio, `columns` a row
 // from 768px (one on phones, two in between); a row that isn't full is centred.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'columns'>>>()
 
-const width = computed(() => peopleRowWidths[props.options.columns!])
+const width = computed(() => peopleRowWidths[props.options.columns])
 // The cards are always light, whatever the background
 const cardStyles = backgroundStyles.light
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import AboutChapter from './AboutChapter.vue'
@@ -8,9 +8,9 @@ import AboutText from './AboutText.vue'
 // Layout `timeline-compact`: the heading and intro, then text-only chapters (no photos, so it suits long timelines and
 // tributes). Left-aligned (`textAlign`) they run down a thin line with a dot each; centred, a short line and a dot
 // sit between them.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'textAlign'>>>()
 
-const centred = computed(() => (props.options.textAlign as Align) === 'center')
+const centred = computed(() => (props.options.textAlign) === 'center')
 </script>
 
 <template>
@@ -28,9 +28,9 @@ const centred = computed(() => (props.options.textAlign as Align) === 'center')
         >
           <template v-if="centred">
             <span v-if="index > 0" aria-hidden="true" class="my-2 h-8 w-px bg-current/20" />
-            <span aria-hidden="true" class="mb-3 size-2 rounded-full bg-current" />
+            <span aria-hidden="true" class="mb-3 size-2 rounded-full bg-current" :class="styles.accent" />
           </template>
-          <span v-else aria-hidden="true" class="absolute start-0 top-1 size-2 rounded-full bg-current" />
+          <span v-else aria-hidden="true" class="absolute start-0 top-1 size-2 rounded-full bg-current" :class="styles.accent" />
           <AboutChapter :item="item" :styles="styles" :align="centred ? 'center' : 'start'" />
         </li>
       </ol>

@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { DARK_TEXT, LIGHT_TEXT, MIN_CONTRAST, PREFER_WHITE_FROM, colorDistance, contrastRatio, ensureContrast, ensureLight, readableTextOn, relativeLuminance, textContrastFloor, tonalShade } from '~/site-theme/color'
+import { DARK_TEXT, LIGHT_TEXT, MIN_CONTRAST, PREFER_WHITE_FROM, colorDistance, contrastRatio, ensureContrast, ensureDark, ensureLight, lightenUntil, readableTextOn, relativeLuminance, textContrastFloor, tonalShade } from '~/site-theme/color'
+
+describe('lightenUntil', () => {
+  it('keeps a colour that passes, else only makes it lighter, or white', () => {
+    const onDark = (color: string) => contrastRatio(color, '#202020') >= MIN_CONTRAST
+
+    expect(lightenUntil('#F0428C', onDark)).toBe('#F0428C')
+    const navy = lightenUntil('#1E2A44', onDark)
+    expect(onDark(navy)).toBe(true)
+    expect(relativeLuminance(navy)).toBeGreaterThan(relativeLuminance('#1E2A44'))
+    expect(lightenUntil('#1E2A44', () => false)).toBe(LIGHT_TEXT)
+  })
+})
 
 describe('ensureContrast', () => {
   it('keeps a colour that is already readable', () => {
@@ -17,6 +29,17 @@ describe('ensureContrast', () => {
     const result = ensureContrast('#0B1F4D', ['#111827'])
 
     expect(contrastRatio(result, '#111827')).toBeGreaterThanOrEqual(MIN_CONTRAST)
+  })
+
+  it('goes darker or lighter, whichever needs the smaller change', () => {
+    // Teal on a mid pink: a pale aqua is nearer than a deep green
+    const onPink = ensureContrast('#14B8A6', ['#F0428C'])
+    expect(contrastRatio(onPink, '#F0428C')).toBeGreaterThanOrEqual(MIN_CONTRAST)
+    expect(relativeLuminance(onPink)).toBeGreaterThan(relativeLuminance('#14B8A6'))
+    // The same teal on white only needs a little darker
+    const onWhite = ensureContrast('#14B8A6', ['#FFFFFF'])
+    expect(relativeLuminance(onWhite)).toBeLessThan(relativeLuminance('#14B8A6'))
+    expect(colorDistance(onWhite, '#14B8A6')).toBeLessThan(0.08)
   })
 
   it('passes on every background it is given', () => {
@@ -97,6 +120,22 @@ describe('ensureLight', () => {
     expect(colorDistance(tint, '#FFFFFF')).toBeLessThan(colorDistance('#FF4FA3', '#FFFFFF'))
     // Still pink (red channel highest)
     expect(Number.parseInt(tint.slice(1, 3), 16)).toBeGreaterThanOrEqual(Number.parseInt(tint.slice(3, 5), 16))
+  })
+})
+
+describe('ensureDark', () => {
+  it('keeps a colour that is already dark enough', () => {
+    expect(ensureDark('#1E2A44', 0.42)).toBe('#1E2A44')
+  })
+
+  it('darkens a light colour to the maximum lightness, keeping its hue', () => {
+    const dark = ensureDark('#F4C2C2', 0.42)
+
+    expect(relativeLuminance(dark)).toBeLessThan(relativeLuminance('#808080'))
+    // Still a pink (red channel highest)
+    expect(Number.parseInt(dark.slice(1, 3), 16)).toBeGreaterThan(Number.parseInt(dark.slice(5, 7), 16))
+    // Every light colour ends up about as dark
+    expect(Math.abs(relativeLuminance(dark) - relativeLuminance(ensureDark('#BFE3D0', 0.42)))).toBeLessThan(0.04)
   })
 })
 

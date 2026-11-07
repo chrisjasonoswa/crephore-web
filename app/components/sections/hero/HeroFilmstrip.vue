@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
@@ -6,7 +7,7 @@ import HeroText from './HeroText.vue'
 
 // Layout `filmstrip`: the names with a row of five photos like a film strip, below or above them
 // (`photoPosition`); the strip scrolls sideways on phones. `textAlign` sets left or centred text.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'photoPosition' | 'textAlign'>>>()
 
 const FRAMES = 5
 // Missing photos show placeholders, so the strip always has five frames
@@ -18,7 +19,7 @@ const stripSlot = computed(() => (props.options.photoPosition === 'above' ? 'bef
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="py-14 @2xl:py-20">
-    <HeroText :content="content" :styles="styles" :align="align" size="large" class="mx-auto max-w-6xl px-6 @2xl:px-10">
+    <HeroText :content="content" :occasion="occasion" :styles="styles" :align="align" size="large" class="mx-auto max-w-6xl px-6 @2xl:px-10">
       <template #[stripSlot]>
         <div
           data-filmstrip

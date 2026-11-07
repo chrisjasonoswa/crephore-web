@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -6,7 +7,7 @@ import MessageText from './MessageText.vue'
 
 // Layout `polaroid`: one tilted instant photo next to the note (`photoSide`); on phones it sits above it.
 // The white print border is part of the look, not a theme colour.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

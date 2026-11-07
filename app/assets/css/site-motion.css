@@ -1,0 +1,78 @@
+/*
+  Event website motion (features/site-motion): the intro animation when the site opens, a scene drawn by script
+  (PageIntroScene). Its overlay is in the server-rendered page with the scene's first frame, and ends on its own timer
+  (`--motion-intro-duration`, set by `motionVars` on `.crephore-site`) when script doesn't play it, then stops catching
+  clicks. Colours only from the site theme.
+*/
+.motion-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: auto;
+  animation: motion-intro-done 0s linear var(--motion-intro-duration) forwards;
+}
+/* In the editor's preview it covers the top of the page, not the editor */
+.motion-intro[data-contained] {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: min(100%, 100svh);
+}
+@keyframes motion-intro-done {
+  to { visibility: hidden; pointer-events: none; }
+}
+
+/* ---------- Reduced motion: the intro is a short fade (PageIntroScene fades its cover; without script it ends soon) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .motion-intro {
+    animation-delay: 200ms;
+  }
+}
+
+/* ---------- Scene intros (PageIntroScene, features/site-motion/scenes) ---------- */
+/*
+  Drawn and played by script on top of the page. The short names below are what the scenes use for the theme's colours
+  and fonts. Until the scene loads, the cover shows its first frame; without script the whole intro still ends on time
+  (`.motion-intro`), and the runner turns that timer off once it plays the scene itself.
+*/
+.intro-scene {
+  --p: var(--site-primary);
+  --a: var(--site-accent);
+  /* The accent as small text on a light surface (paper, a veil): contrast-checked against the page background */
+  --a-text: var(--site-accent-text);
+  --a2: var(--site-secondary);
+  /* The accent, or the primary without one: for a pop of colour on or next to --a2, which --a would match then */
+  --pop: var(--site-accent-else-primary);
+  --bgS: var(--site-bg);
+  --on: var(--site-on-primary);
+  /* Text on the secondary (--a2): contrast-checked like --on */
+  --on2: var(--site-on-secondary);
+  --txt: var(--site-text);
+  /* The accent as it reads on the primary (kept at 3:1 against it) */
+  --a-on-p: var(--site-accent-primary);
+  /* The primary as text on the page background (contrast-checked) */
+  --p-text: var(--site-primary-text);
+  --seal: color-mix(in oklab, var(--site-primary), #000 18%);
+  /* The hero's background and heading colours (set from the hero by PageIntroScene); the primary's until then */
+  --hero-bg: var(--site-primary);
+  --hero-heading: var(--site-secondary-on-primary);
+  --f-display: var(--site-font-heading);
+  --f-script: var(--site-font-heading);
+  --f-body: var(--site-font-body);
+  font-family: var(--f-body);
+}
+.intro-scene-cover,
+.intro-scene-layer,
+.intro-scene .fill {
+  position: absolute;
+  inset: 0;
+}
+.intro-scene-layer {
+  pointer-events: none;
+}
+.intro-scene .center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}

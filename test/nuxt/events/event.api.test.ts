@@ -33,16 +33,12 @@ describe('event api', () => {
   it('creates an event', () => {
     const payload = {
       name: 'Ana & Marco',
-      description: null,
       type: 'Wedding' as const,
-      venueName: 'Taal Vista',
-      venueAddress: 'Tagaytay',
-      venueLatitude: null,
-      venueLongitude: null,
-      venueGooglePlaceId: null,
       startsAt: '2027-06-12T15:00',
       endsAt: '2027-06-12T23:00',
       timezone: 'Asia/Manila',
+      bornOn: null,
+      diedOn: null,
       subdomain: 'ana-and-marco',
       eventGroupId: null,
     }
@@ -61,16 +57,12 @@ describe('event api', () => {
   it('updates an event by id', () => {
     const payload = {
       name: 'Ana & Marco',
-      description: null,
       type: 'Wedding' as const,
-      venueName: 'Taal Vista',
-      venueAddress: 'Tagaytay',
-      venueLatitude: null,
-      venueLongitude: null,
-      venueGooglePlaceId: null,
       startsAt: '2027-06-12T15:00',
       endsAt: '2027-06-12T23:00',
       timezone: 'Asia/Manila',
+      bornOn: null,
+      diedOn: null,
       subdomain: 'ana-and-marco',
       eventGroupId: null,
     }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -6,14 +7,14 @@ import MessageText from './MessageText.vue'
 
 // Layout `side-photo`: a smaller photo beside the note (`photoSide`), in a `frame`: plain (the site's corners),
 // an arch, or a white print border. On phones the photo sits centred above the note.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'frame' | 'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 const photoShape = computed(() => ({
   plain: 'rounded-(--site-radius)',
   arch: 'rounded-t-full',
   framed: '',
-}[props.options.frame!]))
+}[props.options.frame]))
 </script>
 
 <template>

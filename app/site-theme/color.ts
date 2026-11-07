@@ -3,7 +3,9 @@
 
 export const LIGHT_TEXT = '#FFFFFF'
 export const DARK_TEXT = '#111827'
-export const MIN_CONTRAST = 4.5 // WCAG AA, body text
+// The least contrast any site text has: 3:1, WCAG's floor for large text, chosen for every size so hosts' colours show
+// as picked more often (below AA, 4.5:1, for small text: a deliberate choice).
+export const MIN_CONTRAST = 3
 
 type Rgb = [number, number, number] // 0–255
 
@@ -45,17 +47,17 @@ const byContrastOn = (bg: string) => (a: string, b: string) => contrastRatio(b, 
 
 /*
  * White text wins whenever it reaches this contrast, even where near-black would contrast more: white on a colour
- * usually looks better. Lower it for more white (e.g. 3 on mid-tone colours like gold); below MIN_CONTRAST, white text
- * can fall short of WCAG AA, and the contrast tests in useSiteTheme.test.ts will say so.
+ * usually looks better. Lower it for more white; below MIN_CONTRAST, white text gets less contrast than other text, and
+ * the contrast tests in useSiteTheme.test.ts follow it (`textContrastFloor`).
  */
 export const PREFER_WHITE_FROM = 2.2
 
-/** The least contrast text from `readableTextOn` has: PREFER_WHITE_FROM for white, MIN_CONTRAST (AA) otherwise. */
+/** The least contrast text from `readableTextOn` has: PREFER_WHITE_FROM for white, MIN_CONTRAST otherwise. */
 export function textContrastFloor(text: string): number {
   return normalizeHex(text) === LIGHT_TEXT ? Math.min(PREFER_WHITE_FROM, MIN_CONTRAST) : MIN_CONTRAST
 }
 
-/** White or near-black, whichever contrasts more; pure black if neither reaches AA. No preference for white. */
+/** White or near-black, whichever contrasts more; pure black if neither reaches MIN_CONTRAST. No preference for white. */
 function bestContrastOn(bg: string): string {
   const best = [LIGHT_TEXT, DARK_TEXT].sort(byContrastOn(bg))[0]!
   if (contrastRatio(best, bg) >= MIN_CONTRAST)
@@ -127,7 +129,7 @@ export function mixOklch(a: string, b: string, weight: number): string {
 
 /**
  * Fade `fg` towards `bg` (starting at `weight`) only as far as contrast allows.
- * Used for muted text: it looks softer but never drops below AA.
+ * Used for muted text: it looks softer but never drops below MIN_CONTRAST.
  */
 export function fadeTowards(fg: string, bg: string, weight: number, min = MIN_CONTRAST): string {
   for (let w = Math.round(weight * 100); w < 100; w += 5) {
@@ -139,11 +141,10 @@ export function fadeTowards(fg: string, bg: string, weight: number, min = MIN_CO
 }
 
 /**
- * `color` if it reaches `min` contrast on every background in `bgs`; otherwise the same colour made
- * darker (light backgrounds) or lighter (dark backgrounds) until it does.
- * Only the oklch lightness changes, so hue and saturation are kept: a pink stays pink.
- * Used when a brand colour is used as text. Pass backgrounds that are all light or all dark;
- * the first one picks the direction.
+ * `color` if it reaches `min` contrast on every background in `bgs`; otherwise the same colour made darker or
+ * lighter, whichever reaches `min` with the smaller change (e.g. a teal on a mid pink becomes a pale teal or a deep
+ * one, whichever is nearer). Only the oklch lightness changes, so hue and saturation are kept: a pink stays pink.
+ * Used when a brand colour is used as text, a button or a highlight.
  */
 export function ensureContrast(color: string, bgs: string[], min = MIN_CONTRAST): string {
   const passes = (candidate: string) => bgs.every(bg => contrastRatio(candidate, bg) >= min)
@@ -151,16 +152,36 @@ export function ensureContrast(color: string, bgs: string[], min = MIN_CONTRAST)
   if (passes(normalized))
     return normalized
 
-  // Towards whichever end reads best (not the white preference): a brand colour used as text always reaches `min`
-  const target = bestContrastOn(bgs[0]!)
-  const step = target === LIGHT_TEXT ? 0.02 : -0.02
+  // Step away from the colour in both directions at once; the first that passes is the nearer one
   const [lightness, chroma, hue] = toOklch(normalized)
-  for (let l = lightness + step; l > 0 && l < 1; l += step) {
+  for (let change = 0.02; change < 1; change += 0.02) {
+    for (const l of [lightness - change, lightness + change]) {
+      if (l <= 0 || l >= 1)
+        continue
+      const adjusted = fromOklch([l, chroma, hue])
+      if (passes(adjusted))
+        return adjusted
+    }
+  }
+  // Neither gets there: whichever end reads best (not the white preference), so it always reaches `min` if anything can
+  return bestContrastOn(bgs[0]!)
+}
+
+/**
+ * `color` if it `passes`; otherwise the same colour made lighter (oklch lightness only, keeping the hue) until it does,
+ * or white. For colours that must stay light, e.g. brand text on a photo under its dark overlay.
+ */
+export function lightenUntil(color: string, passes: (candidate: string) => boolean): string {
+  const normalized = normalizeHex(color)
+  if (passes(normalized))
+    return normalized
+  const [lightness, chroma, hue] = toOklch(normalized)
+  for (let l = lightness + 0.02; l < 1; l += 0.02) {
     const adjusted = fromOklch([l, chroma, hue])
     if (passes(adjusted))
       return adjusted
   }
-  return target
+  return LIGHT_TEXT
 }
 
 /** Perceptual distance between two colours (Euclidean distance in OKLab; 0 = identical, ~0.02 = barely visible). */
@@ -214,4 +235,23 @@ export function ensureLight(hex: string, minLightness: number, maxChroma: number
     c = Math.max(0, c - 0.002)
 
   return fromOklch([l, c, hue])
+}
+
+/**
+ * `hex` kept dark: oklch lightness lowered to at most `maxLightness`, keeping the hue (and the chroma, reduced only if
+ * needed to stay displayable). Colours already that dark come back unchanged.
+ */
+export function ensureDark(hex: string, maxLightness: number): string {
+  const normalized = normalizeHex(hex)
+  const [lightness, chroma, hue] = toOklch(normalized)
+  if (lightness <= maxLightness)
+    return normalized
+
+  let c = chroma
+  const inGamut = (candidate: number) =>
+    oklchToLinearRgb([maxLightness, candidate, hue]).every(channel => channel >= -1e-4 && channel <= 1 + 1e-4)
+  while (c > 0 && !inGamut(c))
+    c = Math.max(0, c - 0.002)
+
+  return fromOklch([maxLightness, c, hue])
 }

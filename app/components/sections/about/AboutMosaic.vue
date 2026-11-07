@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -6,7 +7,7 @@ import AboutText from './AboutText.vue'
 
 // Layout `mosaic`: the story beside an inset photo grid (`photoSide`): one tall photo and two small ones stacked
 // next to it. On phones the photos go below the story.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

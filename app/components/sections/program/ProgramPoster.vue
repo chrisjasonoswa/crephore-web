@@ -1,28 +1,32 @@
 <script setup lang="ts">
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { programDays, programMarker, showsTime } from '~/features/sections/program/program.helpers'
 import ProgramDayDivider from './ProgramDayDivider.vue'
 import ProgramHeading from './ProgramHeading.vue'
 import ProgramSpeakers from './ProgramSpeakers.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `poster`: a grid of big times (`columns` a row from 1024px, two from 768px), each with a rule, then the title
 // in capitals, the venue, the speakers ("with …", no icons) and, quietest of all, the note. Bold on a colour, so it starts on primary. Without times (`showTime`) the items are
 // numbered 01, 02, … instead.
-const props = defineProps<SectionLayoutProps<'program'>>()
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'titleAlign' | 'showTime' | 'columns'>>>()
+// Where the program's and the venues' eyebrow and heading sit (`titleAlign`)
+const titleAlign = computed(() => props.options.titleAlign)
 
-const days = computed(() => programDays(props.content.items, props.occasion))
+const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
 const columnClasses: Record<string, string> = { 2: '', 3: '@3xl:grid-cols-3' }
 </script>
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-16 @2xl:px-10 @2xl:py-24">
-    <ProgramHeading :content="content" :styles="styles" align="start" class="mx-auto max-w-5xl" />
-    <div v-if="content.items.length" class="mx-auto mt-12 flex max-w-5xl flex-col gap-12">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-5xl" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-12 flex max-w-5xl flex-col gap-12">
       <div v-for="day in days" :key="day.date">
         <ProgramDayDivider :label="day.label" :styles="styles" class="mb-10" />
-        <ol data-program-items class="grid gap-x-10 gap-y-12 @2xl:grid-cols-2" :class="columnClasses[options.columns!]">
+        <ol data-program-items class="grid gap-x-10 gap-y-12 @2xl:grid-cols-2" :class="columnClasses[options.columns]">
           <li v-for="{ item, index } in day.items" :key="item.id" data-program-item>
             <p data-program-marker class="font-(family-name:--site-font-heading) leading-none" :class="styles.brandText">
               <span class="text-6xl @2xl:text-7xl">{{ programMarker(item, index, timed).clock }}</span>
@@ -44,5 +48,6 @@ const columnClasses: Record<string, string> = { 2: '', 3: '@3xl:grid-cols-3' }
         </ol>
       </div>
     </div>
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="poster" class="mx-auto mt-20 max-w-5xl" />
   </SectionFrame>
 </template>

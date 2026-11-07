@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
@@ -7,7 +8,7 @@ import HeroText from './HeroText.vue'
 // Layout `framed`: the first photo in a wide mat border like a printed invitation, the eyebrow and names beside it in
 // large serif. `photoSide` and `textAlign` place them;
 // on phones the photo goes on top. The white mat is part of the look, not a theme colour.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'photoSide' | 'textAlign'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide !== 'right')
 </script>
@@ -25,6 +26,7 @@ const photoOnLeft = computed(() => props.options.photoSide !== 'right')
       <div data-hero-text class="@3xl:row-start-1" :class="photoOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1'">
         <HeroText
           :content="content"
+          :occasion="occasion"
           :styles="styles"
           :align="options.textAlign === 'center' ? 'center' : 'start'"
           size="large"

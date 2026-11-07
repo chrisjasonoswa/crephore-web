@@ -4,7 +4,7 @@ import type { SectionLayoutOptionChoice } from '~/features/sections/section.opti
 // A 3×3 position (text position, card position) picked on a small frame, one dot per spot.
 defineProps<{
   label: string
-  choices: SectionLayoutOptionChoice[]
+  choices: readonly SectionLayoutOptionChoice[]
 }>()
 
 const value = defineModel<string>({ required: true })

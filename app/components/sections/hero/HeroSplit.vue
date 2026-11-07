@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Position } from '~/features/sections/section.options'
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { positionClasses } from '~/features/sections/section.options'
@@ -8,9 +8,9 @@ import HeroText from './HeroText.vue'
 
 // Layout `split`: text on one half, the first layout photo on the other (`photoSide`), the text placed in its half
 // at `textPosition`. On phones the photo goes on top.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'photoSide' | 'textPosition'>>>()
 
-const place = computed(() => positionClasses(props.options.textPosition as Position))
+const place = computed(() => positionClasses(props.options.textPosition))
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
@@ -26,7 +26,7 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
       class="flex flex-col px-6 py-12 @2xl:px-12 @3xl:row-start-1 @3xl:py-20"
       :class="[place.justify, place.items, photoOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1']"
     >
-      <HeroText :content="content" :styles="styles" :align="place.align" size="large" class="max-w-md" />
+      <HeroText :content="content" :occasion="occasion" :styles="styles" :align="place.align" size="large" class="max-w-md" />
     </div>
   </SectionFrame>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -7,7 +8,7 @@ import MessageText from './MessageText.vue'
 
 // Layout `card`: the note on a paper card, with the photo taped to its top corner (`photoCorner`). The card has its
 // own solid surface, so the background photo needs no overlay. The photo's white border is part of the look.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoCorner'>>>()
 
 const photoOnLeft = computed(() => props.options.photoCorner === 'left')
 // The card is always light, whatever the background

@@ -22,7 +22,6 @@ const layoutPhoto = 'https://example.com/couple.jpg'
 
 const content: CountdownContent = {
   eyebrow: 'Counting down to',
-  heading: 'Bea & Carlo\'s wedding',
   showSeconds: true,
   backgroundPhoto,
   layoutPhotos: [layoutPhoto],
@@ -31,7 +30,7 @@ const content: CountdownContent = {
 
 // 112 days, 6 hours, 45 minutes and 20 seconds from the frozen "now"; Sunday, 14 February 2027 in Manila
 const now = new Date('2026-10-24T09:14:40Z')
-const occasion = { startsAt: '2027-02-13T16:00:00Z', timezone: 'Asia/Manila' }
+const occasion = { name: 'Bea & Carlo', venue: 'Manila Cathedral', startsAt: '2027-02-13T16:00:00Z', timezone: 'Asia/Manila' }
 
 beforeAll(() => {
   // Only the clock is frozen; timers and promises run as usual
@@ -92,11 +91,11 @@ describe.each(layouts)('countdown layout $key', ({ key, date }) => {
     }
   })
 
-  it('renders the eyebrow, heading and button', async () => {
+  it('renders the eyebrow, the event\'s name as the heading and the button', async () => {
     const wrapper = await mountLayout(key)
 
     expect(wrapper.text()).toContain('Counting down to')
-    expect(wrapper.find('h2').text()).toBe('Bea & Carlo\'s wedding')
+    expect(wrapper.find('h2').text()).toBe('Bea & Carlo')
     expect(wrapper.find('a[href="#details"]').text()).toBe('Save the date')
   })
 
@@ -139,10 +138,10 @@ describe.each(layouts)('countdown layout $key', ({ key, date }) => {
     }
   })
 
-  it('renders only the countdown when the optional content is missing', async () => {
+  it('renders only the heading and the countdown when the optional content is missing', async () => {
     const wrapper = await mountLayout(key, { content: { showSeconds: true, layoutPhotos: [] } })
 
-    expect(wrapper.find('h2').exists()).toBe(false)
+    expect(wrapper.find('h2').text()).toBe('Bea & Carlo')
     expect(wrapper.find('a').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('Counting down to')
     expect(unitText(wrapper, 'days')).toContain('112')

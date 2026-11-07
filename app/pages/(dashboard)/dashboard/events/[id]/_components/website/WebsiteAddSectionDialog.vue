@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import type { Event } from '~/features/events/event.type'
-import type { SectionType } from '~/features/sections/section.type'
+import type { SectionOccasion, SectionType } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import SectionThumbnail from '~/components/sections/SectionThumbnail.vue'
-import { createWebsiteSection, eventOccasion } from '~/features/event-websites/event-website'
+import { createWebsiteSection, withSampleProgram } from '~/features/event-websites/event-website'
 import { sectionRegistry } from '~/features/sections/section.registry'
 
 // The section types a page can have, each shown as it would look on this event's page. A page has one hero, so the
 // hero isn't offered again once there is one.
 const props = defineProps<{
   event: Event
+  // The page's event, program included, so each sample shows this event's details
+  occasion: SectionOccasion
   theme: SiteTheme
   hasHero: boolean
 }>()
@@ -20,7 +22,6 @@ const emit = defineEmits<{
   add: [type: SectionType]
 }>()
 
-const occasion = computed(() => eventOccasion(props.event))
 // A sample of each type, with the event's details filled in
 const choices = computed(() => Object.values(sectionRegistry).map(definition => ({
   definition,
@@ -54,7 +55,7 @@ function add(type: SectionType) {
           class="flex cursor-pointer flex-col gap-2 rounded-xl border p-2 text-left transition-colors hover:border-primary/60 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-border"
           @click="add(definition.type)"
         >
-          <SectionThumbnail :section="sample" :theme="theme" :occasion="occasion" class="aspect-16/10 w-full rounded-lg border bg-muted" />
+          <SectionThumbnail :section="sample" :theme="theme" :occasion="withSampleProgram(occasion)" class="aspect-16/10 w-full rounded-lg border bg-muted" />
           <span class="flex flex-col gap-0.5 px-1 pb-1">
             <span class="text-sm font-medium">{{ definition.name }}</span>
             <span class="text-xs text-muted-foreground">{{ definition.description }}</span>

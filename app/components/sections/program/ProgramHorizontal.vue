@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import { Balloon, Bird, Briefcase, Cake, Flame, Flower2, Gem, Heart, Leaf, Lightbulb, MapPin, Mic, PartyPopper, UserRound } from '@lucide/vue'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
@@ -7,15 +8,18 @@ import SectionScrollHint from '~/components/sections/SectionScrollHint.vue'
 import { formatProgramTime, programDays, programSpeakers, showsTime } from '~/features/sections/program/program.helpers'
 import { useDragScroll } from '~/features/sections/useDragScroll'
 import ProgramHeading from './ProgramHeading.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `horizontal` ("Horizontal timeline"): the items left to right along a line, each marked with a dot or an icon
 // (`marker`), with the time, title, venue (map pin), speakers (person) and note under it. One row that scrolls sideways
 // on every screen (swipe, or drag with the mouse); centred while it fits. Each day's first item carries its date above
 // the line.
-const props = defineProps<SectionLayoutProps<'program'>>()
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'titleAlign' | 'showTime' | 'marker'>>>()
+// Where the program's and the venues' eyebrow and heading sit (`titleAlign`)
+const titleAlign = computed(() => props.options.titleAlign)
 
 const timed = computed(() => showsTime(props.options))
-const entries = computed(() => programDays(props.content.items, props.occasion)
+const entries = computed(() => programDays(props.occasion.program.items)
   .flatMap(day => day.items.map(({ item }, i) => ({ item, dayLabel: i === 0 ? day.label : '' }))))
 
 // The icon for each `marker` choice (see program.registry.ts); `dot` has none
@@ -33,18 +37,18 @@ const markerIcons: Record<string, Component> = {
   'leaf': Leaf,
   'bird': Bird,
 }
-const markerIcon = computed(() => markerIcons[props.options.marker!])
+const markerIcon = computed(() => markerIcons[props.options.marker])
 const speakersOf = (speakers?: string) => programSpeakers(speakers).join(', ')
 
 const row = useTemplateRef<HTMLOListElement>('row')
-const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.items.length)
+const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.occasion.program.items.length)
 </script>
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :styles="styles" />
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-6xl" />
     <ol
-      v-if="content.items.length"
+      v-if="occasion.program.items.length"
       ref="row"
       data-program-items
       class="mx-auto mt-10 flex max-w-6xl overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -80,7 +84,7 @@ const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfter
           >
             <component :is="markerIcon" class="size-4" />
           </span>
-          <span v-else data-program-marker-dot class="relative block size-3 rounded-full bg-current" :class="styles.brandText" />
+          <span v-else data-program-marker-dot class="relative block size-3 rounded-full bg-current" :class="styles.accent" />
         </div>
         <p v-if="timed && item.startTime" data-program-time class="mt-3 text-sm font-semibold" :class="styles.eyebrow">
           {{ formatProgramTime(item.startTime) }}
@@ -90,19 +94,20 @@ const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfter
         </h3>
         <div v-if="item.venue || speakersOf(item.speakers)" class="mt-2 flex flex-col gap-1 text-sm">
           <p v-if="item.venue" data-program-venue class="flex items-start gap-2 font-medium">
-            <MapPin aria-hidden="true" class="mt-0.5 size-4 shrink-0" :class="styles.eyebrow" />
+            <MapPin aria-hidden="true" class="mt-0.5 size-4 shrink-0" :class="styles.accent" />
             <span><span class="sr-only">Venue: </span>{{ item.venue }}</span>
           </p>
           <p v-if="speakersOf(item.speakers)" data-program-speakers class="flex items-start gap-2">
-            <UserRound aria-hidden="true" class="mt-0.5 size-4 shrink-0" :class="styles.eyebrow" />
+            <UserRound aria-hidden="true" class="mt-0.5 size-4 shrink-0" :class="styles.accent" />
             <span><span class="sr-only">With: </span>{{ speakersOf(item.speakers) }}</span>
           </p>
         </div>
-        <p v-if="item.description" data-program-description class="mt-2 text-sm" :class="styles.muted">
+        <p v-if="item.description" data-program-description class="mt-2 text-xs" :class="styles.muted">
           {{ item.description }}
         </p>
       </li>
     </ol>
     <SectionScrollHint v-if="canScroll" :thumb="thumb" :styles="styles" class="mt-8" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="open" class="mx-auto mt-14 max-w-6xl" />
   </SectionFrame>
 </template>

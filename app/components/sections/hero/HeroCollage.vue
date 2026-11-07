@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '../SectionPhoto.vue'
@@ -6,9 +7,10 @@ import HeroText from './HeroText.vue'
 
 // Layout `collage`: three photos (one tall, two stacked) around the names. From 768px `textPosition` puts the
 // text between the photos, or to their left or right; on phones the text comes first, the photos below it.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'textPosition'>>>()
 
-// Desktop column order of [text, tall photo, stacked photos]
+// Desktop column order of [text, tall photo, stacked photos]. The collage offers only the middle row of the 3×3
+// positions (`middleRowChoices`), so its text position is one of these three
 const order = computed(() => ({
   center: { text: '@3xl:order-2', tall: '@3xl:order-1', stacked: '@3xl:order-3', columns: '@3xl:grid-cols-[1fr_1.3fr_1fr]' },
   left: { text: '@3xl:order-1', tall: '@3xl:order-2', stacked: '@3xl:order-3', columns: '@3xl:grid-cols-[1.3fr_1fr_1fr]' },
@@ -21,7 +23,7 @@ const align = computed(() => (props.options.textPosition === 'center' ? 'center'
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
     <div class="mx-auto grid max-w-6xl items-center gap-8 @3xl:min-h-[30rem] @3xl:gap-6" :class="order.columns">
       <div data-hero-text class="@3xl:px-4" :class="order.text">
-        <HeroText :content="content" :styles="styles" :align="align" size="medium" />
+        <HeroText :content="content" :occasion="occasion" :styles="styles" :align="align" size="medium" />
       </div>
       <!-- On phones the photos sit side by side under the text; from 768px each becomes its own column -->
       <div class="grid grid-cols-2 gap-3 @3xl:contents">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import { Check } from '@lucide/vue'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
@@ -6,15 +7,16 @@ import SectionPhoto from '~/components/sections/SectionPhoto.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { formatProgramTime, joinProgramSpeakers, programBlocks, programDateBadge, programDays, showsTime } from '~/features/sections/program/program.helpers'
 import ProgramHeading from './ProgramHeading.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `photo-cards`: the section split into its colour and the layout photo (`photoSide`; the photo takes two fifths
-// on phones, half from 768px; it stays in view, sticky, while a long list of cards scrolls past), a large bold capitals heading on the colour, and light cards laid across the split. Each
+// on phones, half from 768px; it stays in view, sticky, while a long list of cards scrolls past), a capitals heading on the colour, and light cards laid across the split. Each
 // card has the day number and month, then the weekday and "Day N", then (`blockPer`) one item: the time, the title large
 // in the heading font, the venue and "with" the speakers, and the note; or a whole day's items as ticked lines, the time
 // and title, then the venue and speakers, then the note, smaller. Starts on primary.
-const props = defineProps<SectionLayoutProps<'program'>>()
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'showTime' | 'blockPer' | 'photoSide'>>>()
 
-const days = computed(() => programDays(props.content.items, props.occasion))
+const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
 const perItem = computed(() => props.options.blockPer !== 'day')
 const blocks = computed(() => programBlocks(days.value, perItem.value))
@@ -32,8 +34,8 @@ const cardStyles = backgroundStyles.light
     </div>
     <div class="relative mx-auto flex max-w-5xl flex-col" :class="photoLeft ? 'items-end' : 'items-start'">
       <!-- Kept on the colour, beside the photo -->
-      <ProgramHeading :content="content" :styles="styles" align="start" look="display" class="max-w-[55%] @2xl:max-w-[45%]" />
-      <ol v-if="content.items.length" data-program-items class="mt-8 flex w-full flex-col gap-4 @2xl:mt-10 @2xl:w-3/4 @2xl:gap-5">
+      <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" align="start" look="display" class="max-w-[55%] @2xl:max-w-[45%]" />
+      <ol v-if="occasion.program.items.length" data-program-items class="mt-8 flex w-full flex-col gap-4 @2xl:mt-10 @2xl:w-3/4 @2xl:gap-5">
         <li
           v-for="block in blocks"
           :key="block.key"
@@ -93,7 +95,7 @@ const cardStyles = backgroundStyles.light
                     </template>
                     <span v-if="joinProgramSpeakers(item.speakers)" data-program-speakers>with {{ joinProgramSpeakers(item.speakers) }}</span>
                   </p>
-                  <p v-if="item.description" data-program-description class="mt-0.5 text-xs" :class="cardStyles.muted">
+                  <p v-if="item.description" data-program-description class="mt-0.5 text-[0.7rem]" :class="cardStyles.muted">
                     {{ item.description }}
                   </p>
                 </div>
@@ -102,6 +104,7 @@ const cardStyles = backgroundStyles.light
           </div>
         </li>
       </ol>
+      <ProgramVenues heading-align="start" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="cards" class="mt-12 w-full @2xl:w-3/4" />
     </div>
   </SectionFrame>
 </template>

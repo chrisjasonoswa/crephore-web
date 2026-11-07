@@ -27,16 +27,13 @@ import EventWebsiteTab from '~/pages/(dashboard)/dashboard/events/[id]/_componen
 const event = {
   id: 5,
   name: 'Ana & Marco',
-  description: null,
   type: 'Wedding',
   venueName: 'Manila Cathedral',
-  venueAddress: 'Intramuros, Manila',
-  venueLatitude: null,
-  venueLongitude: null,
-  venueGooglePlaceId: null,
   startsAt: '2027-06-12T07:00:00Z',
   endsAt: '2027-06-12T13:00:00Z',
   timezone: 'Asia/Manila',
+  bornOn: null,
+  diedOn: null,
   subdomain: 'ana-and-marco',
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
@@ -46,7 +43,7 @@ const event = {
 const saved = {
   id: 3,
   eventId: 5,
-  theme: { primaryColor: '#1E2A44', accentColor: '#E8A598', backgroundColor: null, fontPairingKey: 'serif_classic', cornerStyle: 'soft' },
+  theme: { primaryColor: '#1E2A44', secondaryColor: '#E8A598', accentColor: null, backgroundColor: null, fontPairingKey: 'serif_classic', cornerStyle: 'soft', motion: { intro: 'shutter' as const, intensity: 'normal' as const } },
   sections: [
     { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'right', textPosition: 'center' }, content: { heading: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
   ],
@@ -59,7 +56,7 @@ const saved = {
 const published = { ...saved, publishedAt: '2026-10-28T00:00:00Z' } satisfies EventWebsite
 
 async function mountTab() {
-  const wrapper = await mountSuspended(EventWebsiteTab, { props: { event }, attachTo: document.body })
+  const wrapper = await mountSuspended(EventWebsiteTab, { props: { event, program: { items: [] }, venues: [] }, attachTo: document.body })
   await flushPromises()
   return wrapper
 }

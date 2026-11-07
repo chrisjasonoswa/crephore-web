@@ -18,6 +18,12 @@ export interface SectionLayoutDefinition {
   backgrounds: SectionBackground[]
   // Placement options (text position, photo side, …), stored in `Section.options`
   options: SectionLayoutOption[]
+  // The section's fields this layout shows (from its type's `fields`); the editor offers only these, and the rest of
+  // the content is kept for layouts that show it. `required`: the ones it needs filled in. `labels`: a field's label in
+  // this layout, when it reads differently here (the about story is the timelines' intro)
+  fields: readonly string[]
+  required?: readonly string[]
+  labels?: Readonly<Record<string, string>>
   // How many layout photos it shows (the editor offers that many photo fields); 0 for layouts without photos inside.
   // For a slideshow, the most it plays.
   layoutPhotoCount: number
@@ -31,5 +37,11 @@ export interface SectionTypeDefinition<T extends SectionType> {
   // loading a saved website.
   contentVersion: number
   defaultContent: SectionContentMap[T]
+  // Every field its layouts can use (`<type>Fields` in <type>.type.ts); `list.field` names a field of a list's items,
+  // e.g. `timeline.photo`. Photos aren't fields: the background photo and `layoutPhotoCount` cover them.
+  fields: readonly string[]
+  // What the editor's notes call a field ("This layout needs at least one chapter."): a word for text, or one and many
+  // for a list. Only the fields a layout can require or leave out need one.
+  fieldNames?: Readonly<Record<string, string | readonly [string, string]>>
   layouts: SectionLayoutDefinition[]
 }

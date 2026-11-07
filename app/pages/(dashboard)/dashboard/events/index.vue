@@ -11,8 +11,8 @@ definePageMeta({ area: 'user' })
 
 // Events and their groups on one page: the groups panel filters the table
 const selectedGroup = ref<EventGroup | null>(null)
-// Remembered per browser (a convenience; open by default)
-const isGroupsPanelOpen = useLocalStorage('crephore:events:groups-panel-open', true)
+// Closed by default; opening or closing it is remembered per browser, so the next visit looks the same
+const isGroupsPanelOpen = useLocalStorage('crephore:events:groups-panel-open', false)
 
 const groupsPanel = useTemplateRef<InstanceType<typeof EventGroupsPanel>>('groupsPanel')
 

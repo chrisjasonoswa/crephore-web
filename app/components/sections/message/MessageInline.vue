@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import MessageHeading from './MessageHeading.vue'
 // Layout `inline`: like a magazine page. A square photo floats to one side (`photoSide`) from the top of the note, even
 // on phones: the eyebrow and heading sit beside it, and the message (with a drop cap) and signature wrap around and
 // under it. Starting the photo at the top keeps a short note level with it; a long one flows on below.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

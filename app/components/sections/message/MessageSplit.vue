@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -6,7 +7,7 @@ import MessageText from './MessageText.vue'
 
 // Layout `split`: the photo fills one half edge to edge (`photoSide`), the note sits on the other.
 // On phones the photo goes on top.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

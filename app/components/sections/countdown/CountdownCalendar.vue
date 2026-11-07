@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { calendarMonth, calendarWeekdays, formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
@@ -9,7 +10,7 @@ import CountdownHeading from './CountdownHeading.vue'
 // Layout `calendar`: a calendar page of the occasion's month with its day circled, beside (`calendarSide`) the
 // eyebrow, heading, date and a small countdown. On phones the calendar goes on top and everything is centred.
 // The page is paper-like (the light background and text) on every background.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'calendarSide'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
 const month = computed(() => calendarMonth(props.occasion))
@@ -48,7 +49,7 @@ const calendarOnRight = computed(() => props.options.calendarSide === 'right')
       </div>
 
       <div data-countdown-text class="flex flex-col items-center gap-5 text-center @3xl:items-start @3xl:text-start">
-        <CountdownHeading :content="content" :styles="styles" size="medium" class="@3xl:items-start @3xl:text-start" />
+        <CountdownHeading :content="content" :occasion="occasion" :styles="styles" size="medium" class="@3xl:items-start @3xl:text-start" />
         <p data-countdown-date class="text-sm @2xl:text-base" :class="styles.muted">
           {{ date }}
         </p>

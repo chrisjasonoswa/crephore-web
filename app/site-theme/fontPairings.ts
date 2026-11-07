@@ -7,16 +7,16 @@ export interface SiteFont {
   script?: boolean
 }
 
-// Groups in the font picker, by the events each suits
+// Groups in the font picker, by the events each suits (script and modern ones suit any event), in title case
 export type FontPairingGroup = 'wedding' | 'script' | 'modern' | 'party' | 'business' | 'memorial'
 
 export const fontPairingGroups: { key: FontPairingGroup, label: string }[] = [
-  { key: 'wedding', label: 'Weddings & engagements' },
-  { key: 'script', label: 'Script & calligraphy' },
-  { key: 'modern', label: 'Modern & minimal' },
-  { key: 'party', label: 'Birthdays & parties' },
-  { key: 'business', label: 'Business & conferences' },
-  { key: 'memorial', label: 'Memorials & tributes' },
+  { key: 'wedding', label: 'Weddings & Engagements' },
+  { key: 'script', label: 'Any (Script & Calligraphy)' },
+  { key: 'modern', label: 'Any (Modern & Minimal)' },
+  { key: 'party', label: 'Birthdays & Parties' },
+  { key: 'business', label: 'Business & Conferences' },
+  { key: 'memorial', label: 'Memorials & Tributes' },
 ]
 
 export interface FontPairing {

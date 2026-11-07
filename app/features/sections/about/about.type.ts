@@ -8,6 +8,10 @@ export interface AboutTimelineItem {
   photo?: string
 }
 
+// Every field an about layout can use (`timeline.photo`: a chapter's own photo)
+export const aboutFields = ['eyebrow', 'heading', 'body', 'timeline', 'timeline.photo'] as const
+export type AboutField = (typeof aboutFields)[number]
+
 // Every about layout uses the same fields. Story layouts show the eyebrow, heading, body and photos; timeline layouts
 // show the eyebrow, heading, body (as a short intro, when there is one) and the timeline. Both are kept when switching.
 export interface AboutContent {

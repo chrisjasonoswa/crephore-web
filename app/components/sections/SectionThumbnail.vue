@@ -30,7 +30,8 @@ const scale = computed(() => width.value / props.renderWidth)
       class="pointer-events-none absolute top-0 left-0 origin-top-left"
       :style="{ width: `${renderWidth}px`, transform: `scale(${scale})` }"
     >
-      <SiteThemeScope :theme="theme">
+      <!-- Still: the final state, no motion -->
+      <SiteThemeScope :theme="theme" still>
         <SectionRenderer :section="section" :occasion="occasion" />
       </SiteThemeScope>
     </div>

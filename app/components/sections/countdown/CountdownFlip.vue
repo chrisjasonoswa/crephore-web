@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
@@ -9,10 +9,10 @@ import CountdownButton from './CountdownButton.vue'
 // Layout `flip` ("Flip clock"): split-flap cards like an airport board, flipping on each tick (not with reduced
 // motion). The eyebrow above; the heading and date below. The cards use the background's button colours, so they
 // stand out on any background. Aligned by `textAlign`.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'textAlign'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 const date = computed(() => formatOccasionDate(props.occasion))
 
 const phoneColumns = computed(() => (units.value.length === 4 ? 'grid-cols-2' : 'grid-cols-3'))
@@ -53,10 +53,10 @@ const justifyWide = { start: '@2xl:justify-start', center: '@2xl:justify-center'
       </div>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="justify[align]">
-        <h2 v-if="content.heading" class="font-medium" :class="styles.brandText">
-          {{ content.heading }}
+        <h2 class="font-medium" :class="styles.brandText">
+          {{ occasion.name }}
         </h2>
-        <span v-if="content.heading" aria-hidden="true" :class="styles.muted">·</span>
+        <span aria-hidden="true" :class="styles.muted">·</span>
         <span data-countdown-date :class="styles.muted">{{ date }}</span>
       </div>
 

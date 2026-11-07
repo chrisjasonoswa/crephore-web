@@ -2,6 +2,7 @@
 import type { EventWebsiteStartChoice } from './EventWebsiteStart.vue'
 import type { EventWebsite, EventWebsiteDraft } from '~/features/event-websites/event-website.type'
 import type { Event } from '~/features/events/event.type'
+import type { SectionProgram } from '~/features/sections/program/program.type'
 import { ArrowLeft, LayoutTemplate, RotateCw, TriangleAlert } from '@lucide/vue'
 import { useEventListener } from '@vueuse/core'
 import CConfirmationModal from '~/components/custom/c-modal/CConfirmationModal.vue'
@@ -29,6 +30,8 @@ import WebsiteEditor from './website/WebsiteEditor.vue'
 // Guests only see it once published, as it was when last published. The template picker is a placeholder for now.
 const props = defineProps<{
   event: Event
+  // The event's saved program, which the program sections show (edited in the Program tab)
+  program: SectionProgram
 }>()
 
 const isLoading = ref(true)
@@ -71,11 +74,11 @@ async function load() {
 onMounted(load)
 
 // A blank page that was never saved has nothing to lose yet
-const isDirty = computed(() => !!website.value && !isSameWebsite(website.value, saved.value ?? createBlankWebsite()))
+const isDirty = computed(() => !!website.value && !isSameWebsite(website.value, saved.value ?? createBlankWebsite(props.event.type)))
 
 function start(choice: EventWebsiteStartChoice) {
   if (choice === 'blank')
-    website.value = createBlankWebsite()
+    website.value = createBlankWebsite(props.event.type)
   else
     isPickingTemplate.value = true
 }
@@ -213,6 +216,7 @@ useEventListener(window, 'beforeunload', (event: BeforeUnloadEvent) => {
     v-else-if="website"
     v-model:website="website"
     :event="event"
+    :program="program"
     :is-saved="!!saved"
     :is-dirty="isDirty"
     :is-saving="isSaving"

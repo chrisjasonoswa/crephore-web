@@ -11,29 +11,28 @@ import {
   createWebsiteSection,
   duplicateWebsiteSection,
   eventOccasion,
+  withSampleProgram,
   isSameWebsite,
   mapWebsiteToRequest,
   moveItem,
   websiteFromApi,
   websiteProblem,
+  websiteWarnings,
   withSavedIds,
 } from '~/features/event-websites/event-website'
-import { getSectionType } from '~/features/sections/section.registry'
+import { getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 
 const event = {
   id: 5,
   name: 'Ana & Marco',
-  description: null,
   type: 'Wedding',
   venueName: 'Manila Cathedral',
-  venueAddress: 'Intramuros, Manila',
-  venueLatitude: null,
-  venueLongitude: null,
-  venueGooglePlaceId: null,
   // 3 PM in Manila
   startsAt: '2027-06-12T07:00:00Z',
   endsAt: '2027-06-12T13:00:00Z',
   timezone: 'Asia/Manila',
+  bornOn: null,
+  diedOn: null,
   subdomain: 'ana-and-marco',
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
@@ -43,38 +42,66 @@ const event = {
 describe('event website', () => {
   it('starts a blank website with the default theme and no sections', () => {
     expect(createBlankWebsite()).toEqual({
-      theme: { primaryColor: '#1E2A44', accentColor: '#E8A598', fontPairingKey: 'serif_classic', cornerStyle: 'soft' },
+      theme: { primaryColor: '#1E2A44', secondaryColor: '#E8A598', fontPairingKey: 'serif_classic', cornerStyle: 'soft', motion: { intro: 'shutter' as const, intensity: 'bold' as const } },
       sections: [],
     })
   })
 
-  it('takes the occasion from the event', () => {
-    expect(eventOccasion(event)).toEqual({ startsAt: '2027-06-12T07:00:00Z', timezone: 'Asia/Manila' })
+  it('starts a blank website with the colours that suit the kind of event', () => {
+    expect(createBlankWebsite('Birthday').theme).toMatchObject({ primaryColor: '#F26B1D', secondaryColor: '#FFD23F' })
+    expect(createBlankWebsite('Conference').theme).toMatchObject({ primaryColor: '#334155', secondaryColor: '#DCE7F3' })
+    expect(createBlankWebsite('Wedding').theme).not.toHaveProperty('accentColor')
   })
 
-  it('fills a new hero with the event\'s name, date (in its timezone) and venue', () => {
+  it('starts a blank website with the motion that suits the kind of event', () => {
+    expect(createBlankWebsite('Wedding').theme.motion).toEqual({ intro: 'envelope', intensity: 'bold' })
+    expect(createBlankWebsite('Memorial').theme.motion).toEqual({ intro: 'wreath-seal', intensity: 'bold' })
+    expect(createBlankWebsite().theme.motion).toEqual({ intro: 'shutter', intensity: 'bold' })
+  })
+
+  it('takes the occasion from the event, with its program (none unless given)', () => {
+    expect(eventOccasion(event)).toEqual({ name: 'Ana & Marco', venue: 'Manila Cathedral', startsAt: '2027-06-12T07:00:00Z', timezone: 'Asia/Manila', program: { items: [], venues: [] } })
+    const program = { venue: 'Manila Cathedral', items: [{ id: 'item-1', date: '2027-06-12', title: 'Ceremony' }] }
+    expect(eventOccasion(event, program).program).toBe(program)
+    expect(eventOccasion({ ...event, bornOn: '1938-05-01', diedOn: '2026-10-03' })).toMatchObject({ bornOn: '1938-05-01', diedOn: '2026-10-03' })
+  })
+
+  it('gives thumbnails the sample program and its venues on the event\'s day while the event has none', () => {
+    const empty = withSampleProgram(eventOccasion(event))
+    expect(empty.program.venue).toBe('Manila Cathedral')
+    expect(empty.program.items.map(item => item.date)).toEqual([...Array(5).fill('2027-06-12'), '2027-06-13'])
+    expect(empty.program.venues!.map(venue => venue.name)).toEqual(['Manila Cathedral', 'The Manila Hotel'])
+
+    const withItems = eventOccasion(event, { items: [{ id: 'item-1', date: '2027-06-12', title: 'Ceremony' }] })
+    expect(withSampleProgram(withItems)).toBe(withItems)
+  })
+
+  it('starts a memorial\'s new hero with the years under the name (never the dates themselves)', () => {
+    const memorial = { ...event, type: 'Memorial' as const, bornOn: '1938-05-01', diedOn: '2026-10-03' }
+
+    expect(createWebsiteSection('hero', memorial).content).toEqual({ ...getSectionType('hero').defaultContent, lifeDates: 'years' })
+    expect(createWebsiteSection('hero', event).content.lifeDates).toBeUndefined()
+  })
+
+  it('starts a new program section with only its text and photos, never the event\'s program', () => {
+    expect(createWebsiteSection('program', event).content).toEqual({ ...getSectionType('program').defaultContent })
+  })
+
+  it('starts a new hero with the default content, never storing the event\'s name, date or venue', () => {
     const hero = createWebsiteSection('hero', event)
 
     expect(hero).toMatchObject({ type: 'hero', layout: 'fullscreen', background: 'photo', isVisible: true })
-    expect(hero.content).toMatchObject({
-      heading: 'Ana & Marco',
-      date: 'Saturday, 12 June 2027',
-      venue: 'Manila Cathedral',
-      eyebrow: getSectionType('hero').defaultContent.eyebrow,
-      layoutPhotos: [],
-    })
-  })
-
-  it('leaves the hero venue out when the event has none', () => {
-    expect(createWebsiteSection('hero', { ...event, venueName: '' }).content.venue).toBeUndefined()
+    expect(hero.content).toEqual({ ...getSectionType('hero').defaultContent })
+    expect(JSON.stringify(hero.content)).not.toContain('Ana & Marco')
+    expect(JSON.stringify(hero.content)).not.toContain('Manila Cathedral')
   })
 
   it('starts a new message with a generic signature', () => {
     expect(createWebsiteSection('message', event).content).toMatchObject({ signature: 'With love, from us', heading: 'Welcome, family & friends' })
   })
 
-  it('fills a new countdown with the event\'s name', () => {
-    expect(createWebsiteSection('countdown', event).content).toMatchObject({ heading: 'Ana & Marco', showSeconds: true })
+  it('starts a new countdown with the default content, never storing the event\'s name', () => {
+    expect(createWebsiteSection('countdown', event).content).toEqual({ ...getSectionType('countdown').defaultContent })
   })
 
   it('gives every section its own key', () => {
@@ -97,6 +124,21 @@ describe('event website', () => {
     expect(moveItem(items, 0, 2)).toEqual(['b', 'c', 'a'])
     expect(moveItem(items, 2, 0)).toEqual(['c', 'a', 'b'])
     expect(items).toEqual(['a', 'b', 'c'])
+  })
+
+  describe('websiteWarnings', () => {
+    it('lists the visible sections missing content their layout needs, by type and layout', () => {
+      const hero = createWebsiteSection('hero', event)
+      const message = { ...createWebsiteSection('message', event), content: { body: '  ', layoutPhotos: [] } }
+      const about = { ...createWebsiteSection('about', event), layout: 'timeline-zigzag', content: { timeline: [], layoutPhotos: [] } }
+      const hiddenPeople = { ...createWebsiteSection('people', event), content: { heading: 'People', people: [] }, isVisible: false }
+
+      expect(websiteWarnings({ ...createBlankWebsite(), sections: [hero, message, about, hiddenPeople] })).toEqual([
+        `Message (${getSectionType('message').layouts[0]!.name}): This layout needs a message.`,
+        `About (${getSectionLayout('about', 'timeline-zigzag')!.name}): This layout needs at least one chapter.`,
+      ])
+      expect(websiteWarnings({ ...createBlankWebsite(), sections: [hero] })).toEqual([])
+    })
   })
 
   describe('websiteProblem', () => {
@@ -122,10 +164,10 @@ describe('event website', () => {
     const saved: EventWebsite = {
       id: 3,
       eventId: 5,
-      theme: { primaryColor: '#5E7A63', accentColor: '#E9DFC8', backgroundColor: null, fontPairingKey: 'romantic', cornerStyle: 'round' },
+      theme: { primaryColor: '#5E7A63', secondaryColor: '#E9DFC8', accentColor: null, backgroundColor: null, fontPairingKey: 'romantic', cornerStyle: 'round', motion: { intro: 'shutter' as const, intensity: 'normal' as const } },
       sections: [
-        { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'left' }, content: { heading: 'Ana & Marco', layoutPhotos: [] }, contentVersion: 1, isVisible: true, visibility: 'Always' },
-        { id: 12, type: 'countdown', layout: 'boxes', background: 'primary', options: {}, content: { heading: 'Soon', showSeconds: false, layoutPhotos: [] }, contentVersion: 1, isVisible: false, visibility: 'Always' },
+        { id: 11, type: 'hero', layout: 'split', background: 'light', options: { photoSide: 'left' }, content: { eyebrow: 'Together', layoutPhotos: [] }, contentVersion: 2, isVisible: true, visibility: 'Always' },
+        { id: 12, type: 'countdown', layout: 'boxes', background: 'primary', options: {}, content: { eyebrow: 'Soon', showSeconds: false, layoutPhotos: [] }, contentVersion: 2, isVisible: false, visibility: 'Always' },
       ],
       publishedAt: null,
       hasUnpublishedChanges: false,
@@ -137,14 +179,47 @@ describe('event website', () => {
       const website = websiteFromApi(saved)
 
       // No background colour: unset, like a new website
-      expect(website.theme).toEqual({ primaryColor: '#5E7A63', accentColor: '#E9DFC8', fontPairingKey: 'romantic', cornerStyle: 'round' })
+      expect(website.theme).toEqual({ primaryColor: '#5E7A63', secondaryColor: '#E9DFC8', fontPairingKey: 'romantic', cornerStyle: 'round', motion: { intro: 'shutter' as const, intensity: 'normal' as const } })
       expect(website.sections.map(section => [section.key, section.id, section.layout, section.isVisible]))
         .toEqual([['section-11', 11, 'split', true], ['section-12', 12, 'boxes', false]])
       expect(websiteFromApi({ ...saved, theme: { ...saved.theme, backgroundColor: '#FFFCF4' } }).theme.backgroundColor).toBe('#FFFCF4')
     })
 
+    it('saves only the options a section\'s layout has', () => {
+      const website = websiteFromApi(saved)
+      const hero = { ...website.sections[0]!, options: { ...website.sections[0]!.options, removedOption: 'x' } }
+
+      expect(mapWebsiteToRequest({ ...website, sections: [hero] }).sections[0]!.options).toEqual(saved.sections[0]!.options)
+    })
+
+    it('opens a section saved in a removed layout in its replacement', () => {
+      const program = { ...saved.sections[0]!, type: 'program' as const, layout: 'tab-cards', content: { heading: 'Program', venuesHeading: 'Getting there', layoutPhotos: [] }, contentVersion: 4 }
+
+      expect(websiteFromApi({ ...saved, sections: [program] }).sections[0]!.layout).toBe('cards')
+    })
+
+    it('gives a website saved before motion existed the default motion, and saves the motion', () => {
+      const { motion: _, ...oldTheme } = saved.theme
+      const website = websiteFromApi({ ...saved, theme: oldTheme as typeof saved.theme })
+      expect(website.theme.motion).toEqual({ intro: 'shutter', intensity: 'bold' })
+
+      const changed = { ...website, theme: { ...website.theme, motion: { intro: 'orbit' as const, intensity: 'bold' as const } } }
+      expect(mapWebsiteToRequest(changed).theme.motion).toEqual({ intro: 'orbit', intensity: 'bold' })
+      expect(isSameWebsite(changed, website)).toBe(false)
+    })
+
+    it('leaves out colours the API sends as null, and sends unset ones as null', () => {
+      const website = websiteFromApi({ ...saved, theme: { ...saved.theme, secondaryColor: null, accentColor: null } })
+
+      expect(website.theme).not.toHaveProperty('secondaryColor')
+      expect(website.theme).not.toHaveProperty('accentColor')
+      expect(mapWebsiteToRequest(website).theme).toMatchObject({ secondaryColor: null, accentColor: null })
+      expect(websiteFromApi({ ...saved, theme: { ...saved.theme, accentColor: '#C9A54C' } }).theme.accentColor).toBe('#C9A54C')
+      expect(mapWebsiteToRequest({ ...website, theme: { ...website.theme, accentColor: '#C9A54C' } }).theme.accentColor).toBe('#C9A54C')
+    })
+
     it('upgrades saved content from its content version', () => {
-      const upgraded: CountdownContent = { heading: 'Upgraded', showSeconds: false, layoutPhotos: [] }
+      const upgraded: CountdownContent = { eyebrow: 'Upgraded', showSeconds: false, layoutPhotos: [] }
       upgradeSectionContent.mockReturnValueOnce(upgraded)
       const website = websiteFromApi({ ...saved, sections: [{ ...saved.sections[1]!, contentVersion: 1 }] })
 
@@ -178,7 +253,7 @@ describe('event website', () => {
 
       expect(request.theme).toEqual({ ...saved.theme })
       expect(request.sections.map(section => section.id)).toEqual([null, 11])
-      expect(request.sections[0]).toMatchObject({ type: 'hero', layout: 'fullscreen', contentVersion: 1, isVisible: true, visibility: 'Always' })
+      expect(request.sections[0]).toMatchObject({ type: 'hero', layout: 'fullscreen', contentVersion: 2, isVisible: true, visibility: 'Always' })
       expect(request.sections[1]).toEqual({ ...saved.sections[0] })
       expect(JSON.stringify(request)).not.toContain(added.key)
     })
@@ -186,7 +261,7 @@ describe('event website', () => {
     it('compares websites by what would be saved, whatever order the content fields are in', () => {
       const website = websiteFromApi(saved)
       const hero = website.sections[0]!
-      const reordered = { ...hero, content: { layoutPhotos: [], heading: 'Ana & Marco' } }
+      const reordered = { ...hero, content: { layoutPhotos: [], eyebrow: 'Together' } }
 
       expect(isSameWebsite({ ...website, sections: [reordered, website.sections[1]!] }, website)).toBe(true)
       expect(isSameWebsite({ ...website, sections: [{ ...hero, key: 'other' }, website.sections[1]!] }, website)).toBe(true)

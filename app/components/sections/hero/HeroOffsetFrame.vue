@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { HeroLayoutOptions } from '~/features/sections/hero/hero.options'
 import type { SectionBackground, SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhotoCarousel from '../SectionPhotoCarousel.vue'
@@ -8,17 +9,17 @@ import HeroText from './HeroText.vue'
 // down and towards the text like a layered print (`photoSide`). Up to five layout photos; more than one play as a
 // slideshow. On phones the block and photo go on top. The button and the date and venue ("Date", "Location") sit
 // under the names.
-const props = defineProps<SectionLayoutProps<'hero'>>()
+const props = defineProps<SectionLayoutProps<'hero', HeroLayoutOptions<'photoSide'>>>()
 
 const PHOTOS = 5
 const photos = computed(() => props.content.layoutPhotos.slice(0, PHOTOS))
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 
-// The block uses the background's button colour (the other brand colour), so it stands out on every background
+// The block uses the background's button colour (the accent, or the other brand colour), so it stands out on every background
 const blockColours: Record<SectionBackground, string> = {
   light: 'bg-(--site-button-light)',
   primary: 'bg-(--site-button-primary)',
-  accent: 'bg-(--site-button-accent)',
+  secondary: 'bg-(--site-button-secondary)',
   photo: 'bg-(--site-button-photo)',
 }
 </script>
@@ -60,6 +61,7 @@ const blockColours: Record<SectionBackground, string> = {
     >
       <HeroText
         :content="content"
+        :occasion="occasion"
         :styles="styles"
         align="start"
         size="large"

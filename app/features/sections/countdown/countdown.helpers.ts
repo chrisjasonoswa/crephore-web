@@ -1,4 +1,4 @@
-import type { SectionOccasion } from '../section.type'
+import type { OccasionTime } from '../section.type'
 import { computed, onBeforeUnmount, onMounted, ref, toValue, type MaybeRefOrGetter } from 'vue'
 
 // The countdown sections' time maths and date formats. The target is the occasion's start (a UTC instant),
@@ -67,7 +67,7 @@ export function countdownUnits(parts: CountdownParts | null, showSeconds: boolea
  * A live countdown to the occasion, ticking every second. It starts once mounted: the server and the
  * browser can't agree on "now", so the first render (and server rendering) shows "--" instead of numbers.
  */
-export function useCountdown(occasion: MaybeRefOrGetter<SectionOccasion>, showSeconds: MaybeRefOrGetter<boolean>) {
+export function useCountdown(occasion: MaybeRefOrGetter<OccasionTime>, showSeconds: MaybeRefOrGetter<boolean>) {
   const now = ref<number | null>(null)
   let timer: ReturnType<typeof setInterval> | undefined
 
@@ -95,7 +95,7 @@ interface ZonedDate {
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-function zonedDate({ startsAt, timezone }: SectionOccasion): ZonedDate {
+function zonedDate({ startsAt, timezone }: OccasionTime): ZonedDate {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: timezone,
     weekday: 'long',
@@ -110,7 +110,7 @@ function zonedDate({ startsAt, timezone }: SectionOccasion): ZonedDate {
 }
 
 /** "Sunday, 14 February 2027" (long) or "14 · 02 · 2027" (numeric). */
-export function formatOccasionDate(occasion: SectionOccasion, style: 'long' | 'numeric' = 'long'): string {
+export function formatOccasionDate(occasion: OccasionTime, style: 'long' | 'numeric' = 'long'): string {
   const date = zonedDate(occasion)
   if (style === 'numeric')
     return [String(date.day).padStart(2, '0'), String(date.month).padStart(2, '0'), date.year].join(' · ')
@@ -128,7 +128,7 @@ export interface CalendarMonth {
 }
 
 /** The month page of the occasion's date, for the calendar layout. */
-export function calendarMonth(occasion: SectionOccasion): CalendarMonth {
+export function calendarMonth(occasion: OccasionTime): CalendarMonth {
   const date = zonedDate(occasion)
   return {
     title: `${date.monthName} ${date.year}`,

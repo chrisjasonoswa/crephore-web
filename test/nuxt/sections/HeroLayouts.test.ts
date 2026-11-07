@@ -17,16 +17,12 @@ import HeroSplit from '~/components/sections/hero/HeroSplit.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { resolveLayoutOptions } from '~/features/sections/section.options'
 import { getSectionLayout } from '~/features/sections/section.registry'
-import { sampleOccasion } from '~/features/sections/section.type'
 
 const backgroundPhoto = 'https://example.com/background.jpg'
 const layoutPhotos = ['https://example.com/1.jpg', 'https://example.com/2.jpg', 'https://example.com/3.jpg', 'https://example.com/4.jpg', 'https://example.com/5.jpg']
 
 const content: HeroContent = {
   eyebrow: 'Together with their families',
-  heading: 'Bea & Carlo',
-  date: 'Saturday, 14 February 2027',
-  venue: 'Manila Cathedral',
   backgroundPhoto,
   layoutPhotos,
   cta: { label: 'RSVP', href: '#rsvp' },
@@ -48,10 +44,15 @@ const layouts: { key: string, component: Component, photoCount: number, placehol
   { key: 'offset-frame', component: HeroOffsetFrame, photoCount: 5, placeholderCount: 1 },
 ]
 
+// The heading, date and place come from the event: Sunday, 14 February 2027 in Manila
+const occasion = { name: 'Bea & Carlo', venue: 'Manila Cathedral', startsAt: '2027-02-14T02:00:00Z', timezone: 'Asia/Manila' }
+// A memorial's dates of birth and passing
+const memorial = { ...occasion, name: 'Lola Ising', bornOn: '1938-05-01', diedOn: '2026-10-03' }
+
 const definitionOf = (key: string) => getSectionLayout('hero', key)!
 
 // Mounts a layout like SectionRenderer does: its options with defaults filled in
-const mountLayout = (key: string, props: { content?: HeroContent, background?: SectionBackground, options?: Record<string, string> } = {}) => {
+const mountLayout = (key: string, props: { content?: HeroContent, background?: SectionBackground, options?: Record<string, string>, occasion?: object } = {}) => {
   const definition = definitionOf(key)
   const component = layouts.find(layout => layout.key === key)!.component
   return mountSuspended(component, {
@@ -59,7 +60,7 @@ const mountLayout = (key: string, props: { content?: HeroContent, background?: S
       content: props.content ?? content,
       background: props.background ?? definition.backgrounds[0]!,
       options: resolveLayoutOptions(definition.options, props.options),
-      occasion: sampleOccasion(),
+      occasion: props.occasion ?? occasion,
     },
   })
 }
@@ -72,14 +73,31 @@ const comesBefore = (wrapper: Awaited<ReturnType<typeof mountLayout>>, first: st
 }
 
 describe.each(layouts)('hero layout $key', ({ key, photoCount, placeholderCount = photoCount }) => {
-  it('renders the heading, details and RSVP button', async () => {
+  it('renders the event\'s name, date and venue, and the eyebrow and RSVP button', async () => {
     const wrapper = await mountLayout(key)
 
     expect(wrapper.find('h1').text()).toBe('Bea & Carlo')
     expect(wrapper.text()).toContain('Together with their families')
-    expect(wrapper.text()).toContain('Saturday, 14 February 2027')
+    expect(wrapper.text()).toContain('Sunday, 14 February 2027')
     expect(wrapper.text()).toContain('Manila Cathedral')
     expect(wrapper.find('a[href="#rsvp"]').text()).toBe('RSVP')
+  })
+
+  it('shows a memorial\'s life dates under the name, as full dates or years only', async () => {
+    const full = await mountLayout(key, { content: { ...content, lifeDates: 'full' }, occasion: memorial })
+    const years = await mountLayout(key, { content: { ...content, lifeDates: 'years' }, occasion: memorial })
+
+    expect(full.find('[data-hero-life-dates]').text()).toBe('1 May 1938 – 3 October 2026')
+    expect(comesBefore(full, 'Lola Ising', '1 May 1938')).toBe(true)
+    expect(years.find('[data-hero-life-dates]').text()).toBe('1938 – 2026')
+  })
+
+  it('leaves the life dates out when not chosen, or without both dates', async () => {
+    const notChosen = await mountLayout(key, { occasion: memorial })
+    const oneDate = await mountLayout(key, { content: { ...content, lifeDates: 'years' }, occasion: { ...memorial, bornOn: undefined } })
+
+    expect(notChosen.find('[data-hero-life-dates]').exists()).toBe(false)
+    expect(oneDate.find('[data-hero-life-dates]').exists()).toBe(false)
   })
 
   it('renders an unsafe saved button link without a link', async () => {
@@ -134,10 +152,11 @@ describe.each(layouts)('hero layout $key', ({ key, photoCount, placeholderCount 
     }
   })
 
-  it('renders only the heading when the optional content is missing', async () => {
-    const wrapper = await mountLayout(key, { content: { heading: 'Bea & Carlo', layoutPhotos: [] } })
+  it('renders only the event\'s details when the optional content is missing', async () => {
+    const wrapper = await mountLayout(key, { content: { layoutPhotos: [] } })
 
     expect(wrapper.find('h1').text()).toBe('Bea & Carlo')
+    expect(wrapper.text()).not.toContain('Together with their families')
     expect(wrapper.find('a').exists()).toBe(false)
   })
 })
@@ -260,7 +279,7 @@ describe('placement options', () => {
     const details = wrapper.find('[data-hero-details]')
 
     expect(details.findAll('dt').map(dt => dt.text())).toEqual(['Date', 'Location'])
-    expect(details.findAll('dd').map(dd => dd.text())).toEqual(['Saturday, 14 February 2027', 'Manila Cathedral'])
+    expect(details.findAll('dd').map(dd => dd.text())).toEqual(['Sunday, 14 February 2027', 'Manila Cathedral'])
     expect(comesBefore(wrapper, 'href="#rsvp"', 'data-hero-details')).toBe(true)
   })
 

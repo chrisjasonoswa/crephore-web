@@ -10,9 +10,9 @@ const props = withDefaults(defineProps<{
 })
 
 const placeholders = [
-  'from-(--site-accent)/70 to-(--site-primary)/25',
-  'from-(--site-primary)/25 to-(--site-accent)/60',
-  'from-(--site-accent)/45 to-(--site-bg)/40',
+  'from-(--site-secondary)/70 to-(--site-primary)/25',
+  'from-(--site-primary)/25 to-(--site-secondary)/60',
+  'from-(--site-secondary)/45 to-(--site-bg)/40',
 ]
 const placeholder = computed(() => placeholders[props.variant % placeholders.length])
 </script>

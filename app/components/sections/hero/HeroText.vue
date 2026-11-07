@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import type { BackgroundStyles } from '~/features/sections/section.background'
 import type { HeroContent } from '~/features/sections/hero/hero.type'
+import type { SectionOccasion } from '~/features/sections/section.type'
+import { formatOccasionDate } from '~/features/sections/countdown/countdown.helpers'
+import { formatLifeDates } from '~/features/sections/hero/hero.helpers'
 import { safeHref } from '~/features/sections/section.links'
 
-// The hero's text (eyebrow, heading, date · venue, RSVP button). Not a layout: every hero layout renders it,
-// so they stay consistent. Slots let a layout put its photos in the flow (`#before-heading`, `#after-heading`,
-// `#before-cta`).
+// The hero's text (eyebrow, heading, a memorial's life dates, date · venue, RSVP button). Not a layout: every hero
+// layout renders it, so they stay consistent. The heading, life dates, date and venue are the event's (`occasion`). Slots let a layout put its photos
+// in the flow (`#before-heading`, `#after-heading`, `#before-cta`).
 const props = withDefaults(defineProps<{
   content: HeroContent
+  occasion: SectionOccasion
   styles: BackgroundStyles
   align?: 'start' | 'center' | 'end'
   // Heading size: display for full-width layouts, large for half-width, medium for cards and narrow columns
@@ -22,10 +26,12 @@ const props = withDefaults(defineProps<{
   size: 'large',
 })
 
-const details = computed(() => [props.content.date, props.content.venue].filter(Boolean))
+const date = computed(() => formatOccasionDate(props.occasion))
+const lifeDates = computed(() => props.content.lifeDates && formatLifeDates(props.occasion, props.content.lifeDates))
+const details = computed(() => [date.value, props.occasion.venue].filter(Boolean))
 const labelled = computed(() => [
-  { label: 'Date', value: props.content.date },
-  { label: 'Location', value: props.content.venue },
+  { label: 'Date', value: date.value },
+  { label: 'Location', value: props.occasion.venue },
 ].filter(detail => detail.value))
 
 const alignClasses = {
@@ -57,8 +63,17 @@ const headingSizes = {
       class="font-(family-name:--site-font-heading) leading-[1.05] text-balance"
       :class="[headingSizes[size], content.eyebrow && 'mt-4', styles.brandText]"
     >
-      {{ content.heading }}
+      {{ occasion.name }}
     </h1>
+
+    <p
+      v-if="lifeDates"
+      data-hero-life-dates
+      class="mt-3 font-(family-name:--site-font-heading) text-lg tracking-wide @2xl:text-2xl"
+      :class="styles.eyebrow"
+    >
+      {{ lifeDates }}
+    </p>
 
     <slot name="after-heading" />
 

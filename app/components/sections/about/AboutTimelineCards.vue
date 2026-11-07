@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionScrollHint from '~/components/sections/SectionScrollHint.vue'
@@ -11,9 +11,9 @@ import AboutText from './AboutText.vue'
 // Layout `timeline-cards`: the heading and intro (`textAlign`), then the chapters as cards (photo, then text) in one
 // row along a line, a dot over each. The row scrolls sideways on every screen: guests swipe (touch, trackpad) or drag
 // it with the mouse. Cards that all fit stay centred.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'textAlign'>>>()
 
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 
 const row = useTemplateRef<HTMLOListElement>('row')
 const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.timeline.length)
@@ -44,7 +44,7 @@ const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfter
       >
         <!-- The line runs on through the gap to the next card -->
         <span aria-hidden="true" class="absolute start-0 top-1.5 h-px bg-current/20" :class="index === content.timeline.length - 1 ? 'end-0' : '-end-5'" />
-        <span aria-hidden="true" class="absolute start-0 top-0 size-3 rounded-full bg-current" />
+        <span aria-hidden="true" class="absolute start-0 top-0 size-3 rounded-full bg-current" :class="styles.accent" />
         <SectionPhoto data-chapter-photo :src="item.photo" :variant="index" class="aspect-4/3 w-full rounded-(--site-radius)" />
         <AboutChapter :item="item" :styles="styles" class="mt-4" />
       </li>

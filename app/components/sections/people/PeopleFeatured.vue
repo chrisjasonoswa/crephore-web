@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { personPhotoShapes } from '~/features/sections/people/people.helpers'
@@ -9,9 +10,9 @@ import PersonPhoto from './PersonPhoto.vue'
 // Layout `featured` ("Featured pair"): the first two people as large portraits (`photoShape`) joined by an ampersand,
 // for the couple or the hosts; everyone else as small round photos below, a row that isn't full centred. On phones the
 // pair stacks with the ampersand between them.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'photoShape'>>>()
 
-const shape = computed(() => personPhotoShapes[props.options.photoShape as keyof typeof personPhotoShapes])
+const shape = computed(() => personPhotoShapes[props.options.photoShape])
 const pair = computed(() => props.content.people.slice(0, 2))
 const others = computed(() => props.content.people.slice(2))
 </script>

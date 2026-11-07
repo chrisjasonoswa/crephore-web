@@ -1,15 +1,15 @@
 import type { PeopleContent } from '~/features/sections/people/people.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
-import { getSectionType } from '~/features/sections/section.registry'
+import { getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 import WebsitePeopleFields from '~/pages/(dashboard)/dashboard/events/[id]/_components/website/WebsitePeopleFields.vue'
 
-async function mountFields(props: { showPhotos?: boolean, showBio?: boolean, content?: PeopleContent } = {}) {
+// With a real layout, so its declared fields drive the editor: the grid (photos, no bios) by default
+async function mountFields(props: { layout?: 'grid' | 'cards' | 'credits', content?: PeopleContent } = {}) {
   const wrapper = await mountSuspended(WebsitePeopleFields, {
     props: {
       'eventId': 5,
-      'showPhotos': props.showPhotos ?? true,
-      'showBio': props.showBio ?? false,
+      'layout': getSectionLayout('people', props.layout ?? 'grid')!,
       'content': props.content ?? structuredClone(getSectionType('people').defaultContent),
       'onUpdate:content': (next: PeopleContent) => wrapper.setProps({ content: next }),
     },
@@ -54,11 +54,11 @@ describe('website people fields', () => {
   })
 
   it('offers photos and bios only when the layout shows them', async () => {
-    const withBoth = await mountFields({ showPhotos: true, showBio: true })
+    const withBoth = await mountFields({ layout: 'cards' })
     expect(withBoth.findAll('[data-photo-label]').length).toBe(8)
     expect(withBoth.text()).toContain('Bio (optional)')
 
-    const textOnly = await mountFields({ showPhotos: false, showBio: false })
+    const textOnly = await mountFields({ layout: 'credits' })
     expect(textOnly.findAll('[data-photo-label]')).toHaveLength(0)
     expect(textOnly.text()).not.toContain('Bio (optional)')
   })

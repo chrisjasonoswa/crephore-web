@@ -1,14 +1,15 @@
 import type { SectionCta } from '../section.cta.type'
 
-// Every hero layout uses the same fields; only the arrangement changes.
+// Every field a hero layout can use (the heading, date and venue come from the event)
+export const heroFields = ['eyebrow', 'cta', 'lifeDates'] as const
+export type HeroField = (typeof heroFields)[number]
+
+// Every hero layout uses the same fields; only the arrangement changes. The heading (the page's h1), date and place
+// are the event's name, start date and venue (`SectionLayoutProps.occasion`), never stored here, so they follow the
+// event when it changes.
 export interface HeroContent {
   // Small label, e.g. "Together with their families"
   eyebrow?: string
-  // The names, e.g. "Bea & Carlo" (the page's h1)
-  heading: string
-  // Display text, already formatted for the event (e.g. "Saturday, 14 February 2027")
-  date?: string
-  venue?: string
   // The photo behind the section on the `photo` background (any layout, under an overlay); without it the section
   // uses the primary colour. Never shown inside a layout.
   backgroundPhoto?: string
@@ -19,4 +20,9 @@ export interface HeroContent {
   layoutPhotos: string[]
   // The RSVP button
   cta?: SectionCta
+  // A memorial's dates of birth and passing under the name (`occasion.bornOn` / `diedOn`, never stored here), as full
+  // dates or years only; left out without both dates. Unset: none. Offered in the editor only for memorials.
+  lifeDates?: HeroLifeDates
 }
+
+export type HeroLifeDates = 'full' | 'years'

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blankPerson, groupPeopleByRole, peopleLayoutShowsBio, peopleLayoutShowsPhotos, personInitials } from '~/features/sections/people/people.helpers'
+import { blankPerson, groupPeopleByRole, personInitials } from '~/features/sections/people/people.helpers'
 import { layoutPhotosOf, withLayoutPhoto } from '~/features/sections/section.photos'
 import { createDefaultSection } from '~/features/sections/section.registry'
 
@@ -30,11 +30,6 @@ describe('people helpers', () => {
     expect(personInitials('Ñoño Ábalos')).toBe('ÑÁ')
     expect(personInitials('')).toBe('')
     expect(personInitials('  &  ')).toBe('')
-  })
-
-  it('tells which layouts show photos and bios', () => {
-    expect(['grid', 'entourage', 'credits', 'directory'].map(peopleLayoutShowsPhotos)).toEqual([true, false, false, true])
-    expect(['cards', 'spotlight', 'grid'].map(peopleLayoutShowsBio)).toEqual([true, true, false])
   })
 
   it('gives each new person a unique id', () => {

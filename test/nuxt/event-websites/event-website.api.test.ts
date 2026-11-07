@@ -30,7 +30,7 @@ describe('event website api', () => {
 
   it('saves the whole website', () => {
     const payload = {
-      theme: { primaryColor: '#1E2A44', accentColor: '#E8A598', backgroundColor: null, fontPairingKey: 'serif_classic', cornerStyle: 'soft' as const },
+      theme: { primaryColor: '#1E2A44', secondaryColor: '#E8A598', accentColor: null, backgroundColor: null, fontPairingKey: 'serif_classic', cornerStyle: 'soft' as const, motion: { intro: 'shutter' as const, intensity: 'normal' as const } },
       sections: [{
         id: null,
         type: 'countdown' as const,

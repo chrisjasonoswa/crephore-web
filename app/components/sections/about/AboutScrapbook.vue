@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import AboutText from './AboutText.vue'
 // Layout `scrapbook`: three tilted instant photos, overlapping, beside the story on a light sheet of paper
 // (`photoSide`). On phones the photos go on top. The note has its own solid surface, so the background photo needs no
 // overlay; the white print borders are part of the look, not a theme colour.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 // The note is always light, whatever the background

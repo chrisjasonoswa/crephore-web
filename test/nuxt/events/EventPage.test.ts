@@ -13,6 +13,14 @@ vi.mock('~/features/event-websites/event-website.api', () => ({
   publishEventWebsite: vi.fn(),
   unpublishEventWebsite: vi.fn(),
 }))
+vi.mock('~/features/event-programs/event-program.api', () => ({
+  getEventProgram: vi.fn().mockResolvedValue({ data: { items: [] } }),
+  updateEventProgram: vi.fn(),
+}))
+vi.mock('~/features/event-venues/event-venue.api', () => ({
+  getEventVenues: vi.fn().mockResolvedValue({ data: [] }),
+  updateEventVenues: vi.fn(),
+}))
 vi.mock('~/features/event-groups/event-group.api', () => ({
   listEventGroups: vi.fn().mockResolvedValue({ data: { items: [] } }),
 }))
@@ -22,16 +30,13 @@ import EventPage from '~/pages/(dashboard)/dashboard/events/[id]/index.vue'
 const event = {
   id: 5,
   name: 'Ana & Marco',
-  description: null,
   type: 'Wedding',
   venueName: 'Manila Cathedral',
-  venueAddress: 'Intramuros, Manila',
-  venueLatitude: null,
-  venueLongitude: null,
-  venueGooglePlaceId: null,
   startsAt: '2027-06-12T07:00:00Z',
   endsAt: '2027-06-12T13:00:00Z',
   timezone: 'Asia/Manila',
+  bornOn: null,
+  diedOn: null,
   subdomain: 'ana-and-marco',
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
@@ -60,7 +65,7 @@ describe('event page', () => {
 
     expect(getEvent).toHaveBeenCalledWith(5)
     expect(wrapper.find('h1').text()).toBe('Ana & Marco')
-    expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual(['Details', 'Website', 'Guests & RSVP'])
+    expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual(['Details', 'Venues', 'Program', 'Website', 'Guests & RSVP'])
     expect(activeTab(wrapper)).toBe('Details')
     expect(wrapper.find('input[id="name"]').exists()).toBe(true)
   })
@@ -104,6 +109,20 @@ describe('event page', () => {
     await vi.waitFor(() => expect(activeTab(wrapper)).toBe('Website'))
     expect(wrapper.text()).toContain('Your page is empty')
     expect(wrapper.find('[data-start]').exists()).toBe(false)
+  })
+
+  it('loads the event\'s program into the Program tab', async () => {
+    const wrapper = await mountPage('/dashboard/events/5?tab=program')
+
+    expect(activeTab(wrapper)).toBe('Program')
+    expect(wrapper.text()).toContain('No items yet.')
+  })
+
+  it('loads the event\'s venues into the Venues tab', async () => {
+    const wrapper = await mountPage('/dashboard/events/5?tab=venues')
+
+    expect(activeTab(wrapper)).toBe('Venues')
+    expect(wrapper.text()).toContain('No venues yet.')
   })
 
   it('shows "Event not found" when the event cannot be loaded', async () => {

@@ -3,7 +3,7 @@ import type { SectionBackground } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { ImageIcon } from '@lucide/vue'
 import { inPickerOrder, sectionBackgroundLabels } from '~/features/sections/section.type'
-import { lightBackground } from '~/site-theme/useSiteTheme'
+import { lightBackground, secondaryFor } from '~/site-theme/useSiteTheme'
 import WebsiteChoiceGroup from './WebsiteChoiceGroup.vue'
 
 // The section's background, as cards with a swatch in the event's colours (only the ones its layout supports).
@@ -21,7 +21,7 @@ const choices = computed(() => inPickerOrder(props.backgrounds).map(value => ({ 
 const swatchColors = computed<Record<Exclude<SectionBackground, 'photo'>, string>>(() => ({
   light: lightBackground(props.theme),
   primary: props.theme.primaryColor,
-  accent: props.theme.accentColor,
+  secondary: secondaryFor(props.theme),
 }))
 </script>
 

@@ -4,7 +4,7 @@ import type { CountdownContent } from '~/features/sections/countdown/countdown.t
 import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { MessageContent } from '~/features/sections/message/message.type'
 import type { PeopleContent } from '~/features/sections/people/people.type'
-import type { ProgramContent } from '~/features/sections/program/program.type'
+import type { ProgramContent, SectionProgram } from '~/features/sections/program/program.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { Section, SectionBackground, SectionOccasion } from '~/features/sections/section.type'
 import { groupedChoices, positions, resolveLayoutOptions } from '~/features/sections/section.options'
@@ -19,11 +19,13 @@ import PlaygroundProgramContent from './PlaygroundProgramContent.vue'
 
 // Settings of one section on the page: layout, its placement options, background, and its content
 // (per section type: the hero's background and layout photos; the countdown's seconds, button, background and layout photo;
-// the message's signature, background and layout photo; the about section's photos, story length and chapters; the people section's count and photos; the program's items and days, which follow the page's `occasion`).
+// the message's signature, background and layout photo; the about section's photos, story length and chapters; the people section's count and photos; the program's items and days: the page's program, in its `occasion`, whose dates they follow).
 defineProps<{
   occasion: SectionOccasion
 }>()
 const section = defineModel<Section>('section', { required: true })
+// The page's program (the event's in a real site), which the program section's controls change
+const program = defineModel<SectionProgram>('program', { required: true })
 
 const id = useId()
 const definition = computed(() => getSectionType(section.value.type))
@@ -170,6 +172,6 @@ const messageContent = computed({
     <PlaygroundMessageContent v-else-if="section.type === 'message'" v-model:content="messageContent" />
     <PlaygroundAboutContent v-else-if="section.type === 'about'" v-model:content="aboutContent" />
     <PlaygroundPeopleContent v-else-if="section.type === 'people'" v-model:content="peopleContent" />
-    <PlaygroundProgramContent v-else-if="section.type === 'program'" v-model:content="programContent" :occasion="occasion" />
+    <PlaygroundProgramContent v-else-if="section.type === 'program'" v-model:content="programContent" v-model:program="program" :occasion="occasion" />
   </div>
 </template>

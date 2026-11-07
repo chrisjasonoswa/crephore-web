@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import type { ProgramContent, ProgramItem } from '~/features/sections/program/program.type'
+import type { ProgramContent, ProgramItem, ProgramVenue, SectionProgram } from '~/features/sections/program/program.type'
 import type { SectionBackground } from '~/features/sections/section.type'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it } from 'vitest'
@@ -16,25 +16,25 @@ import ProgramNote from '~/components/sections/program/ProgramNote.vue'
 import ProgramPhotoCards from '~/components/sections/program/ProgramPhotoCards.vue'
 import ProgramPoster from '~/components/sections/program/ProgramPoster.vue'
 import ProgramPrinted from '~/components/sections/program/ProgramPrinted.vue'
-import ProgramTabCards from '~/components/sections/program/ProgramTabCards.vue'
 import ProgramTable from '~/components/sections/program/ProgramTable.vue'
 import ProgramTickets from '~/components/sections/program/ProgramTickets.vue'
 import ProgramTimeline from '~/components/sections/program/ProgramTimeline.vue'
 import ProgramVertical from '~/components/sections/program/ProgramVertical.vue'
+import { programBlockColours } from '~/features/sections/program/program.helpers'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { groupedChoices, resolveLayoutOptions } from '~/features/sections/section.options'
 import { getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 
 const backgroundPhoto = 'https://example.com/background.jpg'
 // 14 Feb 2027 in Manila
-const occasion = { startsAt: '2027-02-14T06:00:00Z', timezone: 'Asia/Manila' }
+const event = { name: 'Bea & Carlo', venue: 'Manila Cathedral', startsAt: '2027-02-14T06:00:00Z', timezone: 'Asia/Manila' }
 
 const items: ProgramItem[] = [
   { id: 'a', date: '2027-02-14', startTime: '15:00', endTime: '16:00', title: 'Ceremony', venue: 'Manila Cathedral', description: 'Please be seated by 2:45.', speakers: 'Fr. Jose Cruz' },
   { id: 'b', date: '2027-02-14', startTime: '18:00', title: 'Cocktails', venue: 'Pool deck' },
   { id: 'c', date: '2027-02-15', startTime: '00:30', title: 'After-party', venue: 'Poolside Bar' },
 ]
-const content: ProgramContent = { eyebrow: 'The day', heading: 'Program', items, layoutPhotos: [], backgroundPhoto }
+const content: ProgramContent = { eyebrow: 'The day', heading: 'Program', venuesHeading: 'Getting there', layoutPhotos: [], backgroundPhoto }
 const titles = items.map(item => item.title)
 
 // Each layout, whether it sets the time large (and numbers items without times), shows notes and shows venues
@@ -54,12 +54,12 @@ const layouts: { key: string, component: Component, marker: boolean, notes: bool
   { key: 'vertical', component: ProgramVertical, marker: false, notes: true, venues: true },
   { key: 'date-blocks', component: ProgramDateBlocks, marker: false, notes: true, venues: true },
   { key: 'photo-cards', component: ProgramPhotoCards, marker: false, notes: true, venues: true },
-  { key: 'tab-cards', component: ProgramTabCards, marker: false, notes: true, venues: true },
 ]
 
 const definitionOf = (key: string) => getSectionLayout('program', key)!
 
-const mountLayout = (key: string, props: { content?: ProgramContent, background?: SectionBackground, options?: Record<string, string> } = {}) => {
+// The program is the event's (the occasion's), the rest the section's
+const mountLayout = (key: string, props: { content?: ProgramContent, program?: SectionProgram, background?: SectionBackground, options?: Record<string, string> } = {}) => {
   const definition = definitionOf(key)
   const component = layouts.find(layout => layout.key === key)!.component
   return mountSuspended(component, {
@@ -67,7 +67,7 @@ const mountLayout = (key: string, props: { content?: ProgramContent, background?
       content: props.content ?? content,
       background: props.background ?? definition.backgrounds[0]!,
       options: resolveLayoutOptions(definition.options, props.options),
-      occasion,
+      occasion: { ...event, program: props.program ?? { items } },
     },
   })
 }
@@ -91,12 +91,12 @@ it('registers the program layouts in picker order, each with a time option; only
   expect(registered.every(layout => layout.options.find(option => option.key === 'showTime')!.default === 'show')).toBe(true)
 })
 
-it('starts the bold poster on primary and the paper layouts on accent', () => {
+it('starts the bold poster on primary and the paper layouts on secondary', () => {
   for (const key of ['poster', 'photo-cards'])
     expect(definitionOf(key).backgrounds[0], key).toBe('primary')
   for (const key of ['printed', 'menu-card', 'tickets', 'note'])
-    expect(definitionOf(key).backgrounds[0], key).toBe('accent')
-  for (const key of ['timeline', 'list', 'cards', 'big-times', 'horizontal', 'agenda', 'table', 'vertical', 'date-blocks', 'tab-cards'])
+    expect(definitionOf(key).backgrounds[0], key).toBe('secondary')
+  for (const key of ['timeline', 'list', 'cards', 'big-times', 'horizontal', 'agenda', 'table', 'vertical', 'date-blocks'])
     expect(definitionOf(key).backgrounds[0], key).toBe('light')
 })
 
@@ -139,7 +139,7 @@ describe.each(layouts)('program layout $key', ({ key, marker, notes, venues }) =
   })
 
   it('shows the date when everything is on one day', async () => {
-    const wrapper = await mountLayout(key, { content: { ...content, items: items.slice(0, 2) } })
+    const wrapper = await mountLayout(key, { program: { items: items.slice(0, 2) } })
 
     // The agenda has no tabs for one day; each row's date badge shows it
     if (key === 'agenda') {
@@ -154,7 +154,7 @@ describe.each(layouts)('program layout $key', ({ key, marker, notes, venues }) =
   it('shows the overall venue under the heading, behind a map pin, only when there is one', async () => {
     expect((await mountLayout(key)).find('[data-program-overall-venue]').exists()).toBe(false)
 
-    const venue = (await mountLayout(key, { content: { ...content, venue: 'Manila Cathedral' } })).find('[data-program-heading] [data-program-overall-venue]')
+    const venue = (await mountLayout(key, { program: { venue: 'Manila Cathedral', items } })).find('[data-program-heading] [data-program-overall-venue]')
     expect(venue.text()).toBe('Venue: Manila Cathedral')
     expect(venue.find('svg').classes()).toContain('lucide-map-pin')
   })
@@ -173,7 +173,7 @@ describe.each(layouts)('program layout $key', ({ key, marker, notes, venues }) =
   })
 
   it('shows only the heading without items, and leaves out a missing eyebrow', async () => {
-    const wrapper = await mountLayout(key, { content: { heading: 'Program', items: [], layoutPhotos: [] } })
+    const wrapper = await mountLayout(key, { content: { heading: 'Program', venuesHeading: 'Getting there', layoutPhotos: [] }, program: { items: [] } })
 
     expect(wrapper.find('h2').text()).toBe('Program')
     expect(wrapper.find('[data-program-items]').exists()).toBe(false)
@@ -182,7 +182,7 @@ describe.each(layouts)('program layout $key', ({ key, marker, notes, venues }) =
 })
 
 describe('program colours', () => {
-  it.each(['light', 'primary', 'accent', 'photo'] as const)('uses the brand text colour for titles and the label colour for times on %s', async (background) => {
+  it.each(['light', 'primary', 'secondary', 'photo'] as const)('uses the brand text colour for titles and the label colour for times on %s', async (background) => {
     const wrapper = await mountLayout('timeline', { background })
     const styles = backgroundStyles[background]
 
@@ -207,6 +207,115 @@ describe('layout options', () => {
     expect(await classesOf('timeline', '[data-program-item]', { timeColumn: 'right' })).toContain('flex-row-reverse')
   })
 
+  it.each([
+    ['start', 'items-start'],
+    ['center', 'items-center'],
+    ['end', 'items-end'],
+  ])('timeline: puts the program\'s and the venues\' titles %s', async (titleAlign, alignClass) => {
+    const wrapper = await mountLayout('timeline', { options: { titleAlign }, program: { items, venues: [{ id: 'v1', name: 'Manila Cathedral', address: 'Cabildo St' }] } })
+
+    expect(wrapper.find('[data-program-heading]').classes()).toContain(alignClass)
+    expect(wrapper.find('[data-program-venues-heading]').classes()).toContain(alignClass)
+  })
+
+  it('timeline, list, big times and printed: rule off the venues in the day dividers\' label colour; the table (ending on its own line) not at all; the vertical title in the text colour', async () => {
+    const program = { items, venues: [{ id: 'v1', name: 'Manila Cathedral', address: 'Cabildo St' }] }
+    const timeline = await mountLayout('timeline', { background: 'primary', program })
+    const list = await mountLayout('list', { background: 'primary', program })
+    const table = await mountLayout('table', { background: 'primary', program })
+    const bigTimes = await mountLayout('big-times', { background: 'primary', program })
+    const vertical = await mountLayout('vertical', { background: 'primary', program })
+
+    for (const wrapper of [timeline, list, bigTimes]) {
+      expect(wrapper.find('[data-venues-rule]').classes()).toEqual(expect.arrayContaining(['bg-current/30', backgroundStyles.primary.eyebrow]))
+      expect(wrapper.find('[data-program-day]').classes()).toContain(backgroundStyles.primary.eyebrow)
+    }
+    expect(table.find('[data-venues-rule]').exists()).toBe(false)
+
+    // The printed programme rules its plain venues off the same way, between the program and the venues
+    const printed = await mountLayout('printed', { background: 'primary', program })
+    const html = printed.html()
+    expect(printed.find('[data-venues-rule]').classes()).toEqual(expect.arrayContaining(['bg-current/30', backgroundStyles.primary.eyebrow]))
+    expect(html.indexOf('data-venues-rule')).toBeGreaterThan(html.lastIndexOf('data-program-item'))
+    expect(html.indexOf('data-venues-rule')).toBeLessThan(html.indexOf('data-program-venues'))
+    expect((await mountLayout('printed', { program: { items, venues: [] } })).find('[data-venues-rule]').exists()).toBe(false)
+    expect(table.find('[data-program-venues] .border-t').exists()).toBe(false)
+    expect(vertical.find('[data-program-venues] .border-t').classes()).toContain('border-current/15')
+  })
+
+  // Each layout with the option, and where it put the titles before the option existed (its default)
+  const titleDefaults: [string, 'start' | 'center'][] = [
+    ['timeline', 'center'],
+    ['list', 'center'],
+    ['table', 'start'],
+    ['cards', 'center'],
+    ['big-times', 'start'],
+    ['horizontal', 'center'],
+    ['poster', 'start'],
+    ['agenda', 'start'],
+    ['menu-card', 'center'],
+    ['tickets', 'center'],
+    ['note', 'center'],
+    ['date-blocks', 'start'],
+  ]
+  const withVenue = { items, venues: [{ id: 'v1', name: 'Manila Cathedral', address: 'Cabildo St' }] }
+
+  it.each(titleDefaults)('%s: offers the titles left, centred or right, first among its options, %s by default', async (key, initial) => {
+    const option = definitionOf(key).options[0]!
+    expect(option.key).toBe('titleAlign')
+    expect(option.choices.map(choice => choice.value)).toEqual(['start', 'center', 'end'])
+    expect(option.default).toBe(initial)
+
+    const wrapper = await mountLayout(key, { program: withVenue })
+    expect(wrapper.find('[data-program-heading]').classes()).toContain(`items-${initial}`)
+  })
+
+  it.each(titleDefaults.flatMap(([key]) => (['start', 'center', 'end'] as const).map(align => [key, align] as const)))('%s: puts the program\'s and the venues\' titles %s', async (key, titleAlign) => {
+    const wrapper = await mountLayout(key, { options: { titleAlign }, program: withVenue })
+
+    expect(wrapper.find('[data-program-heading]').classes()).toContain(`items-${titleAlign}`)
+    expect(wrapper.find('[data-program-venues-heading]').classes()).toContain(`items-${titleAlign}`)
+  })
+
+  it('date blocks: keeps the month badge beside the heading on the left, under it centred, across from it on the right', async () => {
+    const header = async (titleAlign: string) => (await mountLayout('date-blocks', { options: { titleAlign } })).find('[data-program-month]').element.parentElement!.classList
+    expect(await header('start')).toContain('justify-between')
+    expect(await header('center')).toContain('flex-col')
+    expect(await header('end')).toContain('flex-row-reverse')
+  })
+
+  it('vertical title: sets the heading sideways by default, or across the top left, centred or right', async () => {
+    const option = definitionOf('vertical').options[0]!
+    expect(option.choices.map(choice => [choice.value, choice.label])).toEqual([['vertical', 'Vertical left'], ['start', 'Left'], ['center', 'Center'], ['end', 'Right']])
+    expect(option.default).toBe('vertical')
+
+    const sideways = await mountLayout('vertical', { program: withVenue })
+    expect(sideways.find('[data-program-vertical-heading]').text()).toBe('Program')
+    expect(sideways.find('[data-program-venues-heading]').classes()).toContain('items-start')
+
+    const centred = await mountLayout('vertical', { options: { titleAlign: 'center' }, program: withVenue })
+    expect(centred.find('[data-program-vertical-heading]').exists()).toBe(false)
+    expect(centred.find('[data-program-heading] h2').text()).toBe('Program')
+    expect(centred.find('[data-program-heading]').classes()).toContain('items-center')
+    expect(centred.find('[data-program-venues-heading]').classes()).toContain('items-center')
+    // The eyebrow shows once, in the heading across the top
+    expect(centred.findAll('[data-program-heading]')).toHaveLength(1)
+  })
+
+  it('photo cards: puts the venues\' titles on the left, like the program\'s', async () => {
+    const wrapper = await mountLayout('photo-cards', { program: withVenue })
+
+    expect(wrapper.find('[data-program-heading]').classes()).toContain('items-start')
+    expect(wrapper.find('[data-program-venues-heading]').classes()).toContain('items-start')
+  })
+
+  it('timeline: centres the titles by default', async () => {
+    const wrapper = await mountLayout('timeline', { program: { items, venues: [{ id: 'v1', name: 'Manila Cathedral', address: 'Cabildo St' }] } })
+
+    expect(wrapper.find('[data-program-heading]').classes()).toContain('items-center')
+    expect(wrapper.find('[data-program-venues-heading]').classes()).toContain('items-center')
+  })
+
   it('timeline: shows the speakers after the venue, as "with" and the names in the label colour', async () => {
     const wrapper = await mountLayout('timeline', { background: 'primary' })
     const speakers = wrapper.find('[data-program-speakers]')
@@ -229,11 +338,29 @@ describe('layout options', () => {
     expect(details.classes()).toContain('@2xl:items-end')
   })
 
-  it('list: draws a line under each item, except a day\'s last when another day follows', async () => {
+  it('list: puts the titles on the right when no item has a venue, speakers or a note', async () => {
+    const titleOf = async (list: ProgramItem[]) => (await mountLayout('list', { program: { items: list } })).find('[data-program-item] h3').classes()
+
+    expect(await titleOf(items)).not.toContain('text-end')
+    const plain = items.map(({ venue: _venue, speakers: _speakers, description: _description, ...item }) => item)
+    expect(await titleOf(plain)).toEqual(expect.arrayContaining(['ms-auto', 'text-end']))
+    // One item with a detail keeps every title on the left
+    expect(await titleOf([...plain, { ...plain[0]!, id: 'd', description: 'A note' }])).not.toContain('text-end')
+  })
+
+  it('list: keeps each date close to its items and leaves a wide gap before the next day', async () => {
+    const wrapper = await mountLayout('list')
+    const divider = wrapper.find('[data-program-day]')
+
+    expect(divider.classes()).not.toContain('mb-4')
+    expect(divider.element.parentElement!.parentElement!.classList).toContain('gap-6')
+  })
+
+  it('list: draws a line under each item, except a day\'s last', async () => {
     const lines = (await mountLayout('list')).findAll('[data-program-item]').map(item => item.classes().includes('border-b'))
 
     // Ceremony, Cocktails (last of the event day, then the next day's divider), After-party (last of all)
-    expect(lines).toEqual([true, false, true])
+    expect(lines).toEqual([true, false, false])
   })
 
   it('printed: shows the venue, then who leads it in italics, then the note, under the title', async () => {
@@ -266,9 +393,16 @@ describe('layout options', () => {
     expect(inOrder(item.text(), ['Manila Cathedral', 'with', 'Fr. Jose Cruz', 'Please be seated by 2:45.'])).toBe(true)
   })
 
+  it('big times: centres the title, venue, speakers and note on the time', async () => {
+    const item = (await mountLayout('big-times')).find('[data-program-item]')
+
+    expect(item.classes()).toContain('items-center')
+    expect(item.find('[data-program-text]').classes()).not.toContain('pt-1')
+  })
+
   it('big times: draws a line under each item except those in a day\'s last row', async () => {
     const linesOf = async (columns: string, list: ProgramItem[]) =>
-      (await mountLayout('big-times', { options: { columns }, content: { ...content, items: list } }))
+      (await mountLayout('big-times', { options: { columns }, program: { items: list } }))
         .findAll('[data-program-item]')
         .map(item => item.classes().includes('border-b') ? (item.classes().includes('@3xl:border-b-0') ? 'phone only' : 'line') : 'none')
     const sameDay = [...items.slice(0, 2), { ...items[1]!, id: 'd', title: 'Dinner' }, { ...items[1]!, id: 'e', title: 'Dance' }]
@@ -346,7 +480,7 @@ describe('layout options', () => {
     const withVenues = await mountLayout('table')
     expect(withVenues.findAll('th').map(th => th.text())).toContain('Venue')
 
-    const withoutVenues = await mountLayout('table', { content: { ...content, items: items.map(({ venue: _, ...item }) => item) } })
+    const withoutVenues = await mountLayout('table', { program: { items: items.map(({ venue: _, ...item }) => item) } })
     expect(withoutVenues.findAll('th').map(th => th.text())).not.toContain('Venue')
   })
 
@@ -372,11 +506,11 @@ describe('layout options', () => {
     expect(dots.findAll('[data-program-marker-dot]')).toHaveLength(3)
     expect(dots.find('[data-program-marker-icon]').exists()).toBe(false)
 
-    const hearts = await mountLayout('horizontal', { background: 'accent', options: { marker: 'heart' } })
+    const hearts = await mountLayout('horizontal', { background: 'secondary', options: { marker: 'heart' } })
     const icons = hearts.findAll('[data-program-marker-icon]')
     expect(icons).toHaveLength(3)
     expect(icons[0]!.find('svg').classes()).toContain('lucide-heart')
-    expect(icons[0]!.classes()).toEqual(expect.arrayContaining(backgroundStyles.accent.avatar.split(' ')))
+    expect(icons[0]!.classes()).toEqual(expect.arrayContaining(backgroundStyles.secondary.avatar.split(' ')))
     expect(hearts.find('[data-program-marker-dot]').exists()).toBe(false)
   })
 
@@ -425,15 +559,12 @@ describe('layout options', () => {
     expect(wrapper.text()).toContain('After-party')
     expect(wrapper.text()).not.toContain('Ceremony')
     expect(wrapper.find('[data-program-date]').text()).toBe('15Feb')
-
-    const hidden = await mountLayout('agenda', { options: { showSpeaker: 'hide' } })
-    expect(hidden.find('[data-program-speakers]').exists()).toBe(false)
   })
 
   it('agenda: joins several speakers with commas and an ampersand', async () => {
-    const two = await mountLayout('agenda', { content: { ...content, items: [{ ...items[0]!, speakers: 'Migs Cruz, Tita Lorna' }] } })
+    const two = await mountLayout('agenda', { program: { items: [{ ...items[0]!, speakers: 'Migs Cruz, Tita Lorna' }] } })
     expect(two.find('[data-program-speakers]').text()).toBe('With: Migs Cruz & Tita Lorna')
-    const three = await mountLayout('agenda', { content: { ...content, items: [{ ...items[0]!, speakers: 'Ana Lim, Paolo Tan, Rina Cruz' }] } })
+    const three = await mountLayout('agenda', { program: { items: [{ ...items[0]!, speakers: 'Ana Lim, Paolo Tan, Rina Cruz' }] } })
     expect(three.find('[data-program-speakers]').text()).toBe('With: Ana Lim, Paolo Tan & Rina Cruz')
   })
 
@@ -453,7 +584,7 @@ describe('layout options', () => {
     // Under a heading per kind of event, None on its own first
     expect(groupedChoices(option.choices).map(group => [group.group, group.choices.length])).toEqual([
       [undefined, 1],
-      ['Any event', 10],
+      ['Any', 10],
       ['Weddings & engagements', 5],
       ['Birthdays & parties', 5],
       ['Business & conferences', 5],
@@ -463,7 +594,7 @@ describe('layout options', () => {
 
   it('note: pins the paper with the button colour by default, or clips it, or neither', async () => {
     const pinned = await mountLayout('note')
-    expect(pinned.find('[data-program-pin]').attributes('style')).toContain('var(--site-button-accent)')
+    expect(pinned.find('[data-program-pin]').attributes('style')).toContain('var(--site-button-secondary)')
     expect(pinned.find('[data-program-clip]').exists()).toBe(false)
 
     const clipped = await mountLayout('note', { options: { attachment: 'clip' } })
@@ -478,7 +609,8 @@ describe('layout options', () => {
     const wrapper = await mountLayout('note', { background: 'primary' })
     expect(wrapper.find('[data-program-note]').classes()).toEqual(expect.arrayContaining(backgroundStyles.light.root.split(' ')))
     expect(wrapper.find('[data-program-heading] p').classes()).toContain('[font-style:var(--site-font-heading-italic)]')
-    expect(wrapper.find('h2').classes()).toContain('uppercase')
+    // In capitals through the theme, so a script heading keeps its own case
+    expect(wrapper.find('h2').classes()).toContain('[text-transform:var(--site-font-heading-case)]')
   })
 
   it('note: shows the venue, "with" the speakers and the note beside detailed rows, or on one small line when compact', async () => {
@@ -502,9 +634,9 @@ describe('layout options', () => {
   })
 
   it.each([
-    ['light', ['accent', 'primary']],
-    ['primary', ['accent', 'light']],
-    ['accent', ['primary', 'light']],
+    ['light', ['secondary', 'primary']],
+    ['primary', ['secondary', 'light']],
+    ['secondary', ['primary', 'light']],
   ] as const)('date blocks: on %s, alternate two other colours, with the month in a badge', async (background, colours) => {
     const wrapper = await mountLayout('date-blocks', { background, options: { blockPer: 'day' } })
     const blocks = wrapper.findAll('[data-program-block]')
@@ -517,14 +649,14 @@ describe('layout options', () => {
   it('date blocks: one block per item by default, each with its date, alternating colours', async () => {
     const blocks = (await mountLayout('date-blocks')).findAll('[data-program-block]')
     expect(blocks.map(block => block.find('[data-program-date]').text())).toEqual(['14SunFeb', '14SunFeb', '15MonFeb'])
-    expect(blocks[0]!.classes()).toEqual(expect.arrayContaining(backgroundStyles.accent.root.split(' ')))
+    expect(blocks[0]!.classes()).toEqual(expect.arrayContaining(backgroundStyles.secondary.root.split(' ')))
     expect(blocks[1]!.classes()).toEqual(expect.arrayContaining(backgroundStyles.primary.root.split(' ')))
   })
 
   it('date blocks: shows the venue and "with" the speakers on a line, then the note, with no option to hide notes', async () => {
     const item = (await mountLayout('date-blocks')).find('[data-program-item]')
     expect(inOrder(item.text(), ['Ceremony', 'Manila Cathedral', 'with Fr. Jose Cruz', 'Please be seated by 2:45.'])).toBe(true)
-    expect(definitionOf('date-blocks').options.map(option => option.key)).toEqual(['showTime', 'blockPer'])
+    expect(definitionOf('date-blocks').options.map(option => option.key)).toEqual(['titleAlign', 'showTime', 'blockPer'])
   })
 
   it('photo cards: puts the photo on photoSide and a light card per date with ticked items', async () => {
@@ -559,41 +691,226 @@ describe('layout options', () => {
     expect(option.choices.map(choice => choice.value)).toEqual(['item', 'day'])
     expect(option.default).toBe('item')
   })
+})
 
-  it('tab cards: a notched header in another colour, the short month in the notch', async () => {
-    const wrapper = await mountLayout('tab-cards')
-    expect(wrapper.find('[data-program-heading]').classes()).toEqual(expect.arrayContaining(backgroundStyles.primary.root.split(' ')))
-    expect(wrapper.find('[data-program-band]').attributes('style')).toContain('--card: var(--site-primary)')
-    expect(wrapper.find('[data-program-month]').text()).toBe('Feb 2027')
-    expect((await mountLayout('tab-cards', { background: 'primary' })).find('[data-program-band]').attributes('style')).toContain('--card: var(--site-bg)')
+describe('item notes', () => {
+  // The font size an element gets from its own or its nearest ancestor's size class (phone sizes, before @ variants)
+  const pixels: Record<string, number> = { 'text-[0.7rem]': 11.2, 'text-xs': 12, 'text-sm': 14, 'text-base': 16 }
+  function sizeOf(element: Element | null): number {
+    for (let node = element; node; node = node.parentElement) {
+      const size = [...node.classList].find(name => name in pixels)
+      if (size)
+        return pixels[size]!
+    }
+    return 16
+  }
+
+  it.each(layouts.map(layout => layout.key))('%s sets an item\'s note smaller than its venue', async (key) => {
+    // Each at its own venue (so each item shows it), with a note
+    const withNotes = items.map((item, index) => ({ ...item, venue: `Hall ${index + 1}`, description: 'Please be seated by 2:45.' }))
+    const wrapper = await mountLayout(key, { program: { items: withNotes } })
+    const item = wrapper.findAll('[data-program-item]').find(found => found.find('[data-program-venue]').exists() && found.find('[data-program-description]').exists())
+
+    expect(item, key).toBeDefined()
+    expect(sizeOf(item!.find('[data-program-description]').element)).toBeLessThan(sizeOf(item!.find('[data-program-venue]').element))
+  })
+})
+
+describe('program venues', () => {
+  const venues: ProgramVenue[] = [
+    { id: 'v1', name: 'Manila Cathedral', address: 'Cabildo St, Intramuros', notes: 'Main doors.', photo: 'https://cdn.example/church.jpg', latitude: 14.59, longitude: 120.97, googleMapsUrl: 'https://maps.app.goo.gl/a', appleMapsUrl: 'https://maps.apple/p/b' },
+    { id: 'v2', name: 'The Manila Hotel', address: 'One Rizal Park', latitude: 14.58, longitude: 120.97, googleMapsUrl: 'https://maps.app.goo.gl/c' },
+  ]
+
+  it.each(layouts.map(layout => layout.key))('%s shows the program\'s venues at the bottom, after the items', async (key) => {
+    const wrapper = await mountLayout(key, { program: { items, venues } })
+    const block = wrapper.find('[data-program-venues]')
+
+    expect(block.exists()).toBe(true)
+    expect(block.findAll('[data-venue-name]').map(name => name.text())).toEqual(['Manila Cathedral', 'The Manila Hotel'])
+    expect(block.find('[data-venue-address]').text()).toBe('Cabildo St, Intramuros')
+    expect(block.find('[data-venue-notes]').text()).toBe('Main doors.')
+    // Below the schedule
+    const html = wrapper.html()
+    expect(html.indexOf('data-program-venues')).toBeGreaterThan(html.lastIndexOf('After-party'))
   })
 
-  it('tab cards: a card per item, the date in a pill and the time on the tab, cycling through four colours', async () => {
-    const wrapper = await mountLayout('tab-cards')
-    const cards = wrapper.findAll('[data-program-card]')
-    expect(cards.map(card => card.find('[data-program-date]').text())).toEqual(['14 Feb', '14 Feb', '15 Feb'])
-    expect(cards.map(card => card.find('[data-program-tab]').text())).toEqual(['3:00 PM', '6:00 PM', '12:30 AM'])
-    expect(cards.map(card => card.attributes('style'))).toEqual([
-      expect.stringContaining('--card: var(--site-accent)'),
-      expect.stringContaining('--card: var(--site-primary)'),
-      expect.stringContaining('--card: var(--site-accent-100)'),
+  it.each(layouts.map(layout => layout.key))('%s heads the venues with their eyebrow and heading', async (key) => {
+    const wrapper = await mountLayout(key, {
+      content: { ...content, venuesEyebrow: 'Find us', venuesHeading: 'Where to go' },
+      program: { items, venues },
+    })
+    const block = wrapper.find('[data-program-venues]')
+
+    expect(block.attributes('aria-label')).toBe('Where to go')
+    expect(block.find('[data-venues-eyebrow]').text()).toBe('Find us')
+    expect(block.find('h3[data-venues-heading]').text()).toBe('Where to go')
+  })
+
+  // Font size classes: text-3xl, @2xl:text-4xl, …
+  const sizesOf = (classes: string[]) => classes.filter(name => /^(@\w+:)?text-\d?xl$/.test(name)).sort()
+
+  it.each(layouts.map(layout => layout.key))('%s sets its heading at the usual size, never bold, and the venues heading at the same size', async (key) => {
+    const wrapper = await mountLayout(key, { program: { items, venues } })
+    const venuesHeading = sizesOf(wrapper.find('[data-venues-heading]').classes())
+
+    expect(venuesHeading).not.toEqual([])
+    expect(venuesHeading).toEqual(sizesOf(wrapper.find('h2').classes()))
+    expect(venuesHeading).toEqual(['@2xl:text-4xl', 'text-3xl'])
+    expect(wrapper.find('h2').classes()).not.toContain('font-bold')
+  })
+
+  it.each(layouts.map(layout => layout.key))('%s shows a venue\'s address in the text colour and its notes softer and smaller', async (key) => {
+    const wrapper = await mountLayout(key, { program: { items, venues } })
+    const muted = Object.values(backgroundStyles).map(styles => styles.muted)
+    const isMuted = (classes: string[]) => classes.some(name => muted.includes(name))
+
+    expect(isMuted(wrapper.find('[data-venue-address]').classes())).toBe(false)
+    expect(isMuted(wrapper.find('[data-venue-notes]').classes())).toBe(true)
+    expect(wrapper.find('[data-venue-address]').classes()).toContain('text-sm')
+    expect(wrapper.find('[data-venue-notes]').classes()).toContain('text-xs')
+  })
+
+  it('leaves out the venues\' empty eyebrow and heading', async () => {
+    const onlyHeading = await mountLayout('timeline', { program: { items, venues } })
+    expect(onlyHeading.find('[data-venues-heading]').text()).toBe('Getting there')
+    expect(onlyHeading.find('[data-venues-eyebrow]').exists()).toBe(false)
+
+    const none = await mountLayout('cards', { content: { ...content, venuesHeading: '' }, program: { items, venues } })
+    expect(none.find('[data-program-venues-heading]').exists()).toBe(false)
+    expect(none.find('[data-program-venues]').attributes('aria-label')).toBe('Venues')
+  })
+
+  it.each(layouts.map(layout => layout.key))('%s shows no venue block without venue details', async (key) => {
+    const wrapper = await mountLayout(key, { program: { items, venues: [] } })
+
+    expect(wrapper.find('[data-program-venues]').exists()).toBe(false)
+  })
+
+  it('previews a venue with its photo, else Google Maps at its pin, else a placeholder when another venue has a preview', async () => {
+    const wrapper = await mountLayout('timeline', { program: { items, venues: [...venues, { id: 'v3', name: 'Garden', notes: 'Behind the hall.' }] } })
+    const entries = wrapper.findAll('[data-program-venue-entry]')
+    const previews = entries.map(venue => venue.find('[data-venue-preview]'))
+
+    expect(previews[0]!.find('img').attributes('src')).toBe('https://cdn.example/church.jpg')
+    expect(previews[1]!.find('iframe').attributes('src')).toBe('https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s14.58,120.97!6i17')
+    expect(previews[2]!.exists()).toBe(false)
+    const placeholder = entries[2]!.find('[data-venue-preview-placeholder]')
+    // A pin in a badge over the venue's name, in the section's soft tint (no gradient)
+    expect(placeholder.find('[data-venue-placeholder-name]').text()).toBe('Garden')
+    expect(placeholder.find('svg').exists()).toBe(true)
+    expect(placeholder.classes()).toEqual(expect.arrayContaining(backgroundStyles.light.avatar.split(' ')))
+    expect(placeholder.classes().some(name => name.startsWith('bg-linear'))).toBe(false)
+    // The ones with a preview show no placeholder
+    expect(entries[0]!.find('[data-venue-preview-placeholder]').exists()).toBe(false)
+  })
+
+  it.each(layouts.map(layout => layout.key).filter(key => key !== 'tickets'))('%s gives a venue without a preview a placeholder only when another venue has one', async (key) => {
+    const garden = { id: 'v3', name: 'Garden', notes: 'Behind the hall.' }
+    const mixed = await mountLayout(key, { program: { items, venues: [venues[0]!, garden] } })
+    const noneHave = await mountLayout(key, { program: { items, venues: [garden, { id: 'v4', name: 'Hall', address: 'Rizal Ave' }] } })
+
+    expect(mixed.findAll('[data-program-venue-entry]')[1]!.find('[data-venue-preview-placeholder]').exists()).toBe(true)
+    expect(noneHave.find('[data-venue-preview-placeholder]').exists()).toBe(false)
+  })
+
+  it('tints the placeholder like the surface it sits on (the light card in cards, the section elsewhere), its badge in the other brand colour', async () => {
+    const program = { items, venues: [venues[0]!, { id: 'v3', name: 'Garden', notes: 'Behind the hall.' }] }
+    const cards = await mountLayout('cards', { background: 'secondary', program })
+    const timeline = await mountLayout('timeline', { background: 'secondary', program })
+
+    expect(cards.find('[data-venue-preview-placeholder]').classes()).toEqual(expect.arrayContaining(backgroundStyles.light.avatar.split(' ')))
+    expect(timeline.find('[data-venue-preview-placeholder]').classes()).toEqual(expect.arrayContaining(backgroundStyles.secondary.avatar.split(' ')))
+    // The badge in the other brand colour: the secondary on the primary tint, the primary on the secondary's
+    expect(cards.find('[data-venue-placeholder-badge]').classes()).toContain('text-(--site-secondary-text)')
+    expect(timeline.find('[data-venue-placeholder-badge]').classes()).toContain('text-(--site-primary-text)')
+  })
+
+  it('horizontal shows its venues without a card: the preview as it is, the details under it on the section\'s colours', async () => {
+    const wrapper = await mountLayout('horizontal', { background: 'secondary', program: { items, venues } })
+    const entry = wrapper.find('[data-program-venue-entry]')
+
+    expect(wrapper.find('[data-program-venues]').attributes('data-look')).toBe('open')
+    expect(entry.classes()).not.toEqual(expect.arrayContaining(['shadow-md']))
+    expect(entry.classes()).not.toEqual(expect.arrayContaining(backgroundStyles.light.root.split(' ')))
+    expect(entry.find('[data-venue-name]').classes()).toContain(backgroundStyles.secondary.brandText)
+    // The preview first, then the details
+    expect(entry.element.firstElementChild!.hasAttribute('data-venue-preview')).toBe(true)
+  })
+
+  it('poster sets its venues like its items: the item rule, the name in small bold capitals, the heading in the heading font', async () => {
+    const wrapper = await mountLayout('poster', { program: { items, venues } })
+    const venue = wrapper.find('[data-program-venue-entry]')
+    const itemTitle = wrapper.find('[data-program-item] h3')
+
+    expect(wrapper.find('[data-venues-heading]').classes()).toContain('font-(family-name:--site-font-heading)')
+    expect(venue.find('[data-venue-name]').classes()).toEqual(expect.arrayContaining(itemTitle.classes().filter(name => name !== 'mt-4')))
+    expect(venue.find('span.h-0\\.5').exists()).toBe(true)
+    expect(venue.find('[data-venue-preview]').classes()).not.toContain('border-4')
+  })
+
+  it('agenda boxes its venues like its items: the border, the preview at the top, then the details', async () => {
+    const wrapper = await mountLayout('agenda', { background: 'primary', program: { items, venues } })
+    const venue = wrapper.find('[data-program-venue-entry]')
+    const item = wrapper.find('[data-program-item]')
+
+    expect(wrapper.find('[data-program-venues]').attributes('data-look')).toBe('agenda')
+    expect(venue.classes()).toEqual(expect.arrayContaining(['border', 'border-current/15', 'rounded-(--site-radius)']))
+    expect(item.classes()).toEqual(expect.arrayContaining(['border', 'border-current/15', 'rounded-(--site-radius)']))
+    expect(venue.element.firstElementChild!.hasAttribute('data-venue-preview')).toBe(true)
+    expect(venue.find('[data-venue-name]').classes()).toContain(backgroundStyles.primary.brandText)
+    expect(venue.find('[data-venue-notes]').classes()).toContain('border-dashed')
+  })
+
+  it('date blocks colour their venue cards like the blocks, in turn and without a shadow; the other card layouts stay light with one', async () => {
+    const program = { items, venues }
+    const dateBlocks = await mountLayout('date-blocks', { background: 'light', program })
+    const [first, second] = dateBlocks.findAll('[data-program-venue-entry]')
+    const [secondary, primary] = programBlockColours('light')
+
+    expect(first!.classes()).toEqual(expect.arrayContaining(backgroundStyles[secondary].root.split(' ')))
+    expect(second!.classes()).toEqual(expect.arrayContaining(backgroundStyles[primary].root.split(' ')))
+    expect(first!.classes()).not.toContain('shadow-md')
+    // Text and button in the card's colours
+    expect(second!.find('[data-venue-name]').classes()).toContain(backgroundStyles[primary].brandText)
+    expect(second!.find('[data-venue-map-link]').classes()).toEqual(expect.arrayContaining(backgroundStyles[primary].button.split(' ')))
+
+    const cards = await mountLayout('cards', { background: 'light', program })
+    expect(cards.find('[data-program-venue-entry]').classes()).toEqual(expect.arrayContaining(['shadow-md', ...backgroundStyles.light.root.split(' ')]))
+  })
+
+  it('tickets keep the "Admit" stub for a venue without a preview', async () => {
+    const wrapper = await mountLayout('tickets', { program: { items, venues: [venues[0]!, { id: 'v3', name: 'Garden', notes: 'Behind the hall.' }] } })
+    const garden = wrapper.findAll('[data-program-venue-entry]')[1]!
+
+    expect(garden.text()).toContain('Admit')
+    expect(garden.find('[data-venue-preview-placeholder]').exists()).toBe(false)
+  })
+
+  it('opens the only map link directly, offers a choice with both, and hides "See map" without one', async () => {
+    const wrapper = await mountLayout('cards', { program: { items, venues: [...venues, { id: 'v3', name: 'Garden', notes: 'Behind the hall.' }] } })
+    const [both, google, none] = wrapper.findAll('[data-program-venue-entry]')
+
+    expect(google!.find('a[data-venue-map-link]').attributes()).toMatchObject({ href: 'https://maps.app.goo.gl/c', target: '_blank' })
+    expect(none!.find('[data-venue-map-link]').exists()).toBe(false)
+    const button = both!.find('button[data-venue-map-link]')
+    expect(button.text()).toContain('See map')
+    expect(both!.findAll('[data-venue-map-choice]').map(link => [link.text(), link.attributes('href')])).toEqual([
+      ['Google Maps (opens in a new tab)', 'https://maps.app.goo.gl/a'],
+      ['Apple Maps (opens in a new tab)', 'https://maps.apple/p/b'],
     ])
-    expect(wrapper.findAll('[data-program-day]').map(day => day.text())).toEqual(['Sun, 14 Feb', 'Mon, 15 Feb'])
   })
 
-  it.each([['primary', 'var(--site-primary)'], ['accent', 'var(--site-accent)']] as const)('tab cards: leaves out cards in the section\'s colour on %s', async (background, colour) => {
-    const cards = (await mountLayout('tab-cards', { background })).findAll('[data-program-card]')
-    expect(cards).toHaveLength(3)
-    expect(cards.every(card => !card.attributes('style')!.includes(`--card: ${colour};`))).toBe(true)
+  it('never links a map link that isn\'t a web address', async () => {
+    const wrapper = await mountLayout('list', { program: { items, venues: [{ id: 'v1', name: 'Hall', notes: 'x', googleMapsUrl: 'javascript:alert(1)' }] } })
+
+    expect(wrapper.find('[data-venue-map-link]').exists()).toBe(false)
   })
 
-  it('tab cards: shows the speakers and the note as a tag line, then the venue behind a pin, and sets the columns', async () => {
-    const item = (await mountLayout('tab-cards')).find('[data-program-item]')
-    expect(inOrder(item.text(), ['Ceremony', 'Fr. Jose Cruz', '·', 'Please be seated by 2:45.', 'Manila Cathedral'])).toBe(true)
-    expect(item.find('[data-program-speakers]').text()).toBe('Fr. Jose Cruz')
-    expect(item.find('[data-program-venue] svg').classes()).toContain('lucide-map-pin')
+  it('puts the pinned note\'s venues on another note', async () => {
+    const wrapper = await mountLayout('note', { program: { items, venues } })
 
-    expect(await classesOf('tab-cards', '[data-program-items]', { columns: '2' })).toContain('@2xl:grid-cols-2')
-    expect(await classesOf('tab-cards', '[data-program-items]', { columns: '1' })).not.toContain('@2xl:grid-cols-2')
+    expect(wrapper.find('[data-program-note] [data-program-venues]').exists()).toBe(false)
+    expect(wrapper.find('[data-program-venues-note] [data-program-venues]').exists()).toBe(true)
   })
 })

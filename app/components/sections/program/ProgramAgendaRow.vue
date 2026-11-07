@@ -12,12 +12,11 @@ const props = defineProps<{
   date: string
   styles: BackgroundStyles
   timed: boolean
-  speakers: boolean
 }>()
 
 const badge = computed(() => programDateBadge(props.date))
 // "Ana Lim", "Ana Lim & Paolo Tan", "Ana Lim, Paolo Tan & Rina Cruz"
-const namesText = computed(() => props.speakers ? joinProgramSpeakers(props.item.speakers) : '')
+const namesText = computed(() => joinProgramSpeakers(props.item.speakers))
 const time = computed(() => props.timed ? formatProgramTimeRange(props.item) : '')
 </script>
 
@@ -45,11 +44,11 @@ const time = computed(() => props.timed ? formatProgramTimeRange(props.item) : '
         class="mt-3 flex flex-col gap-2 text-sm @2xl:flex-row @2xl:flex-wrap @2xl:items-center @2xl:gap-x-8"
       >
         <p v-if="item.venue" data-program-venue class="flex items-center gap-2">
-          <MapPin aria-hidden="true" class="size-4 shrink-0" :class="styles.eyebrow" />
+          <MapPin aria-hidden="true" class="size-4 shrink-0" :class="styles.accent" />
           <span><span class="sr-only">Venue: </span>{{ item.venue }}</span>
         </p>
         <p v-if="namesText" data-program-speakers class="flex items-center gap-2">
-          <UserRound aria-hidden="true" class="size-4 shrink-0" :class="styles.eyebrow" />
+          <UserRound aria-hidden="true" class="size-4 shrink-0" :class="styles.accent" />
           <span><span class="sr-only">With: </span>{{ namesText }}</span>
         </p>
       </div>
@@ -57,7 +56,7 @@ const time = computed(() => props.timed ? formatProgramTimeRange(props.item) : '
       <p
         v-if="item.description"
         data-program-description
-        class="mt-4 border-t border-dashed border-current/20 pt-4 text-sm"
+        class="mt-4 border-t border-dashed border-current/20 pt-4 text-xs"
         :class="styles.muted"
       >
         {{ item.description }}

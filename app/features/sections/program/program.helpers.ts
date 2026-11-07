@@ -1,5 +1,5 @@
-import type { SectionBackground, SectionOccasion } from '../section.type'
-import type { ProgramItem } from './program.type'
+import type { OccasionTime, SectionBackground } from '../section.type'
+import type { ProgramItem, ProgramVenue } from './program.type'
 
 // Times, days and numbering for the program layouts, and what the editor offers.
 
@@ -72,7 +72,7 @@ export function romanNumeral(value: number): string {
 }
 
 /** The occasion's calendar date in its timezone, "2027-02-14". */
-export function occasionDate(occasion: SectionOccasion): string {
+export function occasionDate(occasion: OccasionTime): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: occasion.timezone, year: 'numeric', month: '2-digit', day: '2-digit' })
     .format(new Date(occasion.startsAt))
 }
@@ -117,14 +117,14 @@ export function programMonthLabel(dates: string[], style: 'long' | 'short' = 'lo
 }
 
 /**
- * The two colours the date-led layouts (date blocks, tab cards) alternate between, chosen so neither is the
- * section's own: the accent and the primary on light, the accent and light on primary (and photo), the primary and
- * light on accent. Pass the resolved background (`resolveBackground`).
+ * The two colours the date blocks alternate between, chosen so neither is the
+ * section's own: the secondary and the primary on light, the secondary and light on primary (and photo), the primary and
+ * light on secondary. Pass the resolved background (`resolveBackground`).
  */
 export function programBlockColours(background: SectionBackground): [SectionBackground, SectionBackground] {
-  if (background === 'accent')
+  if (background === 'secondary')
     return ['primary', 'light']
-  return background === 'light' ? ['accent', 'primary'] : ['accent', 'light']
+  return background === 'light' ? ['secondary', 'primary'] : ['secondary', 'light']
 }
 
 export interface ProgramDay {
@@ -136,14 +136,13 @@ export interface ProgramDay {
 }
 
 /**
- * The items grouped into days, in the host's order: a new day starts wherever the date changes. Items without a date
- * belong to the event's day. Layouts show each day's date before its items.
+ * The items grouped into days, in the host's order: a new day starts wherever the date changes. Layouts show each day's
+ * date before its items.
  */
-export function programDays(items: ProgramItem[], occasion: SectionOccasion, style: 'short' | 'long' = 'short'): ProgramDay[] {
-  const eventDate = occasionDate(occasion)
+export function programDays(items: ProgramItem[], style: 'short' | 'long' = 'short'): ProgramDay[] {
   const days: ProgramDay[] = []
   items.forEach((item, index) => {
-    const date = item.date || eventDate
+    const date = item.date
     const last = days.at(-1)
     if (last?.date === date) {
       last.items.push({ item, index })
@@ -166,7 +165,7 @@ export interface ProgramBlock {
 }
 
 /**
- * The blocks of the date-led layouts (date blocks, photo cards, tab cards): one per item (`perItem`, each showing its
+ * The blocks of the date-led layouts (date blocks, photo cards): one per item (`perItem`, each showing its
  * date), or one per day with that day's items.
  */
 export function programBlocks(days: ProgramDay[], perItem: boolean): ProgramBlock[] {
@@ -176,9 +175,10 @@ export function programBlocks(days: ProgramDay[], perItem: boolean): ProgramBloc
 }
 
 /** The days an item can be on: from the event's first to its last day, and the day after (an after-party). */
-export function programDayChoices(startsAt: string, endsAt: string, timezone: string): { value: string, label: string }[] {
+export function programDayChoices(startsAt: string, endsAt: string | null, timezone: string): { value: string, label: string }[] {
   const first = occasionDate({ startsAt, timezone })
-  const last = occasionDate({ startsAt: endsAt, timezone })
+  // Without a set end, the event is one day
+  const last = occasionDate({ startsAt: endsAt ?? startsAt, timezone })
   const choices: { value: string, label: string }[] = []
   for (let date = first, day = 0; date <= addDays(last, 1) && day < 31; date = addDays(date, 1), day++) {
     const formatted = formatProgramDate(date)
@@ -187,12 +187,9 @@ export function programDayChoices(startsAt: string, endsAt: string, timezone: st
   return choices
 }
 
-/**
- * The sample program a new section starts with. Without a date (the registry's default content) every item is on the
- * event's day; with the event's date the after-party moves to the next day.
- */
-export function sampleProgramItems(eventDate = ''): ProgramItem[] {
-  const next = eventDate ? addDays(eventDate, 1) : ''
+/** The sample program, for previews without an event (`sampleOccasion`): on the given day, the after-party the next. */
+export function sampleProgramItems(eventDate: string): ProgramItem[] {
+  const next = addDays(eventDate, 1)
   return [
     { id: 'sample-1', date: eventDate, startTime: '15:00', endTime: '16:00', title: 'Ceremony', venue: 'Manila Cathedral', description: 'Please be seated by 2:45.' },
     { id: 'sample-2', date: eventDate, startTime: '18:00', endTime: '19:00', title: 'Cocktails', venue: 'The Manila Hotel', description: 'Drinks and canapés by the pool.' },
@@ -200,5 +197,62 @@ export function sampleProgramItems(eventDate = ''): ProgramItem[] {
     { id: 'sample-4', date: eventDate, startTime: '20:30', title: 'First dance', venue: 'Grand Ballroom' },
     { id: 'sample-5', date: eventDate, startTime: '21:00', endTime: '00:00', title: 'Party', venue: 'Grand Ballroom', description: 'Dance the night away.' },
     { id: 'sample-6', date: next, startTime: '00:30', title: 'After-party', venue: 'Poolside Bar', description: 'For the night owls.' },
+  ]
+}
+
+/* Venues: their details at the bottom of the program layouts */
+
+/**
+ * Google Maps at the pin, as a venue's map preview (the editor's too): the keyless embed (`google.com/maps/embed`,
+ * what `maps?q=…&output=embed` redirects to), whichever link the pin came from, since Apple Maps can't be shown in a
+ * frame without MapKit JS.
+ */
+export function venueMapEmbedUrl(latitude: number, longitude: number, zoom = 17): string {
+  return `https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s${latitude},${longitude}!6i${zoom}`
+}
+
+/** A venue's preview: its photo, else the map at its pin, else none. */
+export function venuePreview(venue: ProgramVenue): { photo: string } | { map: string } | null {
+  if (venue.photo)
+    return { photo: venue.photo }
+  if ((venue.googleMapsUrl || venue.appleMapsUrl) && venue.latitude != null && venue.longitude != null)
+    return { map: venueMapEmbedUrl(venue.latitude, venue.longitude) }
+  return null
+}
+
+/** The map links guests can open ("See map"): Google Maps' and Apple Maps', the ones the host gave. */
+export function venueMapLinks(venue: ProgramVenue): { label: string, href: string }[] {
+  return [
+    ...(venue.googleMapsUrl ? [{ label: 'Google Maps', href: venue.googleMapsUrl }] : []),
+    ...(venue.appleMapsUrl ? [{ label: 'Apple Maps', href: venue.appleMapsUrl }] : []),
+  ]
+}
+
+/** Whether a venue has anything to show besides its name (only those are listed). */
+export const hasVenueDetails = (venue: Omit<ProgramVenue, 'id' | 'name'>) =>
+  Boolean(venue.address || venue.notes || venue.photo || venue.googleMapsUrl || venue.appleMapsUrl)
+
+/** The sample program's venues with details (`sampleOccasion`, thumbnails): the church and the hotel. */
+export function sampleProgramVenues(): ProgramVenue[] {
+  return [
+    {
+      id: 'sample-venue-1',
+      name: 'Manila Cathedral',
+      address: 'Cabildo St, Intramuros, Manila',
+      notes: 'Enter through the main doors on Plaza Roma. Limited parking at the plaza; please arrive by 2:30.',
+      latitude: 14.591534,
+      longitude: 120.973601,
+      googleMapsUrl: 'https://maps.app.goo.gl/manila-cathedral',
+    },
+    {
+      id: 'sample-venue-2',
+      name: 'The Manila Hotel',
+      address: 'One Rizal Park, Ermita, Manila',
+      notes: 'Grand Ballroom, ground floor. Free valet at the main lobby.',
+      latitude: 14.583228,
+      longitude: 120.97398,
+      googleMapsUrl: 'https://maps.app.goo.gl/manila-hotel',
+      appleMapsUrl: 'https://maps.apple.com/?q=The%20Manila%20Hotel&ll=14.583228,120.97398',
+    },
   ]
 }

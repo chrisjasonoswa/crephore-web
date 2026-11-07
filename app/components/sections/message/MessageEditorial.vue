@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -7,7 +8,7 @@ import MessageBody from './MessageBody.vue'
 
 // Layout `editorial`: a big heading on the left and the message and signature on the right, with a wide photo below
 // or above them (`photoPosition`). On phones everything stacks.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoPosition'>>>()
 
 const photoAbove = computed(() => props.options.photoPosition === 'above')
 </script>

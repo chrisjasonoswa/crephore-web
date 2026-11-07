@@ -1,13 +1,5 @@
 import type { PersonItem } from './people.type'
 
-// What each people layout shows, so the editor only offers the fields the layout uses.
-
-// Names only (`entourage`) or text only (`credits`)
-export const peopleLayoutShowsPhotos = (layoutKey: string) => !['entourage', 'credits'].includes(layoutKey)
-
-// Only the layouts with room for it
-export const peopleLayoutShowsBio = (layoutKey: string) => ['cards', 'spotlight'].includes(layoutKey)
-
 // Enough for a full entourage with sponsors; more would make the page very long
 export const peopleMaxItems = 60
 

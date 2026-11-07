@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import PeopleHeading from './PeopleHeading.vue'
@@ -7,7 +8,7 @@ import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `directory`: compact rows of a small round photo, the name and role, divided by thin lines, in one or two
 // `columns` (one on phones). For committees, staff or long lists with photos.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'columns'>>>()
 
 const twoColumns = computed(() => props.options.columns === '2')
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionScrollHint from '~/components/sections/SectionScrollHint.vue'
@@ -13,9 +13,9 @@ import AboutText from './AboutText.vue'
 // string, its eyebrow, heading and text (when it has any) as the caption. The row scrolls
 // sideways on every screen: guests swipe (touch, trackpad) or drag it with the mouse. Prints that all fit stay centred.
 // The white prints are part of the look, not a theme colour; their captions use the light text colours.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'textAlign'>>>()
 
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 // The captions sit on the white print, whatever the background
 const captionStyles = backgroundStyles.light
 // Tilted like prints pinned by hand; the gap between them (gap-12) leaves room for the tilted corners
@@ -30,7 +30,7 @@ const { canScroll, thumb, isDragging, startDrag, drag, endDrag, ignoreClickAfter
     <AboutText :content="content" :styles="styles" :align="align" class="mx-auto max-w-6xl" :class="align === 'center' && 'max-w-2xl'" />
     <div v-if="content.timeline.length" class="relative mx-auto mt-10 max-w-6xl">
       <!-- One string across the whole row, behind the prints and past the first and last; it stays put while they scroll
-           along it. It and the pins use the background's button colour (the other brand colour, e.g. the accent on the
+           along it. It and the pins use the background's button colour (the other brand colour, e.g. the secondary on the
            primary), so they stand out on the background and on the white prints. -->
       <span aria-hidden="true" data-about-string class="absolute inset-x-0 top-5 h-0.5 rounded-full" :style="{ backgroundColor: `var(--site-button-${shown})` }" />
       <!-- Padding below and around leaves room for the tilted prints' corners and shadows, which a scrolling row clips -->

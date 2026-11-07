@@ -1,15 +1,16 @@
 import type { ApiPaginatedRequest } from '~/types/api'
 
-// Mirrors crephore-backend Features/Events (enum serialized as its name).
+// Mirrors crephore-backend Features/Events (enum serialized as its name). In the order hosts pick from: similar types
+// together, by kind of event (site-theme/eventKinds.ts), then Other.
 export const eventTypes = [
   'Wedding',
+  'Engagement',
   'Birthday',
   'Parties',
+  'Conference',
   'Business',
   'CompanyEvents',
   'Memorial',
-  'Engagement',
-  'Conference',
   'Other',
 ] as const
 
@@ -40,19 +41,18 @@ export interface EventGroupSummary {
 export interface Event {
   id: number
   name: string
-  description: string | null
   type: EventType
+  // Its main venue's name (the first in the Venues tab), "" without one; venues are edited there (event-venues)
   venueName: string
-  venueAddress: string
-  // Filled once Google Places is integrated; always null for now.
-  venueLatitude: number | null
-  venueLongitude: number | null
-  venueGooglePlaceId: string | null
   startsAt: string
-  endsAt: string
+  // Null for an event without a set end
+  endsAt: string | null
   // The venue's IANA timezone, e.g. "Asia/Manila". startsAt/endsAt are UTC;
   // always show them in this timezone with CDateTime.
   timezone: string
+  // A memorial's dates of birth and passing ("1948-02-14"); null for other types
+  bornOn: string | null
+  diedOn: string | null
   subdomain: string
   createdAt: string
   // The current user's access and their own group (groups are personal)
@@ -68,21 +68,18 @@ export interface ListEventsRequest extends ApiPaginatedRequest {
 
 export interface CreateEventRequest {
   name: string
-  description: string | null
   type: EventType
-  venueName: string
-  venueAddress: string
-  // Always sent (null until Google Places is integrated).
-  venueLatitude: number | null
-  venueLongitude: number | null
-  venueGooglePlaceId: string | null
-  // Wall-clock times without an offset ("2027-06-12T15:00"), read in `timezone`
+  // Wall-clock times without an offset ("2027-06-12T15:00"), read in `timezone`; the end is optional
   startsAt: string
-  endsAt: string
+  endsAt: string | null
   timezone: string
+  // A memorial's dates of birth and passing ("1948-02-14"); the API saves null for other types
+  bornOn: string | null
+  diedOn: string | null
   subdomain: string
   eventGroupId: number | null
 }
 
-// Same fields as create; replaces them all, including the user's group
-export type UpdateEventRequest = CreateEventRequest
+// Same fields as create without the group: replaces them all and leaves the user's group as it is (events are
+// grouped in the groups panel)
+export type UpdateEventRequest = Omit<CreateEventRequest, 'eventGroupId'>

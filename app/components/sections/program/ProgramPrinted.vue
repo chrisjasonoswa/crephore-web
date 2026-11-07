@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { formatProgramTime, programDays, programSpeakers, romanNumeral, showsTime } from '~/features/sections/program/program.helpers'
 import ProgramDayDivider from './ProgramDayDivider.vue'
 import ProgramHeading from './ProgramHeading.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `printed` ("Printed programme"): centred like a printed wedding programme. Each part has its `numbering`
 // (none, I, II or 1, 2) above the time in small capitals (bold only without a number), the title in the heading font,
 // then where it is (the venue, plain), who leads it (the speakers, in italics) and the note; a `divider` (line, dot or
-// none) between parts.
-const props = defineProps<SectionLayoutProps<'program'>>()
+// none) between parts. A line in the day labels' colour, midway, sets the program apart from its venues.
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'showTime' | 'numbering' | 'divider'>>>()
 
-const days = computed(() => programDays(props.content.items, props.occasion))
+const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
 const numbered = computed(() => props.options.numbering === 'roman' || props.options.numbering === 'numbers')
 
@@ -25,8 +27,8 @@ function numberOf(index: number): string {
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-16 @2xl:px-10 @2xl:py-24">
-    <ProgramHeading :content="content" :styles="styles" />
-    <div v-if="content.items.length" class="mx-auto mt-12 flex max-w-md flex-col gap-10">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-12 flex max-w-md flex-col gap-10">
       <div v-for="day in days" :key="day.date">
         <ProgramDayDivider :label="day.label" :styles="styles" class="mb-10" />
         <ol data-program-items class="flex flex-col items-center text-center">
@@ -60,12 +62,20 @@ function numberOf(index: number): string {
             <p v-if="programSpeakers(item.speakers).length" data-program-speakers class="mt-1 text-sm italic">
               {{ programSpeakers(item.speakers).join(', ') }}
             </p>
-            <p v-if="item.description" data-program-description class="mt-1.5 text-sm" :class="styles.muted">
+            <p v-if="item.description" data-program-description class="mt-1.5 text-xs" :class="styles.muted">
               {{ item.description }}
             </p>
           </li>
         </ol>
       </div>
     </div>
+    <div
+      v-if="occasion.program.items.length && occasion.program.venues?.length"
+      data-venues-rule
+      aria-hidden="true"
+      class="mx-auto mt-12 h-px max-w-md bg-current/30"
+      :class="styles.eyebrow"
+    />
+    <ProgramVenues :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="plain" class="mx-auto mt-12 max-w-md" />
   </SectionFrame>
 </template>

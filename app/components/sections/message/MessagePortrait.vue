@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -7,7 +8,7 @@ import MessageText from './MessageText.vue'
 // Layout `portrait`: the note centred like a letter, with a small round photo on top or beside the signature
 // (`photoPlacement`). The photo is optional here: without one it's a plain letter, not a placeholder.
 // The white ring is part of the photo's look, not a theme colour.
-defineProps<SectionLayoutProps<'message'>>()
+defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoPlacement'>>>()
 </script>
 
 <template>

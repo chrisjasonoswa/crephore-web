@@ -1,22 +1,26 @@
 <script setup lang="ts">
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import { Paperclip } from '@lucide/vue'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { formatProgramTime, joinProgramSpeakers, programDays, showsTime } from '~/features/sections/program/program.helpers'
 import ProgramHeading from './ProgramHeading.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `note` ("Pinned note"): the program on a sheet of paper pinned, clipped or just laid (`attachment`) on the
-// section's background, slightly tilted from 768px. The eyebrow in the heading font's italic over a bold capitals
+// section's background, slightly tilted from 768px. The eyebrow in the heading font's italic over a capitals
 // heading; then rows (`rows`) under dashed rules, each day after its date, written in the heading font's italic with a
 // highlighter stroke behind it (not the shared ruled divider):
 //  - detailed: the time large, the title in small capitals under it; the venue, "with" the speakers and the note on the
 //    right (under the title on phones)
 //  - compact: the time, a dotted rule, the title in capitals, and the venue, speakers and note on one small line
-// The paper has its own surface, so the background photo needs no overlay. Paper on a colour, so it starts on accent.
-const props = defineProps<SectionLayoutProps<'program'>>()
+// The paper has its own surface, so the background photo needs no overlay. Paper on a colour, so it starts on secondary.
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'titleAlign' | 'showTime' | 'attachment' | 'rows'>>>()
+// Where the program's and the venues' eyebrow and heading sit (`titleAlign`)
+const titleAlign = computed(() => props.options.titleAlign)
 
-const days = computed(() => programDays(props.content.items, props.occasion))
+const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
 const compact = computed(() => props.options.rows === 'compact')
 // The paper is always light, whatever the background
@@ -52,13 +56,13 @@ function detailsOf(item: { venue?: string, speakers?: string, description?: stri
         :stroke-width="1.5"
         class="absolute start-6 -top-5 size-12 -rotate-12 text-current/45"
       />
-      <ProgramHeading :content="content" :styles="noteStyles" look="script" />
-      <div v-if="content.items.length" data-program-items class="mt-8 flex flex-col gap-6">
+      <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="noteStyles" look="script" :align="titleAlign" />
+      <div v-if="occasion.program.items.length" data-program-items class="mt-8 flex flex-col gap-6">
         <div v-for="day in days" :key="day.date">
-          <!-- The stroke is the accent, faded, across the lower half of the text, like a highlighter pen -->
+          <!-- The stroke is the secondary, faded, across the lower half of the text, like a highlighter pen -->
           <h3
             data-program-day
-            class="mb-1 w-fit bg-[linear-gradient(transparent_55%,color-mix(in_oklch,var(--site-accent)_45%,transparent)_55%)] px-1 font-(family-name:--site-font-heading) text-lg [font-style:var(--site-font-heading-italic)]"
+            class="mb-1 w-fit bg-[linear-gradient(transparent_55%,color-mix(in_oklch,var(--site-secondary)_45%,transparent)_55%)] px-1 font-(family-name:--site-font-heading) text-lg [font-style:var(--site-font-heading-italic)]"
             :class="noteStyles.brandText"
           >
             {{ day.label }}
@@ -86,7 +90,7 @@ function detailsOf(item: { venue?: string, speakers?: string, description?: stri
                   <span class="font-(family-name:--site-font-heading) [font-style:var(--site-font-heading-italic)]" :class="noteStyles.muted">with</span>
                   {{ joinProgramSpeakers(item.speakers) }}
                 </p>
-                <p v-if="item.description" data-program-description :class="noteStyles.muted">
+                <p v-if="item.description" data-program-description class="text-[0.7rem]" :class="noteStyles.muted">
                   {{ item.description }}
                 </p>
               </div>
@@ -115,6 +119,26 @@ function detailsOf(item: { venue?: string, speakers?: string, description?: stri
           </ol>
         </div>
       </div>
+    </div>
+    <div
+      v-if="occasion.program.venues?.length"
+      data-program-venues-note
+      class="relative mx-auto mt-14 max-w-2xl rounded-xs px-6 pt-12 pb-10 shadow-2xl @2xl:rotate-1 @2xl:px-12 @2xl:pt-14"
+      :class="noteStyles.root"
+    >
+      <span
+        v-if="options.attachment === 'pin'"
+        aria-hidden="true"
+        class="absolute start-1/2 -top-2.5 size-6 -translate-x-1/2 rounded-full shadow-md ring-2 ring-white/50"
+        :style="{ backgroundColor: `var(--site-button-${shown})` }"
+      />
+      <Paperclip
+        v-else-if="options.attachment === 'clip'"
+        aria-hidden="true"
+        :stroke-width="1.5"
+        class="absolute end-6 -top-5 size-12 rotate-12 text-current/45"
+      />
+      <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="noteStyles" look="plain" />
     </div>
   </SectionFrame>
 </template>

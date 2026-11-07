@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
@@ -8,7 +9,7 @@ import PersonPhoto from './PersonPhoto.vue'
 // Layout `polaroids` ("Polaroid wall"): instant photos scattered like a photo wall (tilted unless `tilt` is off), each
 // person's name written on the print. A row that isn't full is centred. The white prints are part of the look, not a
 // theme colour; the names on them use the light background's brand text colour.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'tilt'>>>()
 
 // The names sit on the white print, whatever the background: the light background's brand text colour
 const printStyles = backgroundStyles.light

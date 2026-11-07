@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import AboutHeading from './AboutHeading.vue'
 // Layout `magazine` ("Long read"): like a magazine page. The first photo floats to one side from the top of the story
 // (`photoSide`): the eyebrow and heading sit beside it and the story (with a drop cap) wraps around and under it.
 // The second and third photos follow in a row below.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

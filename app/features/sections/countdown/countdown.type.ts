@@ -1,11 +1,15 @@
 import type { SectionCta } from '../section.cta.type'
 
-// Every countdown layout uses the same fields. The target is the occasion's start (`SectionLayoutProps.occasion`),
-// never stored here, so it follows the event when its date changes. No venue: that lives in the hero.
+// Every field a countdown layout can use (the heading and target come from the event)
+export const countdownFields = ['eyebrow', 'showSeconds', 'cta'] as const
+export type CountdownField = (typeof countdownFields)[number]
+
+// Every countdown layout uses the same fields. The heading and the target are the occasion's name and start
+// (`SectionLayoutProps.occasion`), never stored here, so they follow the event when it changes. No venue: that lives in
+// the hero.
 export interface CountdownContent {
   // Small label, e.g. "Counting down to"
   eyebrow?: string
-  heading?: string
   // Days, hours and minutes, plus seconds when on (the days-only layout ignores it)
   showSeconds: boolean
   // The photo behind the section on the `photo` background (any layout, under an overlay); without it the section

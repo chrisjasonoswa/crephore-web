@@ -16,7 +16,7 @@ export function layout(
 }
 
 // Every layout offers all four backgrounds; most start on a colour, with the background photo last
-export const colours: SectionBackground[] = ['light', 'primary', 'accent']
+export const colours: SectionBackground[] = ['light', 'primary', 'secondary']
 export const onColour: SectionBackground[] = [...colours, 'photo']
-// Paper (a card, a postcard, an instant photo) stands out on a colour, so these start on the accent
-export const onPaper: SectionBackground[] = ['accent', 'light', 'primary', 'photo']
+// Paper (a card, a postcard, an instant photo) stands out on a colour, so these start on the secondary
+export const onPaper: SectionBackground[] = ['secondary', 'light', 'primary', 'photo']

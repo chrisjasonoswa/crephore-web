@@ -1,18 +1,22 @@
 <script setup lang="ts">
+import type { ProgramLayoutOptions } from '~/features/sections/program/program.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { backgroundStyles } from '~/features/sections/section.background'
 import { joinProgramSpeakers, programDays, programMarker, showsTime } from '~/features/sections/program/program.helpers'
 import ProgramHeading from './ProgramHeading.vue'
+import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `tickets`: each item as a light ticket, the time on a stub behind a perforated line with a notch cut at
 // each end of it, and beside it the title, the venue (small spaced capitals), the speakers (a quiet "with …" line, so
 // they don't compete with the venue's capitals) and the note; `columns` a row from 768px. Each day starts with its date
 // on a tag with a dashed, perforated edge, not the shared ruled divider. Without times (`showTime`) the stubs number the items 01, 02, … Paper on
-// a colour, so it starts on accent.
-const props = defineProps<SectionLayoutProps<'program'>>()
+// a colour, so it starts on secondary.
+const props = defineProps<SectionLayoutProps<'program', ProgramLayoutOptions<'titleAlign' | 'showTime' | 'columns'>>>()
+// Where the program's and the venues' eyebrow and heading sit (`titleAlign`)
+const titleAlign = computed(() => props.options.titleAlign)
 
-const days = computed(() => programDays(props.content.items, props.occasion))
+const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
 // The tickets are always light, whatever the background
 const ticketStyles = backgroundStyles.light
@@ -24,8 +28,8 @@ const notchStyle = { maskImage: notches, WebkitMaskImage: notches, maskComposite
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :styles="styles" />
-    <div v-if="content.items.length" class="mx-auto mt-10 flex flex-col gap-10" :class="options.columns === '1' ? 'max-w-2xl' : 'max-w-5xl'">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" :class="options.columns === '1' ? 'max-w-2xl' : 'max-w-5xl'" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex flex-col gap-10" :class="options.columns === '1' ? 'max-w-2xl' : 'max-w-5xl'">
       <div v-for="day in days" :key="day.date">
         <h3
           data-program-day
@@ -50,14 +54,14 @@ const notchStyle = { maskImage: notches, WebkitMaskImage: notches, maskComposite
                 <h3 class="font-(family-name:--site-font-heading) text-xl leading-snug" :class="ticketStyles.brandText">
                   {{ item.title }}
                 </h3>
-                <p v-if="item.venue" data-program-venue class="mt-1 text-xs font-semibold tracking-[0.15em] uppercase" :class="ticketStyles.eyebrow">
+                <p v-if="item.venue" data-program-venue class="mt-1 text-sm font-semibold tracking-[0.15em] uppercase" :class="ticketStyles.eyebrow">
                   {{ item.venue }}
                 </p>
                 <p v-if="joinProgramSpeakers(item.speakers)" data-program-speakers class="mt-1.5 text-sm">
                   <span class="font-(family-name:--site-font-heading) [font-style:var(--site-font-heading-italic)]" :class="ticketStyles.muted">with</span>
                   {{ joinProgramSpeakers(item.speakers) }}
                 </p>
-                <p v-if="item.description" data-program-description class="mt-1.5 text-sm" :class="ticketStyles.muted">
+                <p v-if="item.description" data-program-description class="mt-1.5 text-xs" :class="ticketStyles.muted">
                   {{ item.description }}
                 </p>
               </div>
@@ -66,5 +70,6 @@ const notchStyle = { maskImage: notches, WebkitMaskImage: notches, maskComposite
         </ol>
       </div>
     </div>
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="tickets" class="mx-auto mt-14 max-w-5xl" />
   </SectionFrame>
 </template>

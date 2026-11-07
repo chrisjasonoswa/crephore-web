@@ -3,16 +3,10 @@
 // for weddings and engagements, birthdays and parties, business and conferences, memorials and tributes.
 // Keys are stored on saved sections (layout options), so never rename one.
 
-export type SiteDividerKind = 'any' | 'wedding' | 'party' | 'business' | 'memorial'
+import type { EventKind } from '~/site-theme/eventKinds'
 
-// The heading each kind is listed under in pickers, in catalogue order
-export const siteDividerKindLabels: Record<SiteDividerKind, string> = {
-  any: 'Any event',
-  wedding: 'Weddings & engagements',
-  party: 'Birthdays & parties',
-  business: 'Business & conferences',
-  memorial: 'Memorials & tributes',
-}
+// The kinds of event (site-theme/eventKinds.ts), in catalogue order; their labels head the picker's groups
+export type SiteDividerKind = EventKind
 
 // One shape of a divider: filled, or drawn as a line (`opacity` softens a line, e.g. the thin rules either side)
 export interface SiteDividerShape {

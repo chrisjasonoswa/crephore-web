@@ -2,9 +2,10 @@
 import { Check } from '@lucide/vue'
 
 // Pick one of a few choices, as cards side by side: the chosen one gets a strong border, a bold label and a check
-// badge, so it stands out at a glance. `#swatch` puts something above a choice's label (e.g. a colour).
+// badge, so it stands out at a glance. `#swatch` puts something above a choice's label (e.g. a colour). A label too
+// long for its card wraps onto a second, centred line rather than running past the card's edges.
 defineProps<{
-  choices: { value: T, label: string }[]
+  choices: readonly { value: T, label: string }[]
   // Names the group for screen readers
   label: string
 }>()
@@ -37,7 +38,7 @@ function choose(next: unknown) {
       :key="choice.value"
       :value="choice.value"
       data-choice
-      class="relative h-auto min-h-10 flex-col gap-2 rounded-lg bg-card px-2 py-2.5 text-xs font-normal hover:border-primary/40 hover:bg-card data-[state=on]:border-primary data-[state=on]:bg-card data-[state=on]:font-semibold data-[state=on]:ring-[0.5px] data-[state=on]:ring-primary"
+      class="relative h-auto min-h-10 flex-col gap-2 rounded-lg bg-card px-2 py-2.5 text-center text-xs leading-tight font-normal whitespace-normal hover:border-primary/40 hover:bg-card data-[state=on]:border-primary data-[state=on]:bg-card data-[state=on]:font-semibold data-[state=on]:ring-[0.5px] data-[state=on]:ring-primary"
     >
       <slot name="swatch" :choice="choice" :selected="choice.value === value" />
       {{ choice.label }}

@@ -63,7 +63,7 @@ describe('program helpers', () => {
 
   it('makes a block per item, the first of each day carrying its heading, or a block per day', () => {
     const items = sampleProgramItems('2027-02-14')
-    const days = programDays(items, { startsAt: '2027-02-14T06:00:00Z', timezone: 'Asia/Manila' })
+    const days = programDays(items)
 
     const perItem = programBlocks(days, true)
     expect(perItem.map(block => [block.key, block.date, block.dayNumber, block.firstOfDay, block.items.length])).toEqual([
@@ -78,22 +78,22 @@ describe('program helpers', () => {
   })
 
   it('picks two block colours that differ from the section\'s', () => {
-    expect(programBlockColours('light')).toEqual(['accent', 'primary'])
-    expect(programBlockColours('primary')).toEqual(['accent', 'light'])
-    expect(programBlockColours('photo')).toEqual(['accent', 'light'])
-    expect(programBlockColours('accent')).toEqual(['primary', 'light'])
+    expect(programBlockColours('light')).toEqual(['secondary', 'primary'])
+    expect(programBlockColours('primary')).toEqual(['secondary', 'light'])
+    expect(programBlockColours('photo')).toEqual(['secondary', 'light'])
+    expect(programBlockColours('secondary')).toEqual(['primary', 'light'])
   })
 
-  it('groups items into days where the date changes, in the host\'s order, undated items on the event\'s day', () => {
-    const days = programDays(sampleProgramItems('2027-02-14'), occasion)
+  it('groups items into days where the date changes, in the host\'s order', () => {
+    const days = programDays(sampleProgramItems('2027-02-14'))
     expect(days.map(day => day.label)).toEqual(['Sun, 14 Feb', 'Mon, 15 Feb'])
     expect(days[1]!.items.map(({ item, index }) => [item.title, index])).toEqual([['After-party', 5]])
 
-    expect(programDays(sampleProgramItems(), occasion).map(day => day.date)).toEqual(['2027-02-14'])
     expect(programDays([
       { id: '1', date: '2027-02-16', title: 'A' },
       { id: '2', date: '2027-02-14', title: 'B' },
-    ], occasion).map(day => day.label)).toEqual(['Tue, 16 Feb', 'Sun, 14 Feb'])
+    ]).map(day => day.label)).toEqual(['Tue, 16 Feb', 'Sun, 14 Feb'])
+    expect(programDays([])).toEqual([])
   })
 
   it('offers the event\'s days and the day after', () => {
@@ -103,12 +103,19 @@ describe('program helpers', () => {
     ])
     expect(programDayChoices('2027-02-14T01:00:00Z', '2027-02-16T09:00:00Z', 'Asia/Manila').map(day => day.value))
       .toEqual(['2027-02-14', '2027-02-15', '2027-02-16', '2027-02-17'])
+    // Without a set end, the event's day and the day after
+    expect(programDayChoices('2027-02-14T06:00:00Z', null, 'Asia/Manila').map(day => day.value)).toEqual(['2027-02-14', '2027-02-15'])
   })
 
-  it('starts a new section with the sample program on the event\'s day', () => {
+  it('starts a new section with only its text and photos: the venue and items are the event\'s', () => {
     const section = createDefaultSection('program')
     expect(section.layout).toBe('timeline')
-    expect(section.content.items.map(item => item.title)).toEqual(['Ceremony', 'Cocktails', 'Dinner & toasts', 'First dance', 'Party', 'After-party'])
-    expect(section.content.items.every(item => item.date === '')).toBe(true)
+    expect(section.content).toEqual({ eyebrow: 'The day', heading: 'Program', venuesHeading: 'Getting there', layoutPhotos: [] })
+  })
+
+  it('has a sample program on the given day, the after-party on the next', () => {
+    const items = sampleProgramItems('2027-02-14')
+    expect(items.map(item => item.title)).toEqual(['Ceremony', 'Cocktails', 'Dinner & toasts', 'First dance', 'Party', 'After-party'])
+    expect(items.map(item => item.date)).toEqual([...Array(5).fill('2027-02-14'), '2027-02-15'])
   })
 })

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { personPhotoShapes } from '~/features/sections/people/people.helpers'
@@ -8,9 +9,9 @@ import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `staggered`: tall portraits (`photoShape`) in a row, every other one dropped lower. Two a row on phones, three
 // in between and five from 768px; a row that isn't full is centred.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'photoShape'>>>()
 
-const shape = computed(() => personPhotoShapes[props.options.photoShape as keyof typeof personPhotoShapes])
+const shape = computed(() => personPhotoShapes[props.options.photoShape])
 </script>
 
 <template>

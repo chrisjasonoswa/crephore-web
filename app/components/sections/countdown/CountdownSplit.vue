@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -9,7 +10,7 @@ import CountdownTiles from './CountdownTiles.vue'
 
 // Layout `split`: the layout photo on one half (`photoSide`), the countdown tiles, date and button on the other.
 // On phones the photo goes on top.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'photoSide'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
@@ -29,7 +30,7 @@ const date = computed(() => formatOccasionDate(props.occasion))
       class="flex flex-col items-center justify-center gap-6 px-6 py-12 text-center @2xl:px-12 @3xl:row-start-1 @3xl:py-20"
       :class="photoOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1'"
     >
-      <CountdownHeading :content="content" :styles="styles" size="medium" />
+      <CountdownHeading :content="content" :occasion="occasion" :styles="styles" size="medium" />
       <CountdownTiles :units="units" :styles="styles" compact />
       <p data-countdown-date class="text-sm" :class="styles.muted">
         {{ date }}

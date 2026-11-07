@@ -13,6 +13,7 @@
   If changes have to be made, tweakcn editor should be used and the updated config should be pasted there.
 */
 @import "tailwind-tweakcn.css";
+@import "site-motion.css";
 
 @custom-variant dark (&:is(.dark *));
 

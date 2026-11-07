@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DateValue } from '@internationalized/date'
 import { parseDate } from '@internationalized/date'
-import { CalendarIcon } from '@lucide/vue'
+import { CalendarIcon, X } from '@lucide/vue'
 import { Field as VeeField } from 'vee-validate'
 import CFormFieldLabel from './CFormFieldLabel.vue'
 import { ref } from 'vue'
@@ -9,10 +9,12 @@ import { cn } from '~/lib/utils'
 
 // A vee-validate date and time field: the shadcn-vue date picker (Calendar in a Popover) plus a time input.
 // The value stays a `datetime-local` string ("2027-06-12T15:00", local time), so schemas and mappers don't change.
+// `clearable` adds a button that empties both (an optional time, e.g. an event's end).
 const props = defineProps<{
   name: string
   label?: string
   class?: string
+  clearable?: boolean
 }>()
 
 // Used when a date is picked before a time
@@ -83,6 +85,16 @@ const formatDate = (date: string) =>
           @update:model-value="(time: string | number) => handleChange(`${splitValue(value).date}T${time}`, !!errors.length)"
           @blur="handleBlur"
         />
+        <Button
+          v-if="clearable && value"
+          type="button"
+          variant="ghost"
+          size="icon"
+          :aria-label="label ? `Clear ${label.toLowerCase()}` : 'Clear date and time'"
+          @click="handleChange('', !!errors.length)"
+        >
+          <X />
+        </Button>
       </div>
       <!-- One message at a time, like vee-validate's errorMessage -->
       <FieldError v-if="errors.length" :errors="[errors[0]]" />

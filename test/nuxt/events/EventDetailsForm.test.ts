@@ -20,16 +20,13 @@ import EventDetailsForm from '~/pages/(dashboard)/dashboard/events/[id]/_compone
 const event: Event = {
   id: 5,
   name: 'Ana & Marco',
-  description: null,
   type: 'Wedding',
   venueName: 'Manila Cathedral',
-  venueAddress: 'Intramuros, Manila',
-  venueLatitude: null,
-  venueLongitude: null,
-  venueGooglePlaceId: null,
   startsAt: '2027-06-12T07:00:00Z',
   endsAt: '2027-06-12T13:00:00Z',
   timezone: 'Asia/Manila',
+  bornOn: null,
+  diedOn: null,
   subdomain: 'ana-and-marco',
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
@@ -78,6 +75,70 @@ describe('EventDetailsForm', () => {
     expect(wrapper.emitted('saved')).toEqual([[saved]])
     expect(cToast).toHaveBeenCalledWith({ title: 'Event updated.', type: 'success' })
     expect(saveButton(wrapper).attributes('disabled')).toBeDefined()
+  })
+
+  it('asks a memorial for the dates of birth and passing, and saves a cleared one as null', async () => {
+    const memorial: Event = { ...event, type: 'Memorial', bornOn: '1938-05-01', diedOn: '2026-10-03' }
+    updateEvent.mockResolvedValue({ data: { ...memorial, bornOn: null } })
+    const wrapper = await mountForm({ event: memorial })
+    const fields = wrapper.find('[data-memorial-fields]')
+
+    expect(fields.findAll('label').map(label => label.text())).toEqual(expect.arrayContaining(['Date of birth', 'Date of passing']))
+    expect(fields.find('button[id="bornOn"]').text()).toContain('1938')
+    expect(fields.find('button[id="diedOn"]').text()).toContain('2026')
+
+    await fields.find('button[aria-label="Clear date of birth"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('form').trigger('submit')
+    await vi.waitFor(() => expect(wrapper.emitted('saved')).toBeDefined())
+
+    expect(updateEvent).toHaveBeenCalledWith(5, expect.objectContaining({ type: 'Memorial', bornOn: null, diedOn: '2026-10-03' }))
+  })
+
+  it('has no life dates for other kinds of events', async () => {
+    const wrapper = await mountForm()
+
+    expect(wrapper.find('[data-memorial-fields]').exists()).toBe(false)
+  })
+
+  it('shows the save bar above the fields: red while there are unsaved changes, green once saved', async () => {
+    const wrapper = await mountForm()
+    const bar = wrapper.find('[data-save-bar]')
+
+    expect(wrapper.find('form').element.firstElementChild).toBe(bar.element)
+    expect(bar.find('[data-save-status]').text()).toBe('All changes saved.')
+    expect(bar.classes()).toContain('bg-green-50')
+
+    await wrapper.find('input[id="name"]').setValue('Ana & Marco 2027')
+    await flushPromises()
+    expect(bar.find('[data-save-status]').text()).toBe('You have unsaved changes.')
+    expect(bar.classes()).toContain('bg-red-50')
+  })
+
+  it('has no group field, and saves without touching the event\'s group', async () => {
+    updateEvent.mockResolvedValue({ data: event })
+    const wrapper = await mountForm({ event: { ...event, eventGroup: { id: 3, name: 'Family' } } })
+
+    expect(wrapper.find('[id="eventGroupId"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Group')
+
+    await wrapper.find('input[id="name"]').setValue('Ana & Marco 2027')
+    await wrapper.find('form').trigger('submit')
+    await vi.waitFor(() => expect(updateEvent).toHaveBeenCalled())
+    expect(updateEvent.mock.calls[0]![1]).not.toHaveProperty('eventGroupId')
+  })
+
+  it('clears the end, saving the event without one', async () => {
+    updateEvent.mockResolvedValue({ data: { ...event, endsAt: null } })
+    const wrapper = await mountForm()
+
+    await wrapper.find('button[aria-label="Clear event ends"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('button[id="endsAt"]').text()).toContain('Pick a date')
+    await wrapper.find('form').trigger('submit')
+    await vi.waitFor(() => expect(wrapper.emitted('saved')).toBeDefined())
+
+    expect(updateEvent).toHaveBeenCalledWith(5, expect.objectContaining({ endsAt: null }))
   })
 
   it('shows the API field errors on the fields', async () => {

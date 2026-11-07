@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import type { ProgramContent, ProgramItem } from '~/features/sections/program/program.type'
+import type { ProgramContent, ProgramItem, SectionProgram } from '~/features/sections/program/program.type'
 import type { SectionOccasion } from '~/features/sections/section.type'
 import { addDays, occasionDate, sampleProgramItems } from '~/features/sections/program/program.helpers'
 import PlaygroundOptionalPhoto from './PlaygroundOptionalPhoto.vue'
 
-// The program section's settings: how many items (the sample program, then a conference-style list) over how many
-// days (1 = all on the event's day; more spread the items evenly, from the occasion's date), an overall venue, the
-// layout photo (the vertical title and photo cards) and the background photo.
+// The program section's settings: the page's program (the event's on a real site), as how many items (the sample
+// program, then a conference-style list) over how many days (1 = all on the event's day; more spread the items evenly,
+// from the occasion's date) and its venue; and the section's own layout photo (the vertical title and photo cards) and
+// background photo.
 const props = defineProps<{
   occasion: SectionOccasion
 }>()
 
 const content = defineModel<ProgramContent>('content', { required: true })
+const program = defineModel<SectionProgram>('program', { required: true })
 
 const id = useId()
-const sample = sampleProgramItems()
+
+
+// The sample program on a fixed day; each item keeps its distance from that day (the after-party is the next day)
+const sampleDay = '2027-01-01'
+const sample = sampleProgramItems(sampleDay)
 const extras: Omit<ProgramItem, 'id' | 'date'>[] = [
   { startTime: '09:00', endTime: '09:30', title: 'Registration & coffee', venue: 'Lobby' },
   { startTime: '09:30', endTime: '10:30', title: 'Opening keynote', venue: 'Hall A', speakers: 'Ana Lim', description: 'Where the industry is heading.' },
@@ -26,10 +32,10 @@ const extras: Omit<ProgramItem, 'id' | 'date'>[] = [
 const counts = [1, 3, 6, 12]
 const dayCounts = [1, 2, 3]
 
-const count = ref(String(content.value.items.length))
+const count = ref(String(program.value.items.length))
 const dayCount = ref('1')
 
-// Rebuilt from the controls; the dates follow the occasion, so switching it keeps "Event day" / "Next day" right
+// Rebuilt from the controls; the dates follow the occasion, so switching it keeps each item on the right day
 function build() {
   const total = Number(count.value)
   const days = Number(dayCount.value)
@@ -37,15 +43,17 @@ function build() {
   const items = Array.from({ length: total }, (_, index): ProgramItem => {
     const base = sample[index] ?? extras[(index - sample.length) % extras.length]!
     const day = Math.min(days - 1, Math.floor((index * days) / total))
-    return { ...base, id: `playground-${index}`, date: days > 1 ? addDays(eventDate, day) : '' }
+    const offset = days > 1 ? day : index < sample.length && sample[index]!.date !== sampleDay ? 1 : 0
+    return { ...base, id: `playground-${index}`, date: addDays(eventDate, offset) }
   })
-  content.value = { ...content.value, items }
+  program.value = { ...program.value, items }
 }
-watch(() => occasionDate(props.occasion), () => dayCount.value !== '1' && build())
+watch(() => occasionDate(props.occasion), build)
 
+// Empty: the program moves around (no venue under the heading)
 const venue = computed({
-  get: () => content.value.venue ?? '',
-  set: venue => (content.value = { ...content.value, venue: venue || undefined }),
+  get: () => program.value.venue ?? '',
+  set: venue => (program.value = { ...program.value, venue: venue || undefined }),
 })
 
 const layoutPhoto = computed({
@@ -98,7 +106,7 @@ function pick(control: 'count' | 'days', next: unknown) {
       <Label :for="`${id}-venue`">Overall venue</Label>
       <Input :id="`${id}-venue`" v-model="venue" placeholder="e.g. Manila Cathedral" />
       <p class="text-xs text-muted-foreground">
-        Under the heading, in every layout.
+        The event's venue when everything happens there: under the heading, in every layout. Empty when the program moves around.
       </p>
     </div>
 

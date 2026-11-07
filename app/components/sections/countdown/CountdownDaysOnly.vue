@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Align } from '~/features/sections/section.options'
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
@@ -8,11 +8,11 @@ import CountdownButton from './CountdownButton.vue'
 
 // Layout `days-only` ("Days only"): one huge number of days ("112 days to go"), then the heading and date.
 // Bold and simple; ignores `showSeconds`. Aligned by `textAlign`.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'textAlign'>>>()
 
 const { units } = useCountdown(() => props.occasion, false)
 const days = computed(() => units.value[0]!)
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 const date = computed(() => formatOccasionDate(props.occasion))
 
 const justify = { start: 'justify-start', center: 'justify-center', end: 'justify-end' }
@@ -35,10 +35,10 @@ const justify = { start: 'justify-start', center: 'justify-center', end: 'justif
       </p>
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="[justify[align], styles.muted]">
-        <h2 v-if="content.heading" :class="styles.brandText">
-          {{ content.heading }}
+        <h2 :class="styles.brandText">
+          {{ occasion.name }}
         </h2>
-        <span v-if="content.heading" aria-hidden="true">·</span>
+        <span aria-hidden="true">·</span>
         <span data-countdown-date>{{ date }}</span>
       </div>
 

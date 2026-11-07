@@ -16,7 +16,7 @@ describe('responsive sections', () => {
 
   it('makes the site-theme wrapper the container sections respond to', async () => {
     const wrapper = await mountSuspended(SiteThemeScope, {
-      props: { theme: { primaryColor: '#1F6E6C', accentColor: '#F4B6C2', fontPairingKey: 'serif_classic', cornerStyle: 'soft' } },
+      props: { theme: { primaryColor: '#1F6E6C', secondaryColor: '#F4B6C2', fontPairingKey: 'serif_classic', cornerStyle: 'soft', motion: { intro: 'shutter' as const, intensity: 'normal' as const } } },
     })
 
     expect(wrapper.classes()).toContain('@container')

@@ -6,7 +6,7 @@ import { alignClasses } from '~/features/sections/section.options'
 
 // A person's name and role (in small capitals), and their bio when `showBio` is on. Not a layout: the people layouts
 // share it. `roleFirst` puts the role above the name (the credits). The name and bio use the background's brand text
-// colour and the role its brand label colour (e.g. primary and accent on light, accent and a soft primary on primary).
+// colour and the role its brand label colour (e.g. primary and secondary on light, secondary and a soft primary on primary).
 withDefaults(defineProps<{
   person: PersonItem
   styles: BackgroundStyles

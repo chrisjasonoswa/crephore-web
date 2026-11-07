@@ -1,29 +1,32 @@
 <script setup lang="ts">
+import type { Event } from '~/features/events/event.type'
 import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import WebsiteButtonField from './WebsiteButtonField.vue'
+import WebsiteEventFields from './WebsiteEventFields.vue'
+import WebsiteTextField from './WebsiteTextField.vue'
 
-// The countdown's text and settings. It always counts down to the event's start (set in Details).
+// The countdown's text and settings. Its heading is the event's name and it counts down to the event's start, both
+// set in Details.
+const props = defineProps<{
+  event: Event
+}>()
+
 const content = defineModel<CountdownContent>('content', { required: true })
 
 const id = useId()
+const eventFields = computed(() => [{ label: 'Heading', value: props.event.name }])
 
 // Optional fields are removed when emptied, so the layout leaves them out
-function set(key: 'eyebrow' | 'heading', value: string | number) {
-  content.value = { ...content.value, [key]: String(value) || undefined }
+function setEyebrow(value: string | number) {
+  content.value = { ...content.value, eyebrow: String(value) || undefined }
 }
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex flex-col gap-2">
-      <Label :for="`${id}-eyebrow`">Small label</Label>
-      <Input :id="`${id}-eyebrow`" :model-value="content.eyebrow ?? ''" placeholder="e.g. Counting down to" @update:model-value="set('eyebrow', $event)" />
-    </div>
+    <WebsiteTextField :model-value="content.eyebrow ?? ''" label="Small label" placeholder="e.g. Counting down to" @update:model-value="setEyebrow" />
 
-    <div class="flex flex-col gap-2">
-      <Label :for="`${id}-heading`">Heading</Label>
-      <Input :id="`${id}-heading`" :model-value="content.heading ?? ''" placeholder="e.g. Ana & Marco's wedding" @update:model-value="set('heading', $event)" />
-    </div>
+    <WebsiteEventFields :fields="eventFields" />
 
     <div class="flex items-center justify-between gap-3">
       <Label :for="`${id}-seconds`">Show seconds</Label>

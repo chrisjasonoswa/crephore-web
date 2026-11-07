@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import type { EventWebsiteDraft, WebsiteSection } from '~/features/event-websites/event-website.type'
 import type { Event } from '~/features/events/event.type'
+import type { SectionProgram } from '~/features/sections/program/program.type'
 import type { SectionType } from '~/features/sections/section.type'
 import type { CustomToastType } from '~/utils/styles/toast-and-alert'
 import { CloudOff, ExternalLink, MoreHorizontal, Plus, RotateCcw } from '@lucide/vue'
+import CAlert from '~/components/custom/c-alert/CAlert.vue'
 import CConfirmationModal from '~/components/custom/c-modal/CConfirmationModal.vue'
 import PreviewFrame from '~/components/site-editor/PreviewFrame.vue'
 import ThemeControls from '~/components/site-editor/ThemeControls.vue'
-import { createWebsiteSection, duplicateWebsiteSection, eventOccasion, moveItem, websiteProblem } from '~/features/event-websites/event-website'
+import { createWebsiteSection, duplicateWebsiteSection, eventOccasion, moveItem, websiteProblem, websiteWarnings } from '~/features/event-websites/event-website'
 import { getSectionType } from '~/features/sections/section.registry'
+import { eventKindFor } from '~/site-theme/eventKinds'
 import WebsiteAddSectionDialog from './WebsiteAddSectionDialog.vue'
 import WebsitePreview from './WebsitePreview.vue'
 import { toastAndAlertStyles } from '~/utils/styles/toast-and-alert'
@@ -20,6 +23,8 @@ import WebsiteSectionSettings from './WebsiteSectionSettings.vue'
 // Above them, the save bar (save, publish, view the live site); the Website tab does the saving and publishing.
 const props = defineProps<{
   event: Event
+  // The event's saved program, which the program sections show
+  program: SectionProgram
   // The website is on the server (saved at least once)
   isSaved: boolean
   // There are changes to save
@@ -48,6 +53,8 @@ const emit = defineEmits<{
 
 // What has to change before it can be saved (e.g. no hero), shown instead of the save status
 const problem = computed(() => websiteProblem(website.value))
+// Sections missing content their layout needs: a warning under the save bar, never a reason not to save or publish
+const warnings = computed(() => websiteWarnings(website.value))
 
 const saveStatus = computed(() => {
   if (problem.value)
@@ -88,12 +95,15 @@ const hasHero = computed(() => website.value.sections.some(section => section.ty
 
 const isUnpublishOpen = ref(false)
 
-const occasion = computed(() => eventOccasion(props.event))
+const occasion = computed(() => eventOccasion(props.event, props.program))
 
 const sections = computed({
   get: () => website.value.sections,
   set: next => (website.value = { ...website.value, sections: next }),
 })
+// Each press of the Style tab's "Play intro" plays the page transition in the preview
+const introKey = ref(0)
+
 const theme = computed({
   get: () => website.value.theme,
   set: next => (website.value = { ...website.value, theme: next }),
@@ -227,6 +237,23 @@ function startOver() {
       </DropdownMenu>
     </div>
 
+    <CAlert
+      v-if="warnings.length"
+      data-website-warnings
+      type="warning"
+      size="sm"
+      role="note"
+      title="Some sections are missing content their layout needs"
+      class="w-full xl:col-span-2"
+    >
+      <p>You can still publish: guests see placeholders there until you add it.</p>
+      <ul class="mt-1 list-disc pl-5">
+        <li v-for="warning in warnings" :key="warning">
+          {{ warning }}
+        </li>
+      </ul>
+    </CAlert>
+
     <!-- Scrolls on its own when taller than the viewport, so every control stays reachable -->
     <Card class="py-0 xl:sticky xl:top-6 xl:max-h-[calc(100svh-3rem)] xl:overflow-y-auto">
       <CardContent class="p-4">
@@ -272,7 +299,7 @@ function startOver() {
           </TabsContent>
 
           <TabsContent value="style">
-            <ThemeControls v-model:theme="theme" />
+            <ThemeControls v-model:theme="theme" :event-kind="eventKindFor(event.type)" @play-intro="introKey++" />
           </TabsContent>
         </Tabs>
       </CardContent>
@@ -282,6 +309,8 @@ function startOver() {
       <WebsitePreview
         :sections="sections"
         :theme="theme"
+        :intro-key="introKey"
+        :event-kind="eventKindFor(event.type)"
         :occasion="occasion"
         :selected-key="selectedKey"
         @select="select"
@@ -289,7 +318,7 @@ function startOver() {
       />
     </PreviewFrame>
 
-    <WebsiteAddSectionDialog v-model:open="isAddOpen" :event="event" :theme="theme" :has-hero="hasHero" @add="addSection" />
+    <WebsiteAddSectionDialog v-model:open="isAddOpen" :event="event" :occasion="occasion" :theme="theme" :has-hero="hasHero" @add="addSection" />
 
     <CConfirmationModal
       v-model:is-open="isDeleteOpen"

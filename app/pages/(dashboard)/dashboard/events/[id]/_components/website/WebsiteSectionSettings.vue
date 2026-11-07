@@ -14,6 +14,7 @@ import { ArrowLeft, Eye, EyeOff } from '@lucide/vue'
 import SectionThumbnail from '~/components/sections/SectionThumbnail.vue'
 import { groupedChoices, positions, resolveLayoutOptions } from '~/features/sections/section.options'
 import { backgroundPhotoOf, layoutPhotosOf, withBackgroundPhoto, withLayoutPhoto } from '~/features/sections/section.photos'
+import { withSampleProgram } from '~/features/event-websites/event-website'
 import { changeSectionLayout, getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 import WebsiteBackgroundPicker from './WebsiteBackgroundPicker.vue'
 import WebsiteChoiceGroup from './WebsiteChoiceGroup.vue'
@@ -26,8 +27,7 @@ import WebsiteMessageFields from './WebsiteMessageFields.vue'
 import WebsiteAboutFields from './WebsiteAboutFields.vue'
 import WebsitePeopleFields from './WebsitePeopleFields.vue'
 import WebsiteProgramFields from './WebsiteProgramFields.vue'
-import { peopleLayoutShowsBio, peopleLayoutShowsPhotos } from '~/features/sections/people/people.helpers'
-import { aboutTimelineShowsPhotos, isAboutTimelineLayout } from '~/features/sections/about/about.helpers'
+import WebsiteSectionNotes from './WebsiteSectionNotes.vue'
 
 // Everything about one section, top to bottom: its layout (picked from thumbnails), the layout's placement options,
 // the background (and its photo), the photos inside the layout, and the text.
@@ -98,6 +98,9 @@ const messageContent = computed({
   get: () => section.value.content as MessageContent,
   set: content => (section.value = { ...section.value, content }),
 })
+// Thumbnails show the sample program while the event has none, so program layouts show their shape
+const thumbnailOccasion = computed(() => withSampleProgram(props.occasion))
+
 const programContent = computed({
   get: () => section.value.content as ProgramContent,
   set: content => (section.value = { ...section.value, content }),
@@ -140,7 +143,7 @@ const programContent = computed({
         class="group flex cursor-pointer flex-col gap-2 rounded-xl border p-2 text-left transition-colors hover:border-primary/60"
         @click="isLayoutPickerOpen = true"
       >
-        <SectionThumbnail :section="section" :theme="theme" :occasion="occasion" class="aspect-16/10 w-full rounded-lg border bg-muted" />
+        <SectionThumbnail :section="section" :theme="theme" :occasion="thumbnailOccasion" class="aspect-16/10 w-full rounded-lg border bg-muted" />
         <span class="flex items-center justify-between gap-2 px-1 pb-0.5">
           <span class="text-sm font-medium">{{ layout?.name }}</span>
           <span class="text-xs font-medium text-primary group-hover:underline">Change layout</span>
@@ -235,31 +238,21 @@ const programContent = computed({
       <h4 class="text-sm font-bold">
         Text
       </h4>
+      <WebsiteSectionNotes v-if="layout" :section="section" :layout="layout" />
       <WebsiteHeroFields v-if="section.type === 'hero'" v-model:content="heroContent" :event="event" />
-      <WebsiteCountdownFields v-else-if="section.type === 'countdown'" v-model:content="countdownContent" />
-      <WebsiteMessageFields v-else-if="section.type === 'message'" v-model:content="messageContent" />
-      <WebsiteAboutFields
-        v-else-if="section.type === 'about'"
-        v-model:content="aboutContent"
-        :event-id="event.id"
-        :is-timeline="isAboutTimelineLayout(section.layout)"
-        :show-chapter-photos="aboutTimelineShowsPhotos(section.layout)"
-      />
-      <WebsitePeopleFields
-        v-else-if="section.type === 'people'"
-        v-model:content="peopleContent"
-        :event-id="event.id"
-        :show-photos="peopleLayoutShowsPhotos(section.layout)"
-        :show-bio="peopleLayoutShowsBio(section.layout)"
-      />
-      <WebsiteProgramFields v-else-if="section.type === 'program'" v-model:content="programContent" :event="event" />
+      <WebsiteCountdownFields v-else-if="section.type === 'countdown'" v-model:content="countdownContent" :event="event" />
+      <WebsiteMessageFields v-else-if="section.type === 'message' && layout" v-model:content="messageContent" :layout="layout" />
+      <!-- Layouts that differ in what they show pass their layout, so the fields follow it (`layout.fields`) -->
+      <WebsiteAboutFields v-else-if="section.type === 'about' && layout" v-model:content="aboutContent" :event-id="event.id" :layout="layout" />
+      <WebsitePeopleFields v-else-if="section.type === 'people' && layout" v-model:content="peopleContent" :event-id="event.id" :layout="layout" />
+      <WebsiteProgramFields v-else-if="section.type === 'program'" v-model:content="programContent" :program="occasion.program" />
     </section>
 
     <WebsiteLayoutPickerDialog
       v-model:open="isLayoutPickerOpen"
       :section="section"
       :theme="theme"
-      :occasion="occasion"
+      :occasion="thumbnailOccasion"
       :is-new="isNew"
       @pick="pickLayout"
     />

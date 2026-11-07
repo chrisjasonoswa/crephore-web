@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import PeopleHeading from './PeopleHeading.vue'
@@ -7,7 +8,7 @@ import PersonPhoto from './PersonPhoto.vue'
 
 // Layout `spotlight`: one person per row with a large photo and their role, name and bio beside it; the photo
 // alternates sides from row to row (`alternate`) or stays on the left. On phones the photo goes on top.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'alternate'>>>()
 
 const photoOnRight = (index: number) => props.options.alternate === 'yes' && index % 2 === 1
 </script>

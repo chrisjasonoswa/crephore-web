@@ -351,7 +351,7 @@ describe('placement options', () => {
   })
 
   it('timeline-polaroids: pins each print at its top edge, on one string across the row, in the background\'s other colour', async () => {
-    // The button colour: the primary on light and accent backgrounds, the accent on primary and photo ones
+    // The button colour: the primary on light and secondary backgrounds, the secondary on primary and photo ones
     for (const background of definitionOf('timeline-polaroids').backgrounds) {
       const wrapper = await mountLayout('timeline-polaroids', { background, content: { ...content, backgroundPhoto: undefined } })
       // Without a photo the photo background renders as primary
@@ -379,5 +379,17 @@ describe('placement options', () => {
   it('timeline-compact: aligns the chapters by textAlign', async () => {
     expect(await classesOf('timeline-compact', '[data-chapter-text]')).toContain('text-start')
     expect(await classesOf('timeline-compact', '[data-chapter-text]', { textAlign: 'center' })).toContain('text-center')
+  })
+})
+
+describe('the fields each layout declares', () => {
+  // The editor offers exactly what the layout says it shows, so it must show exactly that
+  it.each(allLayouts.map(layout => layout.key))('%s renders the chapters and their photos only when it declares them', async (key) => {
+    const fields = definitionOf(key).fields
+    const wrapper = await mountLayout(key)
+
+    expect(wrapper.find('[data-about-chapter]').exists()).toBe(fields.includes('timeline'))
+    expect(wrapper.find('[data-chapter-photo]').exists()).toBe(fields.includes('timeline.photo'))
+    expect(wrapper.text().includes(content.heading!)).toBe(fields.includes('heading'))
   })
 })

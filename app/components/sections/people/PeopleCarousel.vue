@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PeopleLayoutOptions } from '~/features/sections/people/people.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { personPhotoShapes } from '~/features/sections/people/people.helpers'
@@ -10,9 +11,9 @@ import PersonPhoto from './PersonPhoto.vue'
 // Layout `carousel`: one row of tall portraits (`photoShape`) with names, that scrolls sideways on every screen: guests
 // swipe (touch, trackpad) or drag it with the mouse. Fits a big group in little space; portraits that all fit stay
 // centred.
-const props = defineProps<SectionLayoutProps<'people'>>()
+const props = defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'photoShape'>>>()
 
-const shape = computed(() => personPhotoShapes[props.options.photoShape as keyof typeof personPhotoShapes])
+const shape = computed(() => personPhotoShapes[props.options.photoShape])
 
 const row = useTemplateRef<HTMLUListElement>('row')
 const { canScroll, isDragging, startDrag, drag, endDrag, ignoreClickAfterDrag } = useDragScroll(row, () => props.content.people.length)

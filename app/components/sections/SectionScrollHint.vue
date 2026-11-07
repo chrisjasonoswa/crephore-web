@@ -20,6 +20,6 @@ const thumbStyle = computed(() => {
 
 <template>
   <div aria-hidden="true" data-scroll-hint class="relative mx-auto h-1 w-16 rounded-full bg-current/15 @2xl:w-20">
-    <span data-scroll-thumb class="absolute inset-y-0 rounded-full bg-current" :class="styles.brandText" :style="thumbStyle" />
+    <span data-scroll-thumb class="absolute inset-y-0 rounded-full bg-current" :class="styles.accent" :style="thumbStyle" />
   </div>
 </template>

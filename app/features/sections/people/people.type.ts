@@ -12,6 +12,10 @@ export interface PersonItem {
   bio?: string
 }
 
+// Every field a people layout can use (`people.role`, `.photo`, `.bio`: each person's)
+export const peopleFields = ['eyebrow', 'heading', 'people', 'people.role', 'people.photo', 'people.bio'] as const
+export type PeopleField = (typeof peopleFields)[number]
+
 // Every people layout uses the same fields: who's who (the entourage, hosts, speakers, a committee…), in the host's
 // order. Photos belong to the people, so the section has no layout photos.
 export interface PeopleContent {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AboutLayoutOptions } from '~/features/sections/about/about.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -7,7 +8,7 @@ import AboutText from './AboutText.vue'
 // Layout `divider`: a photo and the story split by a thin line (`photoSide`), with a second, round photo sitting on
 // the line. On phones the photo goes on top and the round one overlaps its corner. The round photo's white ring is
 // part of the look, not a theme colour.
-const props = defineProps<SectionLayoutProps<'about'>>()
+const props = defineProps<SectionLayoutProps<'about', AboutLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>

@@ -10,7 +10,8 @@ import { getApiErrors } from '~/lib/axios'
 import { cToast } from '~/lib/cToast'
 import { applyServerErrors } from '~/lib/form'
 import EventFormFields from '../../_components/EventFormFields.vue'
-import { eventFormSchema, mapEventToFormValues, mapFormValuesToEventRequest } from '../../_components/event.form.schema'
+import EventSaveBar from './EventSaveBar.vue'
+import { eventFormSchema, mapEventToFormValues, mapFormValuesToUpdateEventRequest } from '../../_components/event.form.schema'
 
 // The Details tab: the event's fields, saved with PUT /events/{id}
 const props = defineProps<{
@@ -33,7 +34,7 @@ const isSubmitting = computed(() => form.isSubmitting.value)
 
 const onSubmit = form.handleSubmit(async (values) => {
   try {
-    const response = await updateEvent(props.event.id, mapFormValuesToEventRequest(values))
+    const response = await updateEvent(props.event.id, mapFormValuesToUpdateEventRequest(values))
     // The saved event is the new starting point, so there is nothing left to save
     form.resetForm({ values: mapEventToFormValues(response.data) })
     emit('saved', response.data)
@@ -76,19 +77,11 @@ useEventListener(window, 'beforeunload', (event: BeforeUnloadEvent) => {
 </script>
 
 <template>
-  <form class="flex flex-col gap-6 rounded-xl border bg-card p-4 sm:p-6" @submit.prevent="onSubmit">
-    <EventFormFields :form="form" :view-only="!canEdit" />
+  <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
+    <EventSaveBar v-if="canEdit" :is-dirty="isDirty" :is-submitting="isSubmitting" @discard="discardChanges" />
 
-    <div v-if="canEdit" class="flex flex-wrap items-center justify-end gap-2 border-t pt-4">
-      <p v-if="isDirty" class="mr-auto text-sm text-muted-foreground">
-        You have unsaved changes.
-      </p>
-      <Button type="button" variant="outline" :disabled="!isDirty || isSubmitting" @click="discardChanges">
-        Discard changes
-      </Button>
-      <Button type="submit" :disabled="!isDirty || isSubmitting">
-        {{ isSubmitting ? 'Saving…' : 'Save changes' }}
-      </Button>
+    <div class="rounded-xl border bg-card p-4 sm:p-6">
+      <EventFormFields :form="form" :view-only="!canEdit" />
     </div>
 
     <CConfirmationModal

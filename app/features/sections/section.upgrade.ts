@@ -10,8 +10,18 @@ export type UpgradeSteps = { [T in SectionType]?: Record<number, UpgradeStep> }
 // A step looks like
 //   countdown: { 1: ({ title, ...content }) => ({ ...content, heading: title }) }   // 1 → 2: `title` became `heading`
 const upgrades: UpgradeSteps = {
-  // 1 → 2: the program got layout photos (the vertical title's and photo cards' photo)
-  program: { 1: content => ({ ...content, layoutPhotos: content.layoutPhotos ?? [] }) },
+  // 1 → 2: the heading, date and venue come from the event, so the saved ones are dropped
+  hero: { 1: ({ heading: _heading, date: _date, venue: _venue, ...content }) => content },
+  // 1 → 2: the heading comes from the event, so the saved one is dropped
+  countdown: { 1: ({ heading: _heading, ...content }) => content },
+  program: {
+    // 1 → 2: the program got layout photos (the vertical title's and photo cards' photo)
+    1: content => ({ ...content, layoutPhotos: content.layoutPhotos ?? [] }),
+    // 2 → 3: the venue and items come from the event's program, so the saved ones are dropped
+    2: ({ venue: _venue, items: _items, ...content }) => content,
+    // 3 → 4: the venues block got its own heading (and optional eyebrow and description)
+    3: content => ({ ...content, venuesHeading: content.venuesHeading ?? 'Getting there' }),
+  },
 }
 
 /** Saved content brought up to the type's current content version (`steps` only for tests). */

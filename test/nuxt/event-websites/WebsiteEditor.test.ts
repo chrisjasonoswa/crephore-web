@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createBlankWebsite, createWebsiteSection } from '~/features/event-websites/event-website'
 import WebsiteEditor from '~/pages/(dashboard)/dashboard/events/[id]/_components/website/WebsiteEditor.vue'
+import { toastAndAlertStyles } from '~/utils/styles/toast-and-alert'
 
 const { uploadPhoto } = vi.hoisted(() => ({ uploadPhoto: vi.fn() }))
 vi.mock('~/features/media/media.api', () => ({ uploadPhoto }))
@@ -12,16 +13,13 @@ vi.mock('~/features/media/media.api', () => ({ uploadPhoto }))
 const event = {
   id: 5,
   name: 'Ana & Marco',
-  description: null,
   type: 'Wedding',
   venueName: 'Manila Cathedral',
-  venueAddress: 'Intramuros, Manila',
-  venueLatitude: null,
-  venueLongitude: null,
-  venueGooglePlaceId: null,
   startsAt: '2027-06-12T07:00:00Z',
   endsAt: '2027-06-12T13:00:00Z',
   timezone: 'Asia/Manila',
+  bornOn: null,
+  diedOn: null,
   subdomain: 'ana-and-marco',
   createdAt: '2026-10-01T00:00:00Z',
   access: ['Owner'],
@@ -39,11 +37,19 @@ interface SaveState {
   onUnpublish?: () => void | Promise<void>
 }
 
+// The event's saved program (the Program tab's), as the program sections show it
+const program = { venue: 'Manila Cathedral', items: [
+  { id: 'item-1', date: '2027-06-12', startTime: '15:00', endTime: '16:00', title: 'Ceremony' },
+  { id: 'item-2', date: '2027-06-12', startTime: '18:00', title: 'Dinner', venue: 'Grand Ballroom' },
+] }
+
 // Mounted like the Website tab uses it: the editor's website changes are fed back in
 async function mountEditor(website: EventWebsiteDraft = createBlankWebsite(), state: SaveState = {}) {
   const wrapper = await mountSuspended(WebsiteEditor, {
     props: {
       'event': event,
+      'program': program,
+      'venues': [],
       website,
       'isSaved': false,
       'isDirty': true,
@@ -196,18 +202,54 @@ describe('website editor', () => {
     expect(website(wrapper).sections).toHaveLength(1)
     expect(wrapper.find('[data-preview-section] h1').text()).toBe('Ana & Marco')
     expect(wrapper.find('[data-preview-section]').text()).toContain('Saturday, 12 June 2027')
-    // Settings of the new section: its layout, background and text
+    expect(wrapper.find('[data-preview-section]').text()).toContain('Manila Cathedral')
+    // Settings of the new section: its layout, background and text; the event's details are shown as text, not fields
     expect(wrapper.find('[data-change-layout]').text()).toContain('Full')
-    expect(wrapper.find<HTMLInputElement>('input[placeholder="e.g. Ana & Marco"]').element.value).toBe('Ana & Marco')
+    const eventFields = wrapper.find('[data-event-fields]')
+    expect(eventFields.find('[role="note"]').text()).toBe('Heading, date and place are from the event details. Click here to edit event details')
+    expect(eventFields.find('[role="note"] a').text()).toBe('Click here to edit event details')
+    // In the shared info style, like the app's other alerts and toasts
+    expect(eventFields.find('[role="note"]').classes()).toEqual(expect.arrayContaining(toastAndAlertStyles.info.container.split(' ')))
+    expect(eventFields.find('[role="note"]').classes()).not.toContain('bg-card')
+    expect(eventFields.findAll('dt').map(dt => dt.text())).toEqual(['Heading', 'Date', 'Place'])
+    expect(eventFields.findAll('dd').map(dd => dd.text())).toEqual(['Ana & Marco', 'Saturday, 12 June 2027', 'Manila Cathedral'])
+    expect(eventFields.find('input').exists()).toBe(false)
+    // Never saved with the section: they come from the event
+    expect(website(wrapper).sections[0]!.content).not.toHaveProperty('heading')
+  })
+
+  it('shows the event\'s program in a program section, faded with a note while it has no items', async () => {
+    const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event), createWebsiteSection('program', event)] })
+    const programPreview = () => wrapper.findAll('[data-preview-section]')[1]!
+
+    await vi.waitFor(() => expect(programPreview().text()).toContain('Ceremony'))
+    expect(programPreview().text()).toContain('Dinner')
+    expect(programPreview().find('[data-program-overall-venue]').text()).toContain('Manila Cathedral')
+    // Never saved with the section
+    expect(website(wrapper).sections[1]!.content).toEqual({ eyebrow: 'The day', heading: 'Program', venuesHeading: 'Getting there', layoutPhotos: [] })
+
+    await wrapper.setProps({ program: { items: [] } })
+    expect(programPreview().text()).toContain('Program and venue · No schedule yet')
+    expect(programPreview().find('.opacity-40').exists()).toBe(true)
   })
 
   it('updates the preview as the text is edited', async () => {
     const wrapper = await mountEditor()
     await addSection(wrapper, 'hero')
 
-    await wrapper.find('input[placeholder="e.g. Ana & Marco"]').setValue('Ana & Marco Santos')
+    await wrapper.find('input[placeholder="e.g. Together with their families"]').setValue('With joy')
 
-    expect(wrapper.find('[data-preview-section] h1').text()).toBe('Ana & Marco Santos')
+    expect(website(wrapper).sections[0]!.content).toMatchObject({ eyebrow: 'With joy' })
+    expect(wrapper.find('[data-preview-section]').text()).toContain('With joy')
+  })
+
+  it('shows the countdown\'s heading as the event\'s name, from the event details', async () => {
+    const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] })
+    await addSection(wrapper, 'countdown')
+
+    await vi.waitFor(() => expect(wrapper.findAll('[data-preview-section] h2').map(h2 => h2.text())).toContain('Ana & Marco'))
+    expect(wrapper.find('[data-event-fields] [role="note"]').text()).toBe('Heading is from the event details. Click here to edit event details')
+    expect(wrapper.findAll('[data-event-fields] dd').map(dd => dd.text())).toEqual(['Ana & Marco'])
   })
 
   it('adds a message with a generic signature and edits its message', async () => {

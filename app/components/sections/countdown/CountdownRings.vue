@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CountdownUnit } from '~/features/sections/countdown/countdown.helpers'
-import type { Align } from '~/features/sections/section.options'
+import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import { useCountdown } from '~/features/sections/countdown/countdown.helpers'
@@ -10,10 +10,10 @@ import CountdownHeading from './CountdownHeading.vue'
 
 // Layout `rings` ("Progress rings"): each unit in a thin ring that empties as time passes (days out of a year,
 // hours out of a day, …). Two per row on phones. Aligned by `textAlign`.
-const props = defineProps<SectionLayoutProps<'countdown'>>()
+const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'textAlign'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
-const align = computed(() => props.options.textAlign as Align)
+const align = computed(() => props.options.textAlign)
 
 const RADIUS = 46
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
@@ -27,7 +27,7 @@ const justify = { start: '@2xl:justify-start', center: '@2xl:justify-center', en
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
     <div class="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-16 @2xl:px-10 @2xl:py-24" :class="alignClasses[align]">
-      <CountdownHeading :content="content" :styles="styles" :align="align" />
+      <CountdownHeading :content="content" :occasion="occasion" :styles="styles" :align="align" />
 
       <div role="timer" class="grid gap-4 @2xl:flex @2xl:gap-6" :class="[phoneColumns, justify[align]]">
         <div v-for="unit in units" :key="unit.key" :data-unit="unit.key" class="relative mx-auto size-28 @2xl:mx-0 @2xl:size-36">
@@ -45,6 +45,7 @@ const justify = { start: '@2xl:justify-start', center: '@2xl:justify-center', en
               :stroke-dasharray="CIRCUMFERENCE"
               :stroke-dashoffset="offset(unit)"
               class="transition-[stroke-dashoffset] duration-700"
+              :class="styles.accent"
             />
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">

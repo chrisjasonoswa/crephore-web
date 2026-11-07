@@ -91,7 +91,7 @@ describe.each(layouts)('people layout $key', ({ key, photos, bios }) => {
 
       expect(wrapper.find('img').exists()).toBe(false)
       expect(wrapper.findAll('[data-person-initials]').map(initials => initials.text())).toEqual(['BS', 'CR', 'JS', 'RR', 'AL'])
-      // In the avatar colours of the layout's background (the polaroid wall starts on accent)
+      // In the avatar colours of the layout's background (the polaroid wall starts on secondary)
       expect(wrapper.find('[data-person-initials]').classes()).toEqual(expect.arrayContaining(backgroundStyles[definitionOf(key).backgrounds[0]!].avatar.split(' ')))
     })
   }
@@ -119,8 +119,8 @@ describe.each(layouts)('people layout $key', ({ key, photos, bios }) => {
 
 describe('people colours', () => {
   // On each background the name (and bio) use its brand text colour and the role its brand label colour: the primary
-  // and accent on light, the accent and a soft primary on primary, the primary and a soft accent on accent
-  it.each(['light', 'primary', 'accent', 'photo'] as const)('uses the brand colours for names, bios and roles on %s', async (background) => {
+  // and secondary on light, the secondary and a soft primary on primary, the primary and a soft secondary on secondary
+  it.each(['light', 'primary', 'secondary', 'photo'] as const)('uses the brand colours for names, bios and roles on %s', async (background) => {
     const wrapper = await mountLayout('spotlight', { background })
     const styles = backgroundStyles[background]
 
@@ -132,7 +132,7 @@ describe('people colours', () => {
   // The initials switch with the background: a soft tint of the section's colour with that colour's text
   // People without photos; the background photo stays, so the photo background renders as itself
   const withoutPhotos = { ...content, people: people.map(({ photo: _, ...person }) => person) }
-  it.each(['light', 'primary', 'accent', 'photo'] as const)('fills the initials with the avatar colours of %s', async (background) => {
+  it.each(['light', 'primary', 'secondary', 'photo'] as const)('fills the initials with the avatar colours of %s', async (background) => {
     const initials = (await mountLayout('grid', { background, content: withoutPhotos })).find('[data-person-initials]')
 
     for (const className of backgroundStyles[background].avatar.split(' '))
@@ -141,7 +141,7 @@ describe('people colours', () => {
 
   it('uses the same avatar colours on white cards and prints as in the other layouts, while their text stays light', async () => {
     for (const key of ['cards', 'polaroids']) {
-      for (const background of ['primary', 'accent'] as const) {
+      for (const background of ['primary', 'secondary'] as const) {
         const wrapper = await mountLayout(key, { background, content: withoutPhotos })
         for (const className of backgroundStyles[background].avatar.split(' '))
           expect(wrapper.find('[data-person-initials]').classes(), `${key} on ${background}`).toContain(className)
@@ -150,10 +150,10 @@ describe('people colours', () => {
     }
   })
 
-  it('uses a soft tint of the section\'s colour: the primary\'s, the accent\'s on accent', () => {
+  it('uses a soft tint of the section\'s colour: the primary\'s, the secondary\'s on secondary', () => {
     for (const background of ['light', 'primary', 'photo'] as const)
       expect(backgroundStyles[background].avatar, background).toBe('bg-(--site-primary-50) text-(--site-primary-text)')
-    expect(backgroundStyles.accent.avatar).toBe('bg-(--site-accent-100) text-(--site-accent-text)')
+    expect(backgroundStyles.secondary.avatar).toBe('bg-(--site-secondary-100) text-(--site-secondary-text)')
   })
 
   it('uses them in the entourage list too', async () => {
@@ -252,5 +252,17 @@ describe('placement options', () => {
 
     expect(await order({})).toBe('role first')
     expect(await order({ roleFirst: 'no' })).toBe('name first')
+  })
+})
+
+describe('the fields each layout declares', () => {
+  // The editor offers exactly what the layout says it shows, so it must show exactly that
+  it.each(layouts.map(layout => layout.key))('%s renders people\'s roles, photos and bios only when it declares them', async (key) => {
+    const fields = definitionOf(key).fields
+    const wrapper = await mountLayout(key)
+
+    expect(wrapper.text().includes('Bride')).toBe(fields.includes('people.role'))
+    expect(wrapper.find('[data-person-photo]').exists()).toBe(fields.includes('people.photo'))
+    expect(wrapper.text().includes('Planner of everything.')).toBe(fields.includes('people.bio'))
   })
 })

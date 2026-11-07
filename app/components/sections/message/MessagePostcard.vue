@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MessageLayoutOptions } from '~/features/sections/message/message.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
 import SectionPhoto from '~/components/sections/SectionPhoto.vue'
@@ -8,7 +9,7 @@ import MessageText from './MessageText.vue'
 // Layout `postcard`: a light postcard with the photo on one side (`photoSide`) and the note on the other, a divider
 // between them and a stamp in the note's corner. On phones the photo goes on top and the divider and stamp go.
 // The card has its own solid surface, so the background photo needs no overlay.
-const props = defineProps<SectionLayoutProps<'message'>>()
+const props = defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoSide'>>>()
 
 const photoOnLeft = computed(() => props.options.photoSide === 'left')
 // The postcard is always light, whatever the background

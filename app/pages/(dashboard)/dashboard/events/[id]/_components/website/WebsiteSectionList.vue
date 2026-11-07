@@ -2,6 +2,7 @@
 import type { WebsiteSection } from '~/features/event-websites/event-website.type'
 import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, MoreHorizontal, Pencil, Trash2 } from '@lucide/vue'
 import { useDraggable } from 'vue-draggable-plus'
+import { missingFields } from '~/features/sections/section.fields'
 import { getSectionLayout, getSectionType } from '~/features/sections/section.registry'
 
 // The page's sections in order: drag the handles (or Arrow Up/Down on a focused handle) to reorder, the eye to
@@ -20,6 +21,11 @@ const emit = defineEmits<{
 
 const typeName = (section: WebsiteSection) => getSectionType(section.type).name
 const layoutName = (section: WebsiteSection) => getSectionLayout(section.type, section.layout)?.name
+// Content its layout needs is still empty (see the section's settings)
+function isMissingContent(section: WebsiteSection) {
+  const layout = getSectionLayout(section.type, section.layout)
+  return !!layout && missingFields(layout, section.content).length > 0
+}
 
 // Drag with vue-draggable-plus (SortableJS; mouse and touch). The list belongs to the editor, so put Sortable's
 // DOM move back and let the editor reorder it.
@@ -74,7 +80,13 @@ async function onHandleKeydown(event: KeyboardEvent, index: number) {
         :class="!section.isVisible && 'opacity-60'"
         @click="emit('select', section.key)"
       >
-        <span class="text-sm font-medium">{{ typeName(section) }}</span>
+        <span class="flex items-center gap-1.5 text-sm font-medium">
+          {{ typeName(section) }}
+          <template v-if="isMissingContent(section)">
+            <span data-section-missing aria-hidden="true" title="Missing content its layout needs" class="size-2 rounded-full bg-amber-500" />
+            <span class="sr-only">(missing content its layout needs)</span>
+          </template>
+        </span>
         <span class="w-full truncate text-xs text-muted-foreground">
           {{ layoutName(section) }}<template v-if="!section.isVisible"> · Hidden</template>
         </span>
