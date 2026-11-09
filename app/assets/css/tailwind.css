@@ -59,3 +59,66 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Event websites: heading-font text in its pairing's heading weight (`--site-font-heading-weight`, from SiteThemeScope).
+   In the base layer, so a weight utility on the element (e.g. `font-bold`) still wins. */
+@layer base {
+  .font-\(family-name\:--site-font-heading\) {
+    font-weight: var(--site-font-heading-weight, 400);
+  }
+}
+
+/* Event websites: heading sizes. The theme's scales (`--site-hero-heading-scale`, `--site-heading-scale`, set by
+   SiteThemeScope) resize the hero's heading (its h1) and every other section's heading (its h2, and the program's venues
+   heading, which matches it) by scaling the text-size steps they use, so each layout keeps its own sizes and their
+   phone-to-desktop steps; item titles, labels and numbers keep theirs. */
+@layer base {
+  .crephore-site h1 {
+    --text-xl: calc(1.25rem * var(--site-hero-heading-scale, 1));
+    --text-2xl: calc(1.5rem * var(--site-hero-heading-scale, 1));
+    --text-3xl: calc(1.875rem * var(--site-hero-heading-scale, 1));
+    --text-4xl: calc(2.25rem * var(--site-hero-heading-scale, 1));
+    --text-5xl: calc(3rem * var(--site-hero-heading-scale, 1));
+    --text-6xl: calc(3.75rem * var(--site-hero-heading-scale, 1));
+    --text-7xl: calc(4.5rem * var(--site-hero-heading-scale, 1));
+    --text-8xl: calc(6rem * var(--site-hero-heading-scale, 1));
+    --text-9xl: calc(8rem * var(--site-hero-heading-scale, 1));
+  }
+  .crephore-site :is(h2, [data-venues-heading]) {
+    --text-xl: calc(1.25rem * var(--site-heading-scale, 1));
+    --text-2xl: calc(1.5rem * var(--site-heading-scale, 1));
+    --text-3xl: calc(1.875rem * var(--site-heading-scale, 1));
+    --text-4xl: calc(2.25rem * var(--site-heading-scale, 1));
+    --text-5xl: calc(3rem * var(--site-heading-scale, 1));
+    --text-6xl: calc(3.75rem * var(--site-heading-scale, 1));
+    --text-7xl: calc(4.5rem * var(--site-heading-scale, 1));
+    --text-8xl: calc(6rem * var(--site-heading-scale, 1));
+    --text-9xl: calc(8rem * var(--site-heading-scale, 1));
+  }
+}
+
+/* Event websites: the content frame every section but the hero lines up with. Sections pad their sides with
+   `--site-edge` (`px-(--site-edge)`, or `ps-` / `pe-` on a full-bleed half): the side gutter (`--site-gutter`: 28px,
+   48px from 672px, 64px from 1024px), or more once the page is wider than the 1280px column plus gutters, so the
+   content is at most 1280px wide and centred. `100cqw` is the page (SiteThemeScope is the container), so use it on a
+   section or a full-bleed part of one, never inside another container. The hero's text pads with `--site-hero-edge`:
+   the same gutter until the column is full, then a quarter of the extra width on each side (slower than
+   `--site-edge`), so the hero stays a little wider than the sections on large screens. */
+@layer base {
+  .crephore-site section {
+    --site-gutter: 1.75rem;
+    --site-content: 80rem;
+    --site-edge: max(var(--site-gutter), calc((100cqw - var(--site-content)) / 2));
+    --site-hero-edge: calc(var(--site-gutter) + max(0px, (100cqw - var(--site-content) - 2 * var(--site-gutter)) / 4));
+  }
+  @container (width >= 42rem) {
+    .crephore-site section {
+      --site-gutter: 3rem;
+    }
+  }
+  @container (width >= 64rem) {
+    .crephore-site section {
+      --site-gutter: 4rem;
+    }
+  }
+}

@@ -21,9 +21,9 @@ const columnClasses: Record<string, string> = { 2: '', 3: '@3xl:grid-cols-3' }
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-16 @2xl:px-10 @2xl:py-24">
-    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-5xl" />
-    <div v-if="occasion.program.items.length" class="mx-auto mt-12 flex max-w-5xl flex-col gap-12">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-16 @2xl:py-24">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-12 flex flex-col gap-12">
       <div v-for="day in days" :key="day.date">
         <ProgramDayDivider :label="day.label" :styles="styles" class="mb-10" />
         <ol data-program-items class="grid gap-x-10 gap-y-12 @2xl:grid-cols-2" :class="columnClasses[options.columns]">
@@ -48,6 +48,6 @@ const columnClasses: Record<string, string> = { 2: '', 3: '@3xl:grid-cols-3' }
         </ol>
       </div>
     </div>
-    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="poster" class="mx-auto mt-20 max-w-5xl" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="poster" class="mx-auto mt-20" />
   </SectionFrame>
 </template>

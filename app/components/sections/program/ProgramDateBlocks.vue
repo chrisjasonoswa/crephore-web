@@ -8,7 +8,7 @@ import { formatProgramTime, joinProgramSpeakers, programBlockColours, programBlo
 import ProgramHeading from './ProgramHeading.vue'
 import ProgramVenues from './ProgramVenues.vue'
 
-// Layout `date-blocks`: a capitals heading with the month in a badge beside it, then blocks of colour,
+// Layout `date-blocks`: the heading with the month in a badge beside it, then blocks of colour,
 // alternating two colours that differ from the section's (`programBlockColours`), each holding one item or a whole day's
 // items (`blockPer`) beside a huge day number with the weekday and month. Each item: the time, the title in bold capitals, the venue and "with"
 // the speakers on a small line, then the note.
@@ -31,11 +31,11 @@ const venueCardStyles = (shown: SectionBackground) => programBlockColours(shown)
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles, background: shown }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles, background: shown }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <div class="mx-auto max-w-4xl">
       <!-- The month badge beside the heading (left), under it (centre), or across from it (right) -->
       <div class="flex gap-4" :class="headerClasses[titleAlign]">
-        <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" look="display" />
+        <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" />
         <p
           v-if="month && occasion.program.items.length"
           data-program-month

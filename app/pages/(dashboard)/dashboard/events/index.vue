@@ -41,7 +41,7 @@ async function onEventsChanged() {
         ref="groupsPanel"
         v-model:selected="selectedGroup"
         :total-events="totalEvents"
-        class="max-h-96 lg:sticky lg:top-4 lg:h-[calc(100svh-12rem)] lg:max-h-none lg:w-72 lg:shrink-0"
+        class="max-h-96 lg:sticky lg:top-20 lg:h-[calc(100svh-12rem)] lg:max-h-none lg:w-72 lg:shrink-0"
         @close="isGroupsPanelOpen = false"
         @changed="tableVersion++"
       />

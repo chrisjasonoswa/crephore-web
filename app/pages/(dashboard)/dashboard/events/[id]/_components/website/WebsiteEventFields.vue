@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import CAlert from '~/components/custom/c-alert/CAlert.vue'
 
-// Section text that comes from the event (the hero's heading, a memorial's life dates, date and place, the countdown's
-// heading): an info alert naming them, with a link to the Details tab to change them, then each shown as plain text.
-// Never editable here and never saved with the section. The `control` slot puts a section setting between a field's
-// label and its value (e.g. how the life dates show).
+// Section text that comes from the event (the hero's heading, a memorial's life dates, date and place): an info alert
+// naming them, with a link to the Details tab to change them, then each shown as plain text. Never editable here and
+// never saved with the section. The `control` slot puts a section setting between a field's label and its value (e.g.
+// how the life dates show).
 const props = defineProps<{
   fields: { label: string, value: string }[]
 }>()

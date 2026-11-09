@@ -25,9 +25,9 @@ const speakersOf = (speakers?: string) => programSpeakers(speakers).join(', ')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-5xl" />
-    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex max-w-5xl flex-col gap-8">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex flex-col gap-8">
       <fieldset v-for="day in days" :key="day.date" data-program-day-panel class="min-w-0 rounded-(--site-radius) border border-current/15 px-4 pt-4 pb-4 @2xl:px-6 @2xl:pt-5 @2xl:pb-6">
         <legend class="mx-auto px-3">
           <h3 data-program-day class="text-xs font-semibold tracking-[0.2em] uppercase" :class="styles.eyebrow">
@@ -73,6 +73,6 @@ const speakersOf = (speakers?: string) => programSpeakers(speakers).join(', ')
         </ol>
       </fieldset>
     </div>
-    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="cards" class="mx-auto mt-14 max-w-5xl" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="cards" class="mx-auto mt-14" />
   </SectionFrame>
 </template>

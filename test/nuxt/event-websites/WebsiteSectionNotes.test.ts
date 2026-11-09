@@ -16,20 +16,11 @@ describe('website section notes', () => {
     const wrapper = await notesFor(about('timeline-zigzag', []))
 
     expect(wrapper.find('[data-missing-notes]').text()).toBe('This layout needs at least one chapter.')
-    expect(wrapper.find('[data-hidden-notes]').exists()).toBe(false)
   })
 
-  it('says what the layout doesn\'t show and that it\'s kept', async () => {
-    const wrapper = await notesFor(about('split', [{ heading: 'We met' }, { heading: 'We moved' }, { heading: 'Yes' }]))
-
-    expect(wrapper.find('[data-hidden-notes]').text()).toBe('This layout doesn\'t show your 3 chapters. They\'re kept for layouts that do.')
-    expect(wrapper.find('[data-missing-notes]').exists()).toBe(false)
-  })
-
-  it('shows nothing when the layout has what it needs and shows everything filled in', async () => {
-    const wrapper = await notesFor(about('timeline-zigzag', [{ heading: 'We met' }]))
-
-    expect(wrapper.find('[role="note"]').exists()).toBe(false)
+  it('shows nothing when the layout has what it needs, even with content it doesn\'t show', async () => {
+    expect((await notesFor(about('timeline-zigzag', [{ heading: 'We met' }]))).find('[role="note"]').exists()).toBe(false)
+    expect((await notesFor(about('split', [{ heading: 'We met' }]))).find('[role="note"]').exists()).toBe(false)
   })
 
   it('marks sections missing content in the section list', async () => {

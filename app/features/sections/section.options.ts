@@ -116,6 +116,10 @@ export const alignClasses = {
 
 export type Align = keyof typeof alignClasses
 
+// A row's items (a flex row's `justify-*`) and a block of limited width (its margins) placed by an `Align` value
+export const justifyClasses = { start: 'justify-start', center: 'justify-center', end: 'justify-end' } as const
+export const blockAlignClasses = { start: 'me-auto text-start', center: 'mx-auto text-center', end: 'ms-auto text-end' } as const
+
 export const aboveBelowChoices = [
   { value: 'above', label: 'Above' },
   { value: 'below', label: 'Below' },

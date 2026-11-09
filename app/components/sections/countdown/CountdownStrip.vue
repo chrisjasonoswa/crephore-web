@@ -2,7 +2,7 @@
 import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
+import { countdownHeading, formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import CountdownButton from './CountdownButton.vue'
 
 // Layout `strip` ("Slim strip"): a thin band with the date ("14 · 02 · 2027") and the countdown inline, to sit
@@ -16,9 +16,9 @@ const dateOnRight = computed(() => props.options.dateSide === 'right')
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
-    <div class="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 px-6 py-6 text-center @3xl:flex-row @3xl:justify-center @3xl:gap-8 @3xl:py-5">
+    <div class="px-(--site-edge) mx-auto flex w-full flex-col items-center gap-3 py-6 text-center @3xl:flex-row @3xl:justify-center @3xl:gap-8 @3xl:py-5">
       <h2 class="sr-only">
-        {{ occasion.name }}
+        {{ countdownHeading(content, occasion) }}
       </h2>
 
       <div data-countdown-date class="flex flex-col items-center" :class="dateOnRight ? '@3xl:order-3 @3xl:items-end @3xl:text-end' : '@3xl:order-1 @3xl:items-start @3xl:text-start'">

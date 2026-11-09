@@ -14,7 +14,7 @@ const centred = computed(() => (props.options.textAlign) === 'center')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <div class="mx-auto max-w-2xl">
       <AboutText :content="content" :styles="styles" :align="centred ? 'center' : 'start'" />
       <ol v-if="content.timeline.length" data-about-timeline class="relative mt-10 flex flex-col" :class="centred ? 'items-center gap-0' : 'gap-8'">

@@ -17,8 +17,8 @@ const panelStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div class="mx-auto grid max-w-6xl @3xl:grid-cols-12 @3xl:items-center">
+  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div class="mx-auto grid @3xl:grid-cols-12 @3xl:items-center">
       <SectionPhoto
         data-message-photo
         :src="content.layoutPhotos[0]"

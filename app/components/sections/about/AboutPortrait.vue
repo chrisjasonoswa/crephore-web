@@ -20,7 +20,7 @@ const extras = computed(() => props.content.layoutPhotos.slice(1, 3).filter(Bool
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <AboutText :content="content" :styles="styles" :align="align" class="mx-auto max-w-3xl">
       <template #before-heading>
         <SectionPhoto data-about-photo :data-frame="options.frame" :src="content.layoutPhotos[0]" class="w-36 @2xl:w-44" :class="frameClasses" />

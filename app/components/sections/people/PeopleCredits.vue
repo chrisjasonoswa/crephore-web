@@ -11,7 +11,7 @@ defineProps<SectionLayoutProps<'people', PeopleLayoutOptions<'roleFirst'>>>()
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <PeopleHeading :content="content" :styles="styles" />
     <ul v-if="content.people.length" data-people class="mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6 @2xl:gap-8">
       <li v-for="person in content.people" :key="person.id" data-person>

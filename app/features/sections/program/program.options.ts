@@ -2,7 +2,7 @@ import type { LayoutOptionCatalogue, LayoutOptionValues, SectionLayoutOptionChoi
 import { siteDividers } from '~/components/site-graphics/dividers/site-dividers'
 import { eventKindLabels } from '~/site-theme/eventKinds'
 import { allSectionLayoutOptions } from '../section.layout-options'
-import { alignWithEndChoices, showHideChoices, sideChoices } from '../section.options'
+import { showHideChoices, sideChoices } from '../section.options'
 
 // Columns from one to three; layouts offer the counts that suit them (`columnChoices('2', '3')`)
 const columnValues = ['1', '2', '3'] as const
@@ -11,8 +11,6 @@ export const columnChoices = (...values: (typeof columnValues)[number][]) => val
 // Every option a program layout can offer, defined once; layouts pick theirs by key in program.registry.ts. Options
 // several section types share are in `allSectionLayoutOptions` instead.
 export const programSectionLayoutOptions = {
-  // Where the program's and the venues' eyebrow and heading sit
-  titleAlign: { label: 'Titles', choices: alignWithEndChoices, default: 'center' },
   // Some events don't give exact times
   showTime: { label: 'Time', choices: showHideChoices, default: 'show' },
   // Which side of the timeline's line the times go on (the details take the other)

@@ -326,6 +326,13 @@ describe('siteThemeVars fonts', () => {
       expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: pairing.key })['--site-font-heading-italic'], pairing.key).toBe('italic')
   })
 
+  it('lays the photo overlay 10 points stronger than text needs, and keeps the least for the Full hero\'s edge fade', () => {
+    const vars = siteThemeVars(themeWith('#1E2A44', '#E8A598'))
+    const strength = (value: string) => Number(value.match(/(\d+(?:\.\d+)?)%/)![1])
+
+    expect(strength(vars['--site-photo-overlay']!)).toBe(Math.min(strength(vars['--site-photo-overlay-edge']!) + 10, 95))
+  })
+
   it('fades a photo into the primary itself when light text reads on it, else into its dark shade', () => {
     const dark = siteThemeVars(themeWith('#1F3A2E', '#E8D9B5'))
     expect(dark['--site-photo-edge']).toBe(dark['--site-primary'])
@@ -340,11 +347,40 @@ describe('siteThemeVars fonts', () => {
       expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: pairing.key })['--site-font-heading-case'], pairing.key).toBe(pairing.heading.script ? 'none' : 'uppercase')
   })
 
+  it('scales the hero\'s and the other sections\' headings by their sizes, medium (1) when unset', () => {
+    const plain = siteThemeVars(themeWith('#1E2A44', '#E8A598'))
+    expect([plain['--site-hero-heading-scale'], plain['--site-heading-scale']]).toEqual(['1', '1'])
+
+    const sized = siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), heroHeadingSize: 'extra-large', headingSize: 'small' })
+    expect([sized['--site-hero-heading-scale'], sized['--site-heading-scale']]).toEqual(['1.3', '0.85'])
+  })
+
+  it('sets headings in their pairing\'s weight: 400 unless the pairing says otherwise', () => {
+    expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: 'serif_classic' })['--site-font-heading-weight']).toBe('400')
+    expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: 'fs_trench_slab_general_sans' })['--site-font-heading-weight']).toBe('500')
+    expect(siteThemeVars({ ...themeWith('#1E2A44', '#E8A598'), fontPairingKey: 'modern_editorial' })['--site-font-heading-weight']).toBe('300')
+  })
+
+  it('groups the pairings by how the heading looks, every cursive heading under Handwritten', () => {
+    expect(fontPairingGroups.map(group => group.label)).toEqual(['Classic & Elegant', 'Handwritten', 'Clean & Simple', 'Big & Bold', 'Fun & Friendly'])
+    for (const pairing of fontPairings.filter(pairing => pairing.heading.script))
+      expect(pairing.group, pairing.key).toBe('handwritten')
+    const groupOf = (key: string) => fontPairings.find(pairing => pairing.key === key)!.group
+    expect([groupOf('serif_classic'), groupOf('minimal'), groupOf('bold_bash'), groupOf('playful')]).toEqual(['classic', 'clean', 'bold', 'fun'])
+  })
+
+  it('adds Fontshare\'s 58 pairs (Boska + Switzer is Modern editorial), named after their fonts', () => {
+    const pairs = fontPairings.filter(pairing => pairing.key.startsWith('fs_'))
+    expect(pairs).toHaveLength(58)
+    expect(pairs.every(pairing => pairing.name === `${pairing.heading.family} + ${pairing.body.family}`)).toBe(true)
+    expect(fontPairings.filter(pairing => pairing.heading.family === 'Boska' && pairing.body.family === 'Switzer')).toHaveLength(1)
+  })
+
   it('registers the Fontshare families with their provider, the rest from Google Fonts', () => {
     const byName = Object.fromEntries(siteFontFamilies.map(font => [font.name, font]))
 
     expect(byName.Boska).toMatchObject({ provider: 'fontshare', weights: [300], styles: ['normal', 'italic'] })
-    expect(byName.Switzer).toMatchObject({ provider: 'fontshare', weights: [400, 500, 600] })
+    expect(byName.Switzer).toMatchObject({ provider: 'fontshare', weights: expect.arrayContaining([400, 500, 600]) })
     expect(byName.Inter).not.toHaveProperty('provider')
   })
 
@@ -379,9 +415,9 @@ describe('font pairings', () => {
     expect(siteFontFamilies.find(font => font.name === 'Lora')!.styles).toEqual(['normal', 'italic'])
   })
 
-  it('keeps headings to the weights sections use (400), with a body that has semibold or bold', () => {
+  it('loads each heading in the weight it\'s set in (its own, else 400), with a body that has semibold or bold', () => {
     for (const pairing of fontPairings) {
-      expect(pairing.heading.weights, pairing.key).toContain(pairing.heading.weights.includes(400) ? 400 : pairing.heading.weights[0])
+      expect(pairing.heading.weights, pairing.key).toContain(pairing.heading.weight ?? (pairing.heading.weights.includes(400) ? 400 : pairing.heading.weights[0]))
       expect(pairing.body.weights, pairing.key).toContain(400)
       expect(pairing.body.weights.some(weight => weight >= 600), pairing.key).toBe(true)
     }

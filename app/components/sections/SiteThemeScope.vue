@@ -5,6 +5,7 @@ import PageIntroScene from '~/features/site-motion/PageIntroScene.vue'
 import { intensityScale, introDuration, motionVars, prefersReducedMotion, REDUCED_INTRO_MS } from '~/features/site-motion/presets'
 import { lockScroll } from '~/features/site-motion/scroll-lock'
 import { normalizeSiteMotion, sceneKindOf } from '~/features/site-motion/site-motion.type'
+import { stillScopeKey } from '~/features/sections/useScrollPin'
 import { useSiteTheme } from '~/site-theme/useSiteTheme'
 
 // Applies an event's site theme to everything inside it. Wrap sections in this,
@@ -37,6 +38,9 @@ const motion = computed(() => normalizeSiteMotion(props.theme.motion))
 const motionStyle = computed(() => motionVars(motion.value))
 
 // Known on the client only
+// Thumbnails don't follow the page's scroll (sideways rows stay put, `useScrollPin`)
+provide(stillScopeKey, props.still)
+
 const reducedMotion = import.meta.client && prefersReducedMotion()
 const introPlaying = ref(!props.still && props.introOnLoad && motion.value.intro !== 'none')
 const introContained = ref(false)

@@ -251,7 +251,10 @@ describe('event website', () => {
 
       const request = mapWebsiteToRequest({ ...website, sections: [added, website.sections[0]!] })
 
-      expect(request.theme).toEqual({ ...saved.theme })
+      // Saved before heading sizes existed: medium
+      expect(request.theme).toEqual({ ...saved.theme, heroHeadingSize: 'medium', headingSize: 'medium' })
+      expect(mapWebsiteToRequest({ ...websiteFromApi(saved), theme: { ...websiteFromApi(saved).theme, heroHeadingSize: 'extra-large', headingSize: 'small' } }).theme)
+        .toMatchObject({ heroHeadingSize: 'extra-large', headingSize: 'small' })
       expect(request.sections.map(section => section.id)).toEqual([null, 11])
       expect(request.sections[0]).toMatchObject({ type: 'hero', layout: 'fullscreen', contentVersion: 2, isVisible: true, visibility: 'Always' })
       expect(request.sections[1]).toEqual({ ...saved.sections[0] })

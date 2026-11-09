@@ -17,8 +17,8 @@ const align = computed(() => props.options.textAlign)
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div data-about-stack class="mx-auto flex max-w-5xl gap-10 @3xl:gap-14" :class="photosAbove ? 'flex-col-reverse' : 'flex-col'">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div data-about-stack class="mx-auto flex gap-10 @3xl:gap-14" :class="photosAbove ? 'flex-col-reverse' : 'flex-col'">
       <div v-if="isSideBySide" data-about-text class="grid gap-6 @3xl:grid-cols-2 @3xl:gap-16">
         <AboutHeading :content="content" :styles="styles" align="start" size="large" />
         <AboutBody :content="content" align="start" class="@3xl:pt-8" />

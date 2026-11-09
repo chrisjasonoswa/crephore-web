@@ -26,7 +26,7 @@ function numberOf(index: number): string {
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-16 @2xl:px-10 @2xl:py-24">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-16 @2xl:py-24">
     <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" />
     <div v-if="occasion.program.items.length" class="mx-auto mt-12 flex max-w-md flex-col gap-10">
       <div v-for="day in days" :key="day.date">

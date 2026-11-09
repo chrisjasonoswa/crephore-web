@@ -10,7 +10,7 @@ import ProgramHeading from './ProgramHeading.vue'
 import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `photo-cards`: the section split into its colour and the layout photo (`photoSide`; the photo takes two fifths
-// on phones, half from 768px; it stays in view, sticky, while a long list of cards scrolls past), a capitals heading on the colour, and light cards laid across the split. Each
+// on phones, half from 768px; it stays in view, sticky, while a long list of cards scrolls past), the heading on the colour, and light cards laid across the split. Each
 // card has the day number and month, then the weekday and "Day N", then (`blockPer`) one item: the time, the title large
 // in the heading font, the venue and "with" the speakers, and the note; or a whole day's items as ticked lines, the time
 // and title, then the venue and speakers, then the note, smaller. Starts on primary.
@@ -26,15 +26,15 @@ const cardStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <!-- The photo's side of the section, full height; the photo sticks to the top of the screen inside it while the
          cards scroll past, one screen tall (or the section's height, when that's less) -->
     <div data-program-photo-column class="absolute inset-y-0 w-2/5 @2xl:w-1/2" :class="photoLeft ? 'start-0' : 'end-0'">
       <SectionPhoto data-program-photo :src="content.layoutPhotos?.[0]" class="sticky top-0 h-svh max-h-full w-full" />
     </div>
-    <div class="relative mx-auto flex max-w-5xl flex-col" :class="photoLeft ? 'items-end' : 'items-start'">
+    <div class="relative mx-auto flex flex-col" :class="photoLeft ? 'items-end' : 'items-start'">
       <!-- Kept on the colour, beside the photo -->
-      <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" align="start" look="display" class="max-w-[55%] @2xl:max-w-[45%]" />
+      <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" align="start" class="max-w-[55%] @2xl:max-w-[45%]" />
       <ol v-if="occasion.program.items.length" data-program-items class="mt-8 flex w-full flex-col gap-4 @2xl:mt-10 @2xl:w-3/4 @2xl:gap-5">
         <li
           v-for="block in blocks"

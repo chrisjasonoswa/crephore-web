@@ -17,7 +17,7 @@ const titleAlign = computed(() => props.options.titleAlign)
 
 const days = computed(() => programDays(props.occasion.program.items))
 const timed = computed(() => showsTime(props.options))
-const columnClasses: Record<string, string> = { 1: 'max-w-2xl', 2: 'max-w-5xl @3xl:grid-cols-2' }
+const columnClasses: Record<string, string> = { 1: 'max-w-2xl', 2: '@3xl:grid-cols-2' }
 
 // A line under every item but those in a day's last row: the last item, and in two columns (from 1024px) the one beside
 // it when the row is full
@@ -30,10 +30,10 @@ function lineClasses(position: number, count: number): string {
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-5xl" />
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" />
     <!-- The gap matches the space under the day divider, so the divider sits midway -->
-    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex max-w-5xl flex-col gap-8">
+    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex flex-col gap-8">
       <div v-for="day in days" :key="day.date">
         <ProgramDayDivider :label="day.label" :styles="styles" class="mb-8" />
         <ol data-program-items class="grid gap-x-12 gap-y-6" :class="columnClasses[options.columns]">
@@ -64,6 +64,6 @@ function lineClasses(position: number, count: number): string {
         </ol>
       </div>
     </div>
-    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="rows" rule="label" class="mx-auto mt-14 max-w-5xl" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="rows" rule="label" class="mx-auto mt-14" />
   </SectionFrame>
 </template>

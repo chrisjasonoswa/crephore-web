@@ -2,7 +2,7 @@
 import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import { formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
+import { countdownHeading, formatOccasionDate, useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 
@@ -22,7 +22,7 @@ const justifyWide = { start: '@2xl:justify-start', center: '@2xl:justify-center'
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
-    <div class="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-16 @2xl:px-10 @2xl:py-24" :class="alignClasses[align]">
+    <div class="px-(--site-edge) mx-auto flex w-full flex-col gap-8 py-16 @2xl:py-24" :class="alignClasses[align]">
       <p
         v-if="content.eyebrow"
         class="text-[0.7rem] font-semibold tracking-[0.25em] uppercase @2xl:text-xs"
@@ -54,7 +54,7 @@ const justifyWide = { start: '@2xl:justify-start', center: '@2xl:justify-center'
 
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm @2xl:text-base" :class="justify[align]">
         <h2 class="font-medium" :class="styles.brandText">
-          {{ occasion.name }}
+          {{ countdownHeading(content, occasion) }}
         </h2>
         <span aria-hidden="true" :class="styles.muted">·</span>
         <span data-countdown-date :class="styles.muted">{{ date }}</span>

@@ -17,10 +17,10 @@ const cardStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) py-14 @2xl:py-20">
     <div
       data-message-postcard
-      class="mx-auto flex max-w-5xl flex-col gap-6 rounded-(--site-radius) p-4 shadow-xl @2xl:p-6 @3xl:gap-0"
+      class="mx-auto flex flex-col gap-6 rounded-(--site-radius) p-4 shadow-xl @2xl:p-6 @3xl:gap-0"
       :class="[cardStyles.root, photoOnLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse']"
     >
       <SectionPhoto data-message-photo :src="content.layoutPhotos[0]" class="aspect-4/3 w-full @3xl:aspect-auto @3xl:min-h-80 @3xl:w-1/2" />

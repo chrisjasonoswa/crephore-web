@@ -9,16 +9,15 @@ import ProgramOverallVenue from './ProgramOverallVenue.vue'
 // there; behind a map pin). Not a layout:
 // the program layouts share it so they stay consistent. `look` sets the style:
 //  - default: the eyebrow in small spaced capitals over the heading
-//  - script: the eyebrow in the heading font's italic over a capitals heading (the pinned note)
-//  - display: a capitals heading (the date-led layouts, the vertical title's heading across the top)
-// Headings are never bold, and every look is the usual heading size.
+//  - script: the eyebrow in the heading font's italic over the heading (the pinned note)
+// Headings are never bold nor in capitals, and every look is the usual heading size.
 withDefaults(defineProps<{
   content: ProgramContent
   // The program's venue (`occasion.program.venue`)
   venue?: string
   styles: BackgroundStyles
   align?: Align
-  look?: 'default' | 'script' | 'display'
+  look?: 'default' | 'script'
 }>(), {
   align: 'center',
   look: 'default',
@@ -45,8 +44,7 @@ withDefaults(defineProps<{
         styles.brandText,
         {
           'default': ['text-3xl leading-tight @2xl:text-4xl', content.eyebrow && 'mt-3'],
-          'script': ['text-3xl leading-tight [text-transform:var(--site-font-heading-case)] @2xl:text-4xl', content.eyebrow && 'mt-1'],
-          'display': ['text-3xl leading-tight [text-transform:var(--site-font-heading-case)] @2xl:text-4xl', content.eyebrow && 'mt-3'],
+          'script': ['text-3xl leading-tight @2xl:text-4xl', content.eyebrow && 'mt-1'],
         }[look],
       ]"
     >

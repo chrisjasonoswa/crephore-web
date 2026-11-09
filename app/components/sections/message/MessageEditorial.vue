@@ -14,8 +14,8 @@ const photoAbove = computed(() => props.options.photoPosition === 'above')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div class="mx-auto flex max-w-6xl gap-10 @3xl:gap-14" :class="photoAbove ? 'flex-col-reverse' : 'flex-col'">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div data-message-editorial class="mx-auto flex gap-10 @3xl:gap-14" :class="photoAbove ? 'flex-col-reverse' : 'flex-col'">
       <div data-message-text class="grid gap-6 @3xl:grid-cols-2 @3xl:gap-16">
         <MessageHeading :content="content" :styles="styles" align="start" size="large" />
         <MessageBody :content="content" :styles="styles" align="start" class="@3xl:pt-8" />

@@ -21,6 +21,17 @@ describe('upgradeSectionContent', () => {
     vi.restoreAllMocks()
   })
 
+  it('turns the dress code\'s attire preset into the words guests saw, and a custom attire into the host\'s own words', () => {
+    const saved = (attire: string, attireLabel?: string) => ({ heading: 'Dress code', attire, attireLabel, colours: [], avoidColours: [], layoutPhotos: [] }) as never
+    const upgraded = { heading: 'Dress code', colours: [], avoidColours: [], layoutPhotos: [] }
+
+    expect(upgradeSectionContent('dress-code', saved('garden-formal'), 1)).toEqual({ ...upgraded, attire: 'Garden formal' })
+    expect(upgradeSectionContent('dress-code', saved('filipiniana-barong'), 1)).toEqual({ ...upgraded, attire: 'Filipiniana & barong' })
+    expect(upgradeSectionContent('dress-code', saved('custom', ' Sunday best '), 1)).toEqual({ ...upgraded, attire: 'Sunday best' })
+    // A custom attire without words has none now
+    expect(upgradeSectionContent('dress-code', saved('custom', ' '), 1)).toEqual(upgraded)
+  })
+
   it('gives program content saved at version 1 its layout photos, drops the venue and items at version 2, and gives the venues a heading at version 3', () => {
     const atVersion1 = { heading: 'Program', venue: 'Manila Cathedral', items: [{ id: 'a', date: '', title: 'Ceremony' }] } as never
     const atVersion2 = { eyebrow: 'The day', heading: 'Program', venue: 'Manila Cathedral', items: [], layoutPhotos: ['https://example.com/a.jpg'] } as never

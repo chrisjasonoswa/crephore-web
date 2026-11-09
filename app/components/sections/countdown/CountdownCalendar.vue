@@ -21,7 +21,7 @@ const calendarOnRight = computed(() => props.options.calendarSide === 'right')
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
     <div
-      class="mx-auto flex w-full max-w-5xl flex-col items-center gap-10 px-6 py-16 @2xl:px-10 @2xl:py-24 @3xl:flex-row @3xl:justify-center @3xl:gap-16"
+      class="px-(--site-edge) mx-auto flex w-full flex-col items-center gap-10 py-16 @2xl:py-24 @3xl:flex-row @3xl:justify-center @3xl:gap-16"
       :class="calendarOnRight && '@3xl:flex-row-reverse'"
     >
       <div

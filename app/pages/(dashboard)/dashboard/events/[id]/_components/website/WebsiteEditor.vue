@@ -255,17 +255,22 @@ function startOver() {
     </CAlert>
 
     <!-- Scrolls on its own when taller than the viewport, so every control stays reachable -->
-    <Card class="py-0 xl:sticky xl:top-6 xl:max-h-[calc(100svh-3rem)] xl:overflow-y-auto">
+    <Card class="py-0 xl:sticky xl:top-22 xl:max-h-[calc(100svh-7rem)] xl:overflow-y-auto">
       <CardContent class="p-4">
         <Tabs v-model="panel" class="gap-5">
-          <TabsList class="grid w-full grid-cols-2">
-            <TabsTrigger value="sections">
-              Sections
-            </TabsTrigger>
-            <TabsTrigger value="style">
-              Style
-            </TabsTrigger>
-          </TabsList>
+          <!-- Stays at the top while the panel scrolls (h-16: a section's title row sticks right under it): under the app's
+               sticky header (`top-16`) while the page scrolls, at the panel's own top from xl, where the panel scrolls by
+               itself; covers the panel's top padding so nothing shows above it -->
+          <div data-editor-tabs class="sticky top-16 z-20 -mx-4 -mt-4 h-16 bg-card px-4 pt-4 pb-3 xl:top-0">
+            <TabsList class="grid w-full grid-cols-2">
+              <TabsTrigger value="sections">
+                Sections
+              </TabsTrigger>
+              <TabsTrigger value="style">
+                Style
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="sections">
             <WebsiteSectionSettings

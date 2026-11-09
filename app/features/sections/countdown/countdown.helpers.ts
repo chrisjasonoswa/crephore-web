@@ -1,4 +1,5 @@
-import type { OccasionTime } from '../section.type'
+import type { CountdownContent } from './countdown.type'
+import type { OccasionTime, SectionOccasion } from '../section.type'
 import { computed, onBeforeUnmount, onMounted, ref, toValue, type MaybeRefOrGetter } from 'vue'
 
 // The countdown sections' time maths and date formats. The target is the occasion's start (a UTC instant),
@@ -8,6 +9,11 @@ const SECOND = 1000
 const MINUTE = 60 * SECOND
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
+
+/** The countdown's heading: the host's, else the event's name. */
+export function countdownHeading(content: Pick<CountdownContent, 'heading'>, occasion: Pick<SectionOccasion, 'name'>): string {
+  return content.heading?.trim() || occasion.name
+}
 
 export interface CountdownParts {
   days: number

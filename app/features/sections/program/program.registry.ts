@@ -2,7 +2,7 @@ import type { ProgramLayoutOptionKey } from './program.options'
 import type { LayoutOptionPick } from '../section.options'
 import type { SectionBackground } from '../section.type'
 import type { SectionTypeDefinition } from '../section.registry.type'
-import { alignWithEndChoices, pickLayoutOptions } from '../section.options'
+import { pickLayoutOptions } from '../section.options'
 import { layout, onColour, onPaper } from '../section.layout'
 import { columnChoices, programLayoutOptionCatalogue } from './program.options'
 import { programFields } from './program.type'
@@ -142,16 +142,11 @@ export const programSection: SectionTypeDefinition<'program'> = {
     layout({
       key: 'vertical',
       name: 'Vertical title',
-      description: 'The heading set huge and sideways down the left, a wide photo on top, then rows of times, titles and speakers. Bold and modern.',
+      description: 'A wide photo on top, then rows of times, titles and speakers under strong rules. Bold and modern.',
       layoutPhotoCount: 1,
       fields: programFields,
       backgrounds: onColour,
-      options: options(
-        // The heading sideways down the left (the layout's own), or across the top like the other layouts'
-        ['titleAlign', { choices: [{ value: 'vertical', label: 'Vertical left' }, ...alignWithEndChoices], default: 'vertical' }],
-        'showTime',
-        'showPhoto',
-      ),
+      options: options(['titleAlign', { default: 'start' }], 'showTime', 'showPhoto'),
     }, () => import('~/components/sections/program/ProgramVertical.vue')),
     layout({
       key: 'date-blocks',

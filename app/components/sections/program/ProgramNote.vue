@@ -9,7 +9,7 @@ import ProgramHeading from './ProgramHeading.vue'
 import ProgramVenues from './ProgramVenues.vue'
 
 // Layout `note` ("Pinned note"): the program on a sheet of paper pinned, clipped or just laid (`attachment`) on the
-// section's background, slightly tilted from 768px. The eyebrow in the heading font's italic over a capitals
+// section's background, slightly tilted from 768px. The eyebrow in the heading font's italic over the
 // heading; then rows (`rows`) under dashed rules, each day after its date, written in the heading font's italic with a
 // highlighter stroke behind it (not the shared ruled divider):
 //  - detailed: the time large, the title in small capitals under it; the venue, "with" the speakers and the note on the
@@ -39,7 +39,7 @@ function detailsOf(item: { venue?: string, speakers?: string, description?: stri
 </script>
 
 <template>
-  <SectionFrame v-slot="{ background: shown }" :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 py-16 @2xl:px-10 @2xl:py-24">
+  <SectionFrame v-slot="{ background: shown }" :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) py-16 @2xl:py-24">
     <div data-program-note class="relative mx-auto max-w-2xl rounded-xs px-6 pt-12 pb-10 shadow-2xl @2xl:-rotate-1 @2xl:px-12 @2xl:pt-14" :class="noteStyles.root">
       <!-- The pin uses the background's button colour (the other brand colour), like the about polaroids' pins -->
       <span

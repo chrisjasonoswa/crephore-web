@@ -5,6 +5,14 @@ import { fontStack, getFontPairing } from './fontPairings'
 
 export type CornerStyle = 'sharp' | 'soft' | 'round'
 
+// How big headings are set (the hero's, and the other sections'): each scales the heading's own sizes, so every layout
+// keeps its proportions and phones stay smaller than desktops. Stored on saved websites (the API's
+// WebsiteKeys.HeadingSizes), so never rename one.
+export const headingSizes = ['small', 'medium', 'large', 'extra-large'] as const
+export type HeadingSize = (typeof headingSizes)[number]
+export const headingSizeLabels: Record<HeadingSize, string> = { 'small': 'Small', 'medium': 'Medium', 'large': 'Large', 'extra-large': 'XL' }
+export const HEADING_SCALE: Record<HeadingSize, number> = { 'small': 0.85, 'medium': 1, 'large': 1.15, 'extra-large': 1.3 }
+
 export interface SiteTheme {
   // hex, e.g. '#1E2A44'. The only colour a theme needs.
   primaryColor: string
@@ -19,6 +27,9 @@ export interface SiteTheme {
   backgroundColor?: string
   fontPairingKey: string
   cornerStyle: CornerStyle
+  // The hero's heading (the names or title) and the other sections' headings; medium when unset
+  heroHeadingSize?: HeadingSize
+  headingSize?: HeadingSize
   // The intro animation (features/site-motion)
   motion: SiteMotion
 }
@@ -88,6 +99,9 @@ const darker = (a: string, b: string) => (relativeLuminance(a) <= relativeLumina
  * Strength of the photo overlay. Starts at 55% and goes up until white (and
  * muted white) text passes AA even over the brightest part of a photo.
  */
+// Sections lay the overlay this much stronger than the least that keeps text readable, so the primary's tint shows
+// over the photo (the Full hero with its text off-centre keeps the least, `--site-photo-overlay-edge`, under its fade)
+const PHOTO_OVERLAY_BOOST = 10
 function photoOverlayStrength(primary900: string): number {
   for (let strength = 55; strength < 95; strength += 5) {
     const worst = mixSrgb(primary900, LIGHT_TEXT, strength / 100)
@@ -172,12 +186,15 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
     '--site-secondary-on-primary': ensureContrast(secondary, [primary]),
     '--site-primary-on-secondary': ensureContrast(primary, [secondary]),
     '--site-on-photo-muted': `color-mix(in srgb, ${LIGHT_TEXT} ${pct(ON_PHOTO_MUTED * 100)}, transparent)`,
-    '--site-photo-overlay': `color-mix(in srgb, var(--site-primary-900) ${pct(overlayStrength)}, transparent)`,
+    '--site-photo-overlay': `color-mix(in srgb, var(--site-primary-900) ${pct(Math.min(overlayStrength + PHOTO_OVERLAY_BOOST, 95))}, transparent)`,
+    '--site-photo-overlay-edge': `color-mix(in srgb, var(--site-primary-900) ${pct(overlayStrength)}, transparent)`,
     '--site-bg': bg,
     '--site-text': `color-mix(in oklch, var(--site-primary) ${pct(TEXT_TINT)}, ${DARK_TEXT})`,
     '--site-muted': fadeTowards(text, soft, MUTED),
     '--site-border': `color-mix(in oklch, var(--site-primary) ${pct(BORDER_TINT)}, var(--site-bg))`,
     '--site-font-heading': fontStack(fonts.heading),
+    // The weight headings are set in (the pairing's, e.g. Trench Slab Medium); a base rule applies it to heading-font text
+    '--site-font-heading-weight': String(fonts.heading.weight ?? 400),
     '--site-font-body': fontStack(fonts.body),
     // Use for italic heading text (`[font-style:var(--site-font-heading-italic)]`), never `italic`: scripts stay upright
     '--site-font-heading-italic': fonts.heading.script ? 'normal' : 'italic',
@@ -185,6 +202,9 @@ export function siteThemeVars(theme: SiteTheme): Record<string, string> {
     // in capitals can't be read, so it keeps its own case
     '--site-font-heading-case': fonts.heading.script ? 'none' : 'uppercase',
     '--site-radius': RADIUS[theme.cornerStyle] ?? RADIUS.soft,
+    // Heading sizes, as scales of each heading's own sizes (applied by a base rule in tailwind.css)
+    '--site-hero-heading-scale': String(HEADING_SCALE[theme.heroHeadingSize ?? 'medium'] ?? 1),
+    '--site-heading-scale': String(HEADING_SCALE[theme.headingSize ?? 'medium'] ?? 1),
   }
   for (const [step, share] of Object.entries(TINTS))
     vars[`--site-primary-${step}`] = `color-mix(in oklch, var(--site-primary) ${pct(share)}, white)`

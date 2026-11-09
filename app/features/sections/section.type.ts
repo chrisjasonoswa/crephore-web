@@ -8,6 +8,7 @@ import type { HeroContent } from './hero/hero.type'
 import type { MessageContent } from './message/message.type'
 import type { PeopleContent } from './people/people.type'
 import type { ProgramContent, SectionProgram } from './program/program.type'
+import type { DressCodeContent } from './dress-code/dress-code.type'
 import { occasionDate, sampleProgramItems, sampleProgramVenues } from './program/program.helpers'
 
 /**
@@ -46,6 +47,7 @@ export interface SectionContentMap {
   about: AboutContent
   people: PeopleContent
   program: ProgramContent
+  'dress-code': DressCodeContent
 }
 
 export type SectionType = keyof SectionContentMap

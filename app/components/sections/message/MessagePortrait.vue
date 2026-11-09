@@ -12,7 +12,7 @@ defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'photoPlacement'>
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <MessageText :content="content" :styles="styles" align="center" class="mx-auto max-w-3xl">
       <template v-if="content.layoutPhotos[0] && options.photoPlacement === 'top'" #before-heading>
         <SectionPhoto data-message-photo :src="content.layoutPhotos[0]" class="size-20 rounded-full bg-white p-1 shadow-md @2xl:size-24" />

@@ -28,7 +28,7 @@ const date = computed(() => formatOccasionDate(props.occasion, 'numeric'))
   >
     <div
       data-countdown-text
-      class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-16 @2xl:px-10 @2xl:py-24"
+      class="px-(--site-edge) mx-auto flex w-full flex-1 flex-col gap-8 py-16 @2xl:py-24"
       :class="[place.justify, alignClasses[place.align]]"
     >
       <div class="flex flex-col gap-3" :class="place.items">

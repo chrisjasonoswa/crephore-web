@@ -18,7 +18,7 @@ const others = computed(() => props.content.people.slice(2))
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <PeopleHeading :content="content" :styles="styles" />
     <div v-if="pair.length" data-people-pair class="mx-auto mt-10 flex max-w-3xl flex-col items-center gap-4 @2xl:flex-row @2xl:items-start @2xl:justify-center @2xl:gap-10">
       <template v-for="(person, index) in pair" :key="person.id">

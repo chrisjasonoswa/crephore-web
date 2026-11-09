@@ -15,7 +15,7 @@ const align = computed(() => props.options.textAlign)
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <div data-message-text class="mx-auto flex max-w-3xl flex-col gap-8" :class="alignClasses[align]">
       <MessageHeading :content="content" :styles="styles" :align="align" />
       <SectionPhoto data-message-photo :src="content.layoutPhotos[0]" class="aspect-16/9 w-full rounded-(--site-radius)" />

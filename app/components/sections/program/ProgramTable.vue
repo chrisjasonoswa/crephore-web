@@ -21,9 +21,9 @@ const columnCount = computed(() => 1 + Number(timed.value) + Number(speakers.val
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-5xl" />
-    <table v-if="occasion.program.items.length" data-program-items class="mx-auto mt-10 block w-full max-w-5xl text-sm @2xl:table @2xl:border-collapse">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" />
+    <table v-if="occasion.program.items.length" data-program-items class="mx-auto mt-10 block w-full text-sm @2xl:table @2xl:border-collapse">
       <thead class="hidden text-start @2xl:table-header-group">
         <tr class="border-b-2 border-current/25 text-[0.7rem] tracking-[0.2em] uppercase" :class="styles.eyebrow">
           <th v-if="timed" scope="col" class="py-3 pe-6 text-start font-semibold">
@@ -74,6 +74,6 @@ const columnCount = computed(() => 1 + Number(timed.value) + Number(speakers.val
         </tr>
       </tbody>
     </table>
-    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="rows" rule="none" class="mx-auto mt-14 max-w-5xl" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="rows" rule="none" class="mx-auto mt-14" />
   </SectionFrame>
 </template>

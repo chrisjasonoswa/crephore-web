@@ -15,7 +15,7 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <!-- The heading goes in the message's slot so the photo, floated first, sits beside all of the note -->
     <MessageBody data-message-text :content="content" :styles="styles" align="start" drop-cap class="mx-auto max-w-4xl">
       <SectionPhoto

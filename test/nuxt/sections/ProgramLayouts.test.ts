@@ -284,17 +284,16 @@ describe('layout options', () => {
     expect(await header('end')).toContain('flex-row-reverse')
   })
 
-  it('vertical title: sets the heading sideways by default, or across the top left, centred or right', async () => {
+  it('vertical title: puts the heading across the top, left by default, or centred or right (a saved "vertical" reads as left)', async () => {
     const option = definitionOf('vertical').options[0]!
-    expect(option.choices.map(choice => [choice.value, choice.label])).toEqual([['vertical', 'Vertical left'], ['start', 'Left'], ['center', 'Center'], ['end', 'Right']])
-    expect(option.default).toBe('vertical')
+    expect(option.choices.map(choice => [choice.value, choice.label])).toEqual([['start', 'Left'], ['center', 'Center'], ['end', 'Right']])
+    expect(option.default).toBe('start')
 
-    const sideways = await mountLayout('vertical', { program: withVenue })
-    expect(sideways.find('[data-program-vertical-heading]').text()).toBe('Program')
-    expect(sideways.find('[data-program-venues-heading]').classes()).toContain('items-start')
+    const left = await mountLayout('vertical', { options: { titleAlign: 'vertical' }, program: withVenue })
+    expect(left.find('[data-program-heading]').classes()).toContain('items-start')
+    expect(left.find('[data-program-venues-heading]').classes()).toContain('items-start')
 
     const centred = await mountLayout('vertical', { options: { titleAlign: 'center' }, program: withVenue })
-    expect(centred.find('[data-program-vertical-heading]').exists()).toBe(false)
     expect(centred.find('[data-program-heading] h2').text()).toBe('Program')
     expect(centred.find('[data-program-heading]').classes()).toContain('items-center')
     expect(centred.find('[data-program-venues-heading]').classes()).toContain('items-center')
@@ -605,12 +604,16 @@ describe('layout options', () => {
     expect(plain.find('[data-program-pin]').exists() || plain.find('[data-program-clip]').exists()).toBe(false)
   })
 
-  it('note: sets the eyebrow in italics over a capitals heading, on light paper whatever the background', async () => {
+  it('note: sets the eyebrow in italics over the heading, on light paper whatever the background', async () => {
     const wrapper = await mountLayout('note', { background: 'primary' })
     expect(wrapper.find('[data-program-note]').classes()).toEqual(expect.arrayContaining(backgroundStyles.light.root.split(' ')))
     expect(wrapper.find('[data-program-heading] p').classes()).toContain('[font-style:var(--site-font-heading-italic)]')
-    // In capitals through the theme, so a script heading keeps its own case
-    expect(wrapper.find('h2').classes()).toContain('[text-transform:var(--site-font-heading-case)]')
+  })
+
+  it.each(['note', 'date-blocks', 'vertical', 'photo-cards'])('%s: sets the heading as written, never in capitals', async (key) => {
+    const heading = (await mountLayout(key)).find('[data-program-heading] h2')
+    expect(heading.text()).toBe('Program')
+    expect(heading.classes().some(name => name === 'uppercase' || name.includes('text-transform'))).toBe(false)
   })
 
   it('note: shows the venue, "with" the speakers and the note beside detailed rows, or on one small line when compact', async () => {
@@ -622,9 +625,14 @@ describe('layout options', () => {
     expect(compact.find('[data-program-speakers]').exists()).toBe(true)
   })
 
-  it('vertical: sets the heading sideways, a photo on top (or none), then time ranges and "By" the speakers', async () => {
+  it('vertical: divides the items with thin rules, none after a day\'s last item', async () => {
+    const item = (await mountLayout('vertical')).find('[data-program-item]')
+    expect(item.classes()).toEqual(expect.arrayContaining(['border-b', 'border-current/20', 'last:border-b-0']))
+    expect(item.classes()).not.toContain('border-b-2')
+  })
+
+  it('vertical: a photo on top (or none), then time ranges and "By" the speakers', async () => {
     const wrapper = await mountLayout('vertical', { content: { ...content, layoutPhotos: ['https://example.com/banner.jpg'] } })
-    expect(wrapper.find('h2').classes()).toContain('[writing-mode:vertical-rl]')
     expect(wrapper.find('[data-program-photo]').attributes('src')).toBe('https://example.com/banner.jpg')
     const item = wrapper.find('[data-program-item]')
     expect(item.find('[data-program-time]').text()).toBe('3:00 PM – 4:00 PM')

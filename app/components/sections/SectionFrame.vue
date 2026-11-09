@@ -42,12 +42,13 @@ const overlayClasses: Record<NonNullable<typeof props.overlay>, string> = {
   none: '',
 }
 // With `edge`: the overlay only near the text (the start and end overlays still cover everything on narrow screens,
-// where the text spans the width), and the fade into the edge colour over it
+// where the text spans the width), at the least strength that keeps text readable (`--site-photo-overlay-edge`; the
+// others are a little stronger), and the fade into the edge colour over it
 const nearOverlayClasses: Partial<Record<NonNullable<typeof props.overlay>, string>> = {
-  top: 'bg-linear-to-b from-(--site-photo-overlay) from-40% to-transparent to-65%',
-  bottom: 'bg-linear-to-t from-(--site-photo-overlay) from-40% to-transparent to-65%',
-  start: 'bg-(--site-photo-overlay) @3xl:bg-transparent @3xl:bg-linear-to-r @3xl:from-(--site-photo-overlay) @3xl:from-40% @3xl:to-transparent @3xl:to-65%',
-  end: 'bg-(--site-photo-overlay) @3xl:bg-transparent @3xl:bg-linear-to-l @3xl:from-(--site-photo-overlay) @3xl:from-40% @3xl:to-transparent @3xl:to-65%',
+  top: 'bg-linear-to-b from-(--site-photo-overlay-edge) from-40% to-transparent to-65%',
+  bottom: 'bg-linear-to-t from-(--site-photo-overlay-edge) from-40% to-transparent to-65%',
+  start: 'bg-(--site-photo-overlay-edge) @3xl:bg-transparent @3xl:bg-linear-to-r @3xl:from-(--site-photo-overlay-edge) @3xl:from-40% @3xl:to-transparent @3xl:to-65%',
+  end: 'bg-(--site-photo-overlay-edge) @3xl:bg-transparent @3xl:bg-linear-to-l @3xl:from-(--site-photo-overlay-edge) @3xl:from-40% @3xl:to-transparent @3xl:to-65%',
 }
 const edgeClasses: Partial<Record<NonNullable<typeof props.overlay>, string>> = {
   top: 'bg-linear-to-b from-(--site-photo-edge) to-transparent to-45%',

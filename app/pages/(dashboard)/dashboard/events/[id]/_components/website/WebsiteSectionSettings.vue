@@ -7,6 +7,7 @@ import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { MessageContent } from '~/features/sections/message/message.type'
 import type { PeopleContent } from '~/features/sections/people/people.type'
 import type { ProgramContent } from '~/features/sections/program/program.type'
+import type { DressCodeContent } from '~/features/sections/dress-code/dress-code.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
 import type { SectionBackground, SectionOccasion } from '~/features/sections/section.type'
 import type { SiteTheme } from '~/site-theme/useSiteTheme'
@@ -27,6 +28,7 @@ import WebsiteMessageFields from './WebsiteMessageFields.vue'
 import WebsiteAboutFields from './WebsiteAboutFields.vue'
 import WebsitePeopleFields from './WebsitePeopleFields.vue'
 import WebsiteProgramFields from './WebsiteProgramFields.vue'
+import WebsiteDressCodeFields from './WebsiteDressCodeFields.vue'
 import WebsiteSectionNotes from './WebsiteSectionNotes.vue'
 
 // Everything about one section, top to bottom: its layout (picked from thumbnails), the layout's placement options,
@@ -105,11 +107,17 @@ const programContent = computed({
   get: () => section.value.content as ProgramContent,
   set: content => (section.value = { ...section.value, content }),
 })
+const dressCodeContent = computed({
+  get: () => section.value.content as DressCodeContent,
+  set: content => (section.value = { ...section.value, content }),
+})
 </script>
 
 <template>
   <div class="flex flex-col gap-6">
-    <div class="flex items-center gap-2">
+    <!-- The section's title row stays in view under the editor's tabs while its settings scroll (under the app's header
+         and the tabs, `top-32`; from xl the panel scrolls by itself, so under the tabs only, `top-16`) -->
+    <div data-section-title class="sticky top-32 z-10 -mx-4 -mt-3 flex items-center gap-2 border-b bg-card px-4 py-2 xl:top-16">
       <Button type="button" variant="ghost" size="icon-sm" aria-label="All sections" title="All sections" @click="emit('back')">
         <ArrowLeft />
       </Button>
@@ -240,12 +248,13 @@ const programContent = computed({
       </h4>
       <WebsiteSectionNotes v-if="layout" :section="section" :layout="layout" />
       <WebsiteHeroFields v-if="section.type === 'hero'" v-model:content="heroContent" :event="event" />
-      <WebsiteCountdownFields v-else-if="section.type === 'countdown'" v-model:content="countdownContent" :event="event" />
+      <WebsiteCountdownFields v-else-if="section.type === 'countdown' && layout" v-model:content="countdownContent" :event="event" :layout="layout" />
       <WebsiteMessageFields v-else-if="section.type === 'message' && layout" v-model:content="messageContent" :layout="layout" />
       <!-- Layouts that differ in what they show pass their layout, so the fields follow it (`layout.fields`) -->
       <WebsiteAboutFields v-else-if="section.type === 'about' && layout" v-model:content="aboutContent" :event-id="event.id" :layout="layout" />
       <WebsitePeopleFields v-else-if="section.type === 'people' && layout" v-model:content="peopleContent" :event-id="event.id" :layout="layout" />
       <WebsiteProgramFields v-else-if="section.type === 'program'" v-model:content="programContent" :program="occasion.program" />
+      <WebsiteDressCodeFields v-else-if="section.type === 'dress-code' && layout" v-model:content="dressCodeContent" :layout="layout" />
     </section>
 
     <WebsiteLayoutPickerDialog

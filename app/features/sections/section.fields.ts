@@ -27,37 +27,17 @@ export function missingFields(layout: LayoutFieldInfo, content: object): string[
   return (layout.required ?? []).filter(field => !hasValue(values[field]))
 }
 
-/** The section's filled-in fields (not a list's item fields) that the layout doesn't show: kept for layouts that do. */
-export function hiddenFields(all: readonly string[], layout: LayoutFieldInfo, content: object): string[] {
-  const values = content as Record<string, unknown>
-  return all.filter(field => !field.includes('.') && !layout.fields.includes(field) && hasValue(values[field]))
-}
+// "a message", "an attire motif"
+const article = (name: string) => (/^[aeiou]/i.test(name) ? 'an' : 'a')
 
 /**
- * The editor's notes for a section in its layout: what the layout needs that's still empty ("This layout needs at least
- * one chapter."), and what's filled in but not shown ("This layout doesn't show your 3 chapters. They're kept for layouts
- * that do."). Fields are named by the type's `fieldNames`.
+ * The editor's notes for what a section's layout needs that's still empty ("This layout needs at least one chapter.",
+ * "This layout needs a message."), naming fields by the type's `fieldNames`. (Content a layout doesn't show needs no
+ * note: the editor only offers the fields the layout shows.)
  */
-export function fieldNotes(
-  definition: Pick<SectionTypeDefinition<SectionType>, 'fields' | 'fieldNames'>,
-  layout: LayoutFieldInfo,
-  content: object,
-): { missing: string[], hidden: string[] } {
-  const values = content as Record<string, unknown>
-  const nameOf = (field: string) => definition.fieldNames?.[field] ?? field
-  return {
-    missing: missingFields(layout, content).map((field) => {
-      const name = nameOf(field)
-      return typeof name === 'string' ? `This layout needs a ${name}.` : `This layout needs at least one ${name[0]}.`
-    }),
-    hidden: hiddenFields(definition.fields, layout, content).map((field) => {
-      const name = nameOf(field)
-      const value = values[field]
-      if (typeof name === 'string' || !Array.isArray(value))
-        return `This layout doesn't show your ${typeof name === 'string' ? name : name[0]}. It's kept for layouts that do.`
-      return value.length === 1
-        ? `This layout doesn't show your ${name[0]}. It's kept for layouts that do.`
-        : `This layout doesn't show your ${value.length} ${name[1]}. They're kept for layouts that do.`
-    }),
-  }
+export function missingNotes(definition: Pick<SectionTypeDefinition<SectionType>, 'fieldNames'>, layout: LayoutFieldInfo, content: object): string[] {
+  return missingFields(layout, content).map((field) => {
+    const name = definition.fieldNames?.[field] ?? field
+    return typeof name === 'string' ? `This layout needs ${article(name)} ${name}.` : `This layout needs at least one ${name[0]}.`
+  })
 }

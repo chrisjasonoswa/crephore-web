@@ -18,9 +18,9 @@ const cardStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <PeopleHeading :content="content" :styles="styles" />
-    <ul v-if="content.people.length" data-people class="mx-auto mt-10 flex max-w-5xl flex-wrap justify-center gap-6">
+    <ul v-if="content.people.length" data-people class="mx-auto mt-10 flex flex-wrap justify-center gap-6">
       <li
         v-for="person in content.people"
         :key="person.id"

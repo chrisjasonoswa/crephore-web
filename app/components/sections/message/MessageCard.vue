@@ -16,7 +16,7 @@ const cardStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 pt-20 pb-14 @2xl:px-10 @2xl:pt-24 @2xl:pb-20">
+  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) pt-20 pb-14 @2xl:pt-24 @2xl:pb-20">
     <div data-message-card class="relative mx-auto max-w-2xl rounded-(--site-radius) px-7 pt-14 pb-10 shadow-xl @2xl:px-14 @2xl:py-14" :class="cardStyles.root">
       <div
         data-message-corner

@@ -20,7 +20,7 @@ const titleAlign = computed(() => props.options.titleAlign)
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-2xl" />
     <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex max-w-2xl flex-col gap-8">
       <div v-for="day in days" :key="day.date">

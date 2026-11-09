@@ -39,12 +39,13 @@ describe('section registry', () => {
     ])
   })
 
-  it('registers the ten countdown layouts in picker order', () => {
+  it('registers the eleven countdown layouts in picker order', () => {
     expect(getSectionType('countdown').layouts.map(layout => layout.key)).toEqual([
       'boxes',
       'minimal',
       'photo',
       'split',
+      'invitation',
       'rings',
       'flip',
       'sentence',
@@ -122,15 +123,19 @@ describe('section registry', () => {
     }
   })
 
-  it('gives every layout valid backgrounds and options whose defaults are among their choices', () => {
-    for (const layout of Object.values(sectionRegistry).flatMap(definition => definition.layouts)) {
-      expect(layout.backgrounds.length, layout.key).toBeGreaterThan(0)
-      for (const background of layout.backgrounds)
-        expect(sectionBackgrounds).toContain(background)
+  it('gives every layout valid backgrounds and options whose defaults are among their choices (all but a few have options)', () => {
+    // The dress code's compact one-liners have nothing to place or show and hide
+    const withoutOptions = ['dress-code/strip', 'dress-code/pill', 'dress-code/note']
+    for (const definition of Object.values(sectionRegistry)) {
+      for (const layout of definition.layouts) {
+        expect(layout.backgrounds.length, layout.key).toBeGreaterThan(0)
+        for (const background of layout.backgrounds)
+          expect(sectionBackgrounds).toContain(background)
 
-      expect(layout.options.length, layout.key).toBeGreaterThan(0)
-      for (const option of layout.options)
-        expect(option.choices.map(choice => choice.value), `${layout.key}.${option.key}`).toContain(option.default)
+        expect(layout.options.length > 0, layout.key).toBe(!withoutOptions.includes(`${definition.type}/${layout.key}`))
+        for (const option of layout.options)
+          expect(option.choices.map(choice => choice.value), `${layout.key}.${option.key}`).toContain(option.default)
+      }
     }
   })
 
@@ -158,9 +163,9 @@ describe('section registry', () => {
     expect(getSectionLayout('hero', 'collage')!.backgrounds).toEqual(['light', 'primary', 'secondary', 'photo'])
   })
 
-  it('declares one layout photo for the countdown split and none for the other countdown layouts', () => {
+  it('declares one layout photo for the countdown split, two for the invitation and none for the other countdown layouts', () => {
     expect(getSectionType('countdown').layouts.filter(layout => layout.layoutPhotoCount > 0).map(layout => [layout.key, layout.layoutPhotoCount]))
-      .toEqual([['split', 1]])
+      .toEqual([['split', 1], ['invitation', 2]])
   })
 
   it('offers the (optional) background photo on every layout', () => {
@@ -212,7 +217,7 @@ describe('changeSectionLayout', () => {
     // The timeline's item layout isn't carried to a layout without it
     const timeline = { ...list, layout: 'timeline', options: { titleAlign: 'start', showTime: 'show', timeColumn: 'right' } }
     expect(changeSectionLayout(timeline, 'table').options).toEqual({ titleAlign: 'start', showTime: 'show' })
-    // A value the new layout doesn't offer takes its default: Simple list has no "Vertical left"
+    // A value the new layout doesn't offer takes its default (here the vertical title's old "Vertical left", still on saved sections)
     const vertical = { ...list, layout: 'vertical', options: { titleAlign: 'vertical', showTime: 'show', showPhoto: 'show' } }
     expect(changeSectionLayout(vertical, 'list').options).toEqual({ titleAlign: 'center', showTime: 'show' })
   })

@@ -7,6 +7,7 @@ import CountdownBoxes from '~/components/sections/countdown/CountdownBoxes.vue'
 import CountdownCalendar from '~/components/sections/countdown/CountdownCalendar.vue'
 import CountdownDaysOnly from '~/components/sections/countdown/CountdownDaysOnly.vue'
 import CountdownFlip from '~/components/sections/countdown/CountdownFlip.vue'
+import CountdownInvitation from '~/components/sections/countdown/CountdownInvitation.vue'
 import CountdownMinimal from '~/components/sections/countdown/CountdownMinimal.vue'
 import CountdownPhoto from '~/components/sections/countdown/CountdownPhoto.vue'
 import CountdownRings from '~/components/sections/countdown/CountdownRings.vue'
@@ -47,6 +48,7 @@ const layouts: { key: string, component: Component, date?: string }[] = [
   { key: 'minimal', component: CountdownMinimal },
   { key: 'photo', component: CountdownPhoto, date: '14 · 02 · 2027' },
   { key: 'split', component: CountdownSplit, date: 'Sunday, 14 February 2027' },
+  { key: 'invitation', component: CountdownInvitation },
   { key: 'rings', component: CountdownRings },
   { key: 'flip', component: CountdownFlip, date: 'Sunday, 14 February 2027' },
   { key: 'sentence', component: CountdownSentence },
@@ -97,6 +99,14 @@ describe.each(layouts)('countdown layout $key', ({ key, date }) => {
     expect(wrapper.text()).toContain('Counting down to')
     expect(wrapper.find('h2').text()).toBe('Bea & Carlo')
     expect(wrapper.find('a[href="#details"]').text()).toBe('Save the date')
+  })
+
+  it('heads it with the host\'s heading, else (or when blank) the event\'s name', async () => {
+    const wrapper = await mountLayout(key, { content: { ...content, heading: 'Join us as we begin our life together' } })
+    expect(wrapper.find('h2').text()).toBe('Join us as we begin our life together')
+    expect(wrapper.text()).not.toContain('Bea & Carlo')
+
+    expect((await mountLayout(key, { content: { ...content, heading: '  ' } })).find('h2').text()).toBe('Bea & Carlo')
   })
 
   it('renders an unsafe saved button link without a link', async () => {
@@ -197,6 +207,45 @@ describe('countdown layouts', () => {
 
     const withoutPhoto = await mountLayout('split', { content: { ...content, layoutPhotos: [] } })
     expect(withoutPhoto.find('[data-photo-placeholder]').exists()).toBe(true)
+  })
+
+  it('invitation: the eyebrow without an icon, the message under the heading, the numbers under a rule', async () => {
+    const body = 'We are getting married in the hills above Florence.'
+    const wrapper = await mountLayout('invitation', { content: { ...content, body } })
+    const eyebrow = wrapper.find('[data-countdown-text] p')
+
+    expect(eyebrow.text()).toBe('Counting down to')
+    expect(eyebrow.find('svg').exists()).toBe(false)
+    expect(wrapper.find('[data-countdown-body]').text()).toBe(body)
+    expect(comesBefore(wrapper, 'Bea &amp; Carlo', body)).toBe(true)
+    expect(wrapper.find('[role="timer"]').element.parentElement!.classList).toContain('border-t')
+
+    expect((await mountLayout('invitation')).find('[data-countdown-body]').exists()).toBe(false)
+    // Only the invitation shows the message
+    for (const { key } of layouts.filter(layout => layout.key !== 'invitation'))
+      expect(definitionOf(key).fields).not.toContain('body')
+    expect(definitionOf('invitation').fields).toContain('body')
+  })
+
+  it('invitation: two layout photos (never the background photo) on photoSide, right by default, each with a placeholder when missing', async () => {
+    const second = 'https://example.com/envelope.jpg'
+    const wrapper = await mountLayout('invitation', { content: { ...content, layoutPhotos: [layoutPhoto, second] } })
+
+    expect(definitionOf('invitation').layoutPhotoCount).toBe(2)
+    expect(wrapper.findAll('img').map(img => img.attributes('src'))).toEqual([layoutPhoto, second])
+    expect(wrapper.find('[data-countdown-photos]').classes()).toContain('@3xl:col-start-2')
+    expect(wrapper.find('[data-countdown-text]').classes()).toContain('@3xl:col-start-1')
+    // The small photo on the text's side, framed in the section's colour
+    const frame = wrapper.findAll('[data-countdown-photo]')[1]!.element.parentElement!
+    expect(frame.classList).toContain('start-0')
+    expect(frame.getAttribute('style')).toContain('var(--site-primary)')
+
+    const left = await mountLayout('invitation', { options: { photoSide: 'left' } })
+    expect(left.find('[data-countdown-photos]').classes()).toContain('@3xl:col-start-1')
+    expect(left.findAll('[data-countdown-photo]')[1]!.element.parentElement!.classList).toContain('end-0')
+
+    const withoutPhotos = await mountLayout('invitation', { content: { ...content, layoutPhotos: [] } })
+    expect(withoutPhotos.findAll('[data-photo-placeholder]')).toHaveLength(2)
   })
 
   it.each(['boxes', 'minimal', 'rings', 'flip', 'sentence', 'days-only'])('%s: aligns the text by textAlign', async (key) => {

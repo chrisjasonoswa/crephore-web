@@ -4,13 +4,17 @@ import { normalizeHex } from '~/site-theme/color'
 
 // A colour as a swatch picker plus an editable hex value. `optional`: it can be left empty (the model is undefined),
 // showing `emptyColor` faded in the swatch (what's used instead) and `placeholder` in the field, with a button to clear it.
-const props = defineProps<{
+// `size="sm"`: the small label of the fields beside it in a list item (`WebsiteTextField size="sm"`).
+const props = withDefaults(defineProps<{
   id: string
   label: string
   optional?: boolean
   emptyColor?: string
   placeholder?: string
-}>()
+  size?: 'default' | 'sm'
+}>(), {
+  size: 'default',
+})
 
 const color = defineModel<string | undefined>({ required: true })
 
@@ -40,8 +44,8 @@ function onDraftBlur() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
-    <Label :for="props.id">{{ props.label }}</Label>
+  <div class="flex flex-col" :class="size === 'sm' ? 'gap-1.5' : 'gap-2'">
+    <Label :for="props.id" :class="size === 'sm' && 'text-xs'">{{ props.label }}</Label>
     <div class="flex items-center gap-2">
       <input
         :value="color ?? emptyColor ?? '#FFFFFF'"

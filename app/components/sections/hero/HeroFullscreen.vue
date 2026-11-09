@@ -23,8 +23,9 @@ const place = computed(() => positionClasses(position.value))
     :edge="position !== 'center'"
     class="flex min-h-[max(var(--site-screen-height),36rem)] flex-col"
   >
-    <!-- The full width, so text placed left or right sits near that edge (padding grows with the screen) -->
-    <div class="flex w-full flex-1 flex-col px-6 py-16 @2xl:px-12 @2xl:py-24 @5xl:px-20" :class="[place.justify, place.items]">
+    <!-- The full width, so text placed left or right sits near that edge, padded like every other section's content
+         until their 1280px column is full, then a little more as the screen grows (`--site-hero-edge`) -->
+    <div class="flex w-full flex-1 flex-col px-(--site-hero-edge) py-16 @2xl:py-24" :class="[place.justify, place.items]">
       <HeroText :content="content" :occasion="occasion" :styles="styles" :align="place.align" size="display" class="max-w-2xl" />
     </div>
   </SectionFrame>

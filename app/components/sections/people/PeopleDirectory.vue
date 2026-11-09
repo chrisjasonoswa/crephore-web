@@ -14,7 +14,7 @@ const twoColumns = computed(() => props.options.columns === '2')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <div class="mx-auto max-w-4xl">
       <PeopleHeading :content="content" :styles="styles" align="start" />
       <ul v-if="content.people.length" data-people class="mt-8 grid gap-x-10" :class="twoColumns && '@2xl:grid-cols-2'">

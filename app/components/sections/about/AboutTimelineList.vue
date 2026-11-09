@@ -14,7 +14,7 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <AboutText :content="content" :styles="styles" align="start" class="mx-auto max-w-4xl" />
     <ol v-if="content.timeline.length" data-about-timeline class="relative mx-auto mt-12 flex max-w-4xl flex-col gap-10">
       <span aria-hidden="true" class="absolute inset-y-0 start-1.5 w-px bg-current/20" />

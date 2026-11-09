@@ -124,3 +124,17 @@ describe('theme controls: groups', () => {
     expect(html.indexOf('Intensity')).toBeLessThan(html.indexOf('Intro animation'))
   })
 })
+
+describe('theme controls: heading sizes', () => {
+  it('sets the hero\'s and the other sections\' heading sizes, medium by default', async () => {
+    const wrapper = await mountControls(theme, {}, 'fonts')
+    const control = (key: string) => wrapper.find(`[data-heading-size="${key}"]`)
+
+    expect(control('heroHeadingSize').find('[data-state="on"]').text()).toBe('Medium')
+    expect(control('headingSize').find('[data-state="on"]').text()).toBe('Medium')
+
+    await control('heroHeadingSize').findAll('button').find(button => button.text() === 'XL')!.trigger('click')
+    await control('headingSize').findAll('button').find(button => button.text() === 'Small')!.trigger('click')
+    expect(themeOf(wrapper)).toMatchObject({ heroHeadingSize: 'extra-large', headingSize: 'small' })
+  })
+})

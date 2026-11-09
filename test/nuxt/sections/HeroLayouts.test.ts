@@ -188,15 +188,28 @@ describe('placement options', () => {
     expect(comesBefore(wrapper, '<h1', 'data-arch')).toBe(true)
   })
 
+  it('arch: sizes the arch by the screen\'s height, within bounds and the screen\'s width', async () => {
+    const arch = (await mountLayout('arch')).find('[data-arch]')
+    expect(arch.classes()).toEqual(expect.arrayContaining(['aspect-3/4', 'h-[min(clamp(14rem,calc(var(--site-screen-height)_-_28rem),48rem),calc((100cqw_-_3rem)*4/3))]']))
+    expect(arch.classes().some(name => /^(@\w+:)?w-\d/.test(name))).toBe(false)
+  })
+
   it('arch: puts the names below the arch', async () => {
     const wrapper = await mountLayout('arch', { options: { namesPlacement: 'below' } })
 
     expect(comesBefore(wrapper, 'data-arch', '<h1')).toBe(true)
   })
 
+  it('editorial: spans the sections\' column, its photo 16:7 from 672px but never taller than the screen leaves', async () => {
+    const wrapper = await mountLayout('editorial')
+    expect(wrapper.find('section').classes()).toContain('px-(--site-edge)')
+    expect(wrapper.find('[data-hero-editorial]').classes().some(name => name.startsWith('max-w-'))).toBe(false)
+    expect(wrapper.find('[data-hero-editorial-photo]').classes()).toEqual(expect.arrayContaining(['aspect-4/3', '@2xl:aspect-[16/7]', '@2xl:max-h-[max(14rem,calc(var(--site-screen-height)_-_26rem))]']))
+  })
+
   it('editorial: puts the photo above or below the headline', async () => {
-    expect((await mountLayout('editorial', { options: { photoPosition: 'above' } })).find('section > div').classes()).toContain('flex-col-reverse')
-    expect((await mountLayout('editorial', { options: { photoPosition: 'below' } })).find('section > div').classes()).not.toContain('flex-col-reverse')
+    expect((await mountLayout('editorial', { options: { photoPosition: 'above' } })).find('[data-hero-editorial]').classes()).toContain('flex-col-reverse')
+    expect((await mountLayout('editorial', { options: { photoPosition: 'below' } })).find('[data-hero-editorial]').classes()).not.toContain('flex-col-reverse')
   })
 
   it('overlay-card: puts the card at cardPosition, with no overlay on the photo', async () => {
@@ -208,15 +221,46 @@ describe('placement options', () => {
     expect(wrapper.find('section > .-z-10').exists()).toBe(false)
   })
 
+  it('overlay-card: lines the card up with the other sections\' content edge, no width of its own', async () => {
+    const place = (await mountLayout('overlay-card')).find('[data-hero-card]').element.parentElement!.classList
+    expect(place).toContain('px-(--site-edge)')
+    expect([...place].some(name => /max-w-|(^|:)px-\d/.test(name))).toBe(false)
+  })
+
+  it('banner: lines its text up with the other sections\' content column', async () => {
+    const text = (await mountLayout('banner')).find('[data-hero-banner-text]').classes()
+    expect(text).toContain('px-(--site-edge)')
+    expect(text.some(name => /max-w-|(^|:)px-\d/.test(name))).toBe(false)
+  })
+
+  it('collage: spans the other sections\' content column, its photos as tall as the screen allows', async () => {
+    const wrapper = await mountLayout('collage')
+    expect(wrapper.find('section').classes()).toContain('px-(--site-edge)')
+    const collage = wrapper.find('[data-hero-collage]').classes()
+    expect(collage).toContain('@5xl:h-[clamp(26rem,calc(var(--site-screen-height)_-_14rem),52rem)]')
+    expect(collage.some(name => name.startsWith('max-w-'))).toBe(false)
+  })
+
   it('collage: puts the text between, left of or right of the photos', async () => {
-    expect((await mountLayout('collage', { options: { textPosition: 'center' } })).find('[data-hero-text]').classes()).toContain('@3xl:order-2')
-    expect((await mountLayout('collage', { options: { textPosition: 'left' } })).find('[data-hero-text]').classes()).toContain('@3xl:order-1')
-    expect((await mountLayout('collage', { options: { textPosition: 'right' } })).find('[data-hero-text]').classes()).toContain('@3xl:order-3')
+    expect((await mountLayout('collage', { options: { textPosition: 'center' } })).find('[data-hero-text]').classes()).toContain('@5xl:order-2')
+    expect((await mountLayout('collage', { options: { textPosition: 'left' } })).find('[data-hero-text]').classes()).toContain('@5xl:order-1')
+    expect((await mountLayout('collage', { options: { textPosition: 'right' } })).find('[data-hero-text]').classes()).toContain('@5xl:order-3')
   })
 
   it('banner: puts the photo strip above or below the names', async () => {
     expect((await mountLayout('banner', { options: { photoPosition: 'below' } })).find('section').classes()).toContain('flex-col-reverse')
     expect((await mountLayout('banner', { options: { photoPosition: 'above' } })).find('section').classes()).not.toContain('flex-col-reverse')
+  })
+
+  it('filmstrip: spans the hero (never shrinking to the strip\'s width), the strip scrolling edge to edge below 768px', async () => {
+    const wrapper = await mountLayout('filmstrip')
+    const strip = wrapper.find('[data-filmstrip]').element
+    // The hero's text block: the padded element holding the strip
+    const text = [...strip.closest('section')!.querySelectorAll('*')].find(el => el.classList.contains('px-(--site-edge)') && el.contains(strip))!
+    expect(text.classList).toContain('w-full')
+    expect(text.classList).toContain('px-(--site-edge)')
+    expect([...text.classList].some(name => name === 'mx-auto' || name.startsWith('max-w-'))).toBe(false)
+    expect(wrapper.find('[data-filmstrip]').classes()).toEqual(expect.arrayContaining(['overflow-x-auto', '-mx-(--site-edge)', '@3xl:grid-cols-5']))
   })
 
   it('filmstrip: always shows five frames, below or above the names', async () => {
@@ -294,13 +338,15 @@ describe('screen height', () => {
   it.each(layouts.map(layout => layout.key))('%s fills the screen\'s height, and at least 36rem', async (key) => {
     const wrapper = await mountLayout(key)
 
-    expect(wrapper.find('section').classes()).toContain('min-h-[max(var(--site-screen-height),36rem)]')
+    // On the section, or (the filmstrip, whose section grows by the room its pinned strip slides through) on the
+    // content right inside it
+    expect(wrapper.findAll('section, section > div').some(el => el.classes().includes('min-h-[max(var(--site-screen-height),36rem)]'))).toBe(true)
   })
 
-  it('lets the banner\'s photo take the height the text leaves', async () => {
-    const photo = (await mountLayout('banner')).find('[data-photo-placeholder], img')
-
-    expect(photo.classes()).toEqual(expect.arrayContaining(['flex-1', 'min-h-52']))
+  it('lets the banner\'s photo take the height the text leaves, never its own (which would stretch the hero)', async () => {
+    const wrapper = await mountLayout('banner')
+    expect(wrapper.find('[data-hero-banner-photo]').classes()).toEqual(expect.arrayContaining(['relative', 'flex-1', 'min-h-52']))
+    expect(wrapper.find('[data-hero-banner-photo] > *').classes()).toEqual(expect.arrayContaining(['absolute', 'inset-0']))
   })
 })
 
@@ -324,11 +370,20 @@ describe('full: the photo\'s edge', () => {
     expect(wrapper.find('[data-photo-overlay]').classes()).toEqual(expect.arrayContaining(['bg-linear-to-t', 'from-40%', 'to-65%']))
   })
 
-  it('places the text across the full width, near its edge', async () => {
+  it('places the text across the full width, padded like the other sections until their column is full', async () => {
     const text = (await mountLayout('fullscreen', { options: { textPosition: 'bottom-right' } })).find('section > div:not([class*="absolute"])')
 
     expect(text.classes()).not.toContain('max-w-6xl')
-    expect(text.classes()).toEqual(expect.arrayContaining(['w-full', '@5xl:px-20']))
+    expect(text.classes()).toEqual(expect.arrayContaining(['w-full', 'px-(--site-hero-edge)']))
+    expect(text.classes().some(name => /(^|:)px-\d|px-\[10%\]/.test(name))).toBe(false)
+  })
+
+  it('keeps the least overlay under the edge fade, and the stronger one for centred text', async () => {
+    const offCentre = await mountLayout('fullscreen', { background: 'photo', options: { textPosition: 'bottom-left' } })
+    const centred = await mountLayout('fullscreen', { background: 'photo', options: { textPosition: 'center' } })
+
+    expect(offCentre.find('[data-photo-overlay]').classes()).toContain('from-(--site-photo-overlay-edge)')
+    expect(centred.find('[data-photo-overlay]').classes()).toContain('bg-(--site-photo-overlay)')
   })
 
   it('keeps the even overlay for centred text, and draws no edge without a photo', async () => {

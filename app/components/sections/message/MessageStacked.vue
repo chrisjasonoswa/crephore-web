@@ -12,7 +12,7 @@ defineProps<SectionLayoutProps<'message', MessageLayoutOptions<'textAlign'>>>()
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
     <SectionPhoto data-message-photo :src="content.layoutPhotos[0]" class="aspect-16/7 w-full @3xl:aspect-16/5" />
-    <div class="mx-auto max-w-3xl px-6 py-12 @2xl:px-10 @2xl:py-16">
+    <div class="mx-auto max-w-3xl px-(--site-gutter) py-12 @2xl:py-16">
       <MessageText :content="content" :styles="styles" :align="options.textAlign" />
     </div>
   </SectionFrame>

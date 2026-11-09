@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import type { EventKind } from '~/site-theme/eventKinds'
+import type { FontPairing } from '~/site-theme/fontPairings'
 import type { ColorPreset } from '~/site-theme/presets'
-import type { CornerStyle, SiteTheme } from '~/site-theme/useSiteTheme'
+import type { CornerStyle, HeadingSize, SiteTheme } from '~/site-theme/useSiteTheme'
 import { Palette, Sparkles, TriangleAlert, Type } from '@lucide/vue'
 import { motionIntensityLabels, normalizeSiteMotion, pageIntros } from '~/features/site-motion/site-motion.type'
 import { normalizeHex } from '~/site-theme/color'
 import { fontPairingGroups, fontPairings, fontStack } from '~/site-theme/fontPairings'
 import { eventKindLabels, eventKinds } from '~/site-theme/eventKinds'
 import { backgroundPresets, colorPresets } from '~/site-theme/presets'
-import { lightBackground, secondaryFor, siteThemeWarnings } from '~/site-theme/useSiteTheme'
+import { headingSizeLabels, headingSizes, lightBackground, secondaryFor, siteThemeWarnings } from '~/site-theme/useSiteTheme'
 import ColorInput from './ColorInput.vue'
 import MotionControls from './MotionControls.vue'
 
 // Site-wide settings, in three groups that open one at a time (an accordion, all closed at first so every group shows
 // at a glance; each row says what's chosen): Colors (presets, the brand colours, the light background), Fonts &
-// corners, and Animation (the intro, intensity first). They apply to every section of the page. Used by the event
+// corners and the hero's and other sections' heading sizes, and Animation (the intro, intensity first). They apply to every section of the page. Used by the event
 // website editor and the admin playground. `play-intro`: the motion's "Play intro" button.
 // The presets open on the kind of the preset in use; with custom colours, on `eventKind` (the event's kind), else any.
 const props = defineProps<{ eventKind?: EventKind }>()
@@ -74,6 +75,7 @@ const backgroundAdjusted = computed(() =>
 // Readable text is guaranteed by the theme; these flag colours that make buttons or sections blend in.
 const warnings = computed(() => siteThemeWarnings(theme.value))
 
+const fontsOf = (pairing: FontPairing) => `${pairing.heading.family} + ${pairing.body.family}`
 const fontPairingKey = computed({
   get: () => theme.value.fontPairingKey,
   set: key => (theme.value = { ...theme.value, fontPairingKey: key }),
@@ -83,6 +85,16 @@ const fontPairingKey = computed({
 function setCornerStyle(next: unknown) {
   if (typeof next === 'string' && next)
     theme.value = { ...theme.value, cornerStyle: next as CornerStyle }
+}
+
+// How big the hero's heading and the other sections' headings are set
+const headingSizeControls = [
+  { key: 'heroHeadingSize', label: 'Hero heading size' },
+  { key: 'headingSize', label: 'Section heading size' },
+] as const
+function setHeadingSize(key: 'heroHeadingSize' | 'headingSize', next: unknown) {
+  if (typeof next === 'string' && next)
+    theme.value = { ...theme.value, [key]: next as HeadingSize }
 }
 
 /* Each group's row: what's chosen in it */
@@ -221,8 +233,9 @@ const animationSummary = computed(() => {
                   {{ group.label }}
                 </SelectLabel>
                 <SelectItem v-for="pairing in fontPairings.filter(item => item.group === group.key)" :key="pairing.key" :value="pairing.key">
-                  <span :style="{ fontFamily: fontStack(pairing.heading) }" class="text-base">{{ pairing.name }}</span>
-                  <span class="text-xs text-muted-foreground">{{ pairing.heading.family }} + {{ pairing.body.family }}</span>
+                  <span :style="{ fontFamily: fontStack(pairing.heading), fontWeight: pairing.heading.weight ?? 400 }" class="text-base">{{ pairing.name }}</span>
+                  <!-- Pairings named after their fonts (Fontshare's) don't repeat them -->
+                  <span v-if="pairing.name !== fontsOf(pairing)" class="text-xs text-muted-foreground">{{ fontsOf(pairing) }}</span>
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -240,6 +253,24 @@ const animationSummary = computed(() => {
           >
             <ToggleGroupItem v-for="option in cornerStyles" :key="option" :value="option" class="flex-1 capitalize">
               {{ option }}
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        <!-- Heading sizes: the hero's and the other sections', each Medium by default -->
+        <div v-for="size in headingSizeControls" :key="size.key" class="flex flex-col gap-2">
+          <Label :id="`${id}-${size.key}`">{{ size.label }}</Label>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            :model-value="theme[size.key] ?? 'medium'"
+            :aria-labelledby="`${id}-${size.key}`"
+            :data-heading-size="size.key"
+            class="grid w-full grid-cols-4"
+            @update:model-value="setHeadingSize(size.key, $event)"
+          >
+            <ToggleGroupItem v-for="option in headingSizes" :key="option" :value="option" class="h-auto py-1.5 text-xs leading-tight whitespace-normal">
+              {{ headingSizeLabels[option] }}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>

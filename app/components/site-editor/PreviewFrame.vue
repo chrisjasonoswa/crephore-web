@@ -25,7 +25,9 @@ function setDevice(next: unknown) {
 </script>
 
 <template>
-  <div class="flex min-w-0 flex-col gap-3">
+  <!-- The dashboard's sticky header (h-16) covers the page's top, so pinned section content stops below it
+       (`--site-sticky-top`, read by useScrollPin) -->
+  <div class="flex min-w-0 flex-col gap-3 [--site-sticky-top:64px]">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <slot name="toolbar">
         <p class="text-sm text-muted-foreground">

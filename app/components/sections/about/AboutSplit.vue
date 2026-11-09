@@ -25,10 +25,10 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
     </div>
     <div
       data-about-column
-      class="flex flex-col justify-center px-6 py-12 @2xl:px-12 @3xl:row-start-1 @3xl:py-20"
-      :class="photoOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1'"
+      class="flex flex-col justify-center px-(--site-edge) py-12 @3xl:row-start-1 @3xl:py-20"
+      :class="photoOnLeft ? '@3xl:col-start-2 @3xl:ps-(--site-gutter)' : '@3xl:col-start-1 @3xl:pe-(--site-gutter)'"
     >
-      <AboutText :content="content" :styles="styles" align="start" class="max-w-lg" />
+      <AboutText :content="content" :styles="styles" align="start" />
     </div>
   </SectionFrame>
 </template>

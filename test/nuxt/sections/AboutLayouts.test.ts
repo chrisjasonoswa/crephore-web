@@ -239,7 +239,7 @@ describe('placement options', () => {
     expect(wrapper.findAll('[data-about-polaroid]')).toHaveLength(3)
     for (const className of backgroundStyles.light.root.split(' '))
       expect(wrapper.find('[data-about-note]').classes()).toContain(className)
-    expect(await classesOf('scrapbook', '.max-w-6xl', { photoSide: 'right' })).toContain('@3xl:flex-row-reverse')
+    expect(await classesOf('scrapbook', '[data-about-scrapbook]', { photoSide: 'right' })).toContain('@3xl:flex-row-reverse')
   })
 
   it('magazine: floats the first photo from the top of the story on photoSide, with a drop cap, the rest below', async () => {

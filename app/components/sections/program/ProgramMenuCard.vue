@@ -26,7 +26,7 @@ const cardStyles = backgroundStyles.light
 </script>
 
 <template>
-  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) py-14 @2xl:py-20">
     <div data-program-card class="mx-auto max-w-xl rounded-(--site-radius) p-3 shadow-xl @2xl:p-4" :class="cardStyles.root">
       <div class="rounded-(--site-radius) border-4 border-double border-current/25 px-6 py-12 text-center @2xl:px-12 @2xl:py-14">
         <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="cardStyles" :align="titleAlign" />

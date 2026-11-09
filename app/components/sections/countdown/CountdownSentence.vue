@@ -2,12 +2,12 @@
 import type { CountdownLayoutOptions } from '~/features/sections/countdown/countdown.options'
 import type { SectionLayoutProps } from '~/features/sections/section.type'
 import SectionFrame from '~/components/sections/SectionFrame.vue'
-import { useCountdown } from '~/features/sections/countdown/countdown.helpers'
+import { countdownHeading, useCountdown } from '~/features/sections/countdown/countdown.helpers'
 import { alignClasses } from '~/features/sections/section.options'
 import CountdownButton from './CountdownButton.vue'
 
 // Layout `sentence`: the countdown written as a line of text, like an invitation ("112 days, 6 hours and
-// 45 minutes"), the heading (the event's name) under it in italics. Aligned by `textAlign`.
+// 45 minutes"), the heading under it in italics. Aligned by `textAlign`.
 const props = defineProps<SectionLayoutProps<'countdown', CountdownLayoutOptions<'textAlign'>>>()
 
 const { units } = useCountdown(() => props.occasion, () => props.content.showSeconds)
@@ -26,7 +26,7 @@ const joiner = (index: number) => (index === 0 ? '' : index === parts.value.leng
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
-    <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-6 py-16 @2xl:px-10 @2xl:py-28" :class="alignClasses[align]">
+    <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 px-(--site-gutter) py-16 @2xl:py-28" :class="alignClasses[align]">
       <p
         v-if="content.eyebrow"
         class="text-[0.7rem] font-semibold tracking-[0.25em] uppercase @2xl:text-xs"
@@ -43,7 +43,7 @@ const joiner = (index: number) => (index === 0 ? '' : index === parts.value.leng
         class="font-(family-name:--site-font-heading) text-2xl [font-style:var(--site-font-heading-italic)] text-balance @2xl:text-4xl"
         :class="styles.brandText"
       >
-        {{ occasion.name }}
+        {{ countdownHeading(content, occasion) }}
       </h2>
 
       <CountdownButton :cta="content.cta" :styles="styles" class="mt-2" />

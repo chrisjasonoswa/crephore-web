@@ -3,6 +3,7 @@ import type { AboutContent } from '~/features/sections/about/about.type'
 import type { CountdownContent } from '~/features/sections/countdown/countdown.type'
 import type { HeroContent } from '~/features/sections/hero/hero.type'
 import type { MessageContent } from '~/features/sections/message/message.type'
+import type { DressCodeContent } from '~/features/sections/dress-code/dress-code.type'
 import type { PeopleContent } from '~/features/sections/people/people.type'
 import type { ProgramContent, SectionProgram } from '~/features/sections/program/program.type'
 import type { SectionLayoutOption } from '~/features/sections/section.options'
@@ -14,6 +15,7 @@ import PlaygroundCountdownContent from './PlaygroundCountdownContent.vue'
 import PlaygroundHeroContent from './PlaygroundHeroContent.vue'
 import PlaygroundAboutContent from './PlaygroundAboutContent.vue'
 import PlaygroundMessageContent from './PlaygroundMessageContent.vue'
+import PlaygroundDressCodeContent from './PlaygroundDressCodeContent.vue'
 import PlaygroundPeopleContent from './PlaygroundPeopleContent.vue'
 import PlaygroundProgramContent from './PlaygroundProgramContent.vue'
 
@@ -76,6 +78,10 @@ const aboutContent = computed({
 })
 const messageContent = computed({
   get: () => section.value.content as MessageContent,
+  set: content => (section.value = { ...section.value, content }),
+})
+const dressCodeContent = computed({
+  get: () => section.value.content as DressCodeContent,
   set: content => (section.value = { ...section.value, content }),
 })
 </script>
@@ -173,5 +179,6 @@ const messageContent = computed({
     <PlaygroundAboutContent v-else-if="section.type === 'about'" v-model:content="aboutContent" />
     <PlaygroundPeopleContent v-else-if="section.type === 'people'" v-model:content="peopleContent" />
     <PlaygroundProgramContent v-else-if="section.type === 'program'" v-model:content="programContent" v-model:program="program" :occasion="occasion" />
+    <PlaygroundDressCodeContent v-else-if="section.type === 'dress-code'" v-model:content="dressCodeContent" />
   </div>
 </template>

@@ -16,9 +16,9 @@ const photoOnLeft = (index: number) => (index % 2 === 0) === (props.options.firs
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <AboutText :content="content" :styles="styles" align="center" class="mx-auto max-w-2xl" />
-    <ol v-if="content.timeline.length" data-about-timeline class="relative mx-auto mt-12 flex max-w-5xl flex-col gap-10 @3xl:gap-14">
+    <ol v-if="content.timeline.length" data-about-timeline class="relative mx-auto mt-12 flex flex-col gap-10 @3xl:gap-14">
       <span v-if="showLine" aria-hidden="true" data-about-line class="absolute inset-y-0 start-1.5 w-px bg-current/20 @3xl:start-1/2" />
       <li
         v-for="(item, index) in content.timeline"

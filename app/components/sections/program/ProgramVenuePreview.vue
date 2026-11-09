@@ -29,7 +29,6 @@ const loading = usePhotoLoading()
     <img v-if="'photo' in preview" :src="preview.photo" alt="" :loading="loading" decoding="async" class="size-full object-cover">
     <iframe v-else :src="preview.map" :title="`Map of ${venue.name}`" loading="lazy" referrerpolicy="no-referrer" class="size-full border-0" />
   </div>
-  <!-- The name is shown under it too, so screen readers skip it -->
   <div
     v-else-if="placeholder"
     data-venue-preview-placeholder
@@ -37,6 +36,9 @@ const loading = usePhotoLoading()
     class="flex flex-col items-center justify-center gap-3 overflow-hidden p-4"
     :class="tint"
   >
+    <!-- The name is shown under it too, so screen readers skip it. (Inside the placeholder, not before it: a comment
+         between the root's v-if branches makes this branch two nodes when rendered on the server, which drops the
+         layout's classes, its size and corners, on the live site.) -->
     <span data-venue-placeholder-badge class="flex size-16 shrink-0 items-center justify-center rounded-full border border-current/40 bg-current/10 @2xl:size-20" :class="badge">
       <MapPin class="size-7 stroke-[1.5] @2xl:size-8" />
     </span>

@@ -27,9 +27,9 @@ const notchStyle = { maskImage: notches, WebkitMaskImage: notches, maskComposite
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" :class="options.columns === '1' ? 'max-w-2xl' : 'max-w-5xl'" />
-    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex flex-col gap-10" :class="options.columns === '1' ? 'max-w-2xl' : 'max-w-5xl'">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto" :class="options.columns === '1' && 'max-w-2xl'" />
+    <div v-if="occasion.program.items.length" class="mx-auto mt-10 flex flex-col gap-10" :class="options.columns === '1' && 'max-w-2xl'">
       <div v-for="day in days" :key="day.date">
         <h3
           data-program-day
@@ -70,6 +70,6 @@ const notchStyle = { maskImage: notches, WebkitMaskImage: notches, maskComposite
         </ol>
       </div>
     </div>
-    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="tickets" class="mx-auto mt-14 max-w-5xl" />
+    <ProgramVenues :heading-align="titleAlign" :venues="occasion.program.venues ?? []" :content="content" :styles="styles" look="tickets" class="mx-auto mt-14" />
   </SectionFrame>
 </template>

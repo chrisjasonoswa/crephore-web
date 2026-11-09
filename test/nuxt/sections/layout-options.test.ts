@@ -2,6 +2,7 @@ import type { SectionType } from '~/features/sections/section.type'
 import { describe, expect, it } from 'vitest'
 import { aboutSectionLayoutOptions } from '~/features/sections/about/about.options'
 import { countdownSectionLayoutOptions } from '~/features/sections/countdown/countdown.options'
+import { dressCodeSectionLayoutOptions } from '~/features/sections/dress-code/dress-code.options'
 import { heroSectionLayoutOptions } from '~/features/sections/hero/hero.options'
 import { messageSectionLayoutOptions } from '~/features/sections/message/message.options'
 import { peopleSectionLayoutOptions } from '~/features/sections/people/people.options'
@@ -18,6 +19,7 @@ const typeCatalogues: Record<SectionType, Record<string, unknown>> = {
   about: aboutSectionLayoutOptions,
   people: peopleSectionLayoutOptions,
   program: programSectionLayoutOptions,
+  'dress-code': dressCodeSectionLayoutOptions,
 }
 const types = Object.keys(sectionRegistry) as SectionType[]
 

@@ -192,7 +192,7 @@ describe('website editor', () => {
     await settle()
 
     expect([...document.body.querySelectorAll('[data-add-section]')].map(el => el.getAttribute('data-add-section')))
-      .toEqual(['hero', 'countdown', 'message', 'about', 'people', 'program'])
+      .toEqual(['hero', 'countdown', 'message', 'about', 'people', 'program', 'dress-code'])
   })
 
   it('adds a hero with the event\'s details, shows it in the preview and opens its settings', async () => {
@@ -243,13 +243,22 @@ describe('website editor', () => {
     expect(wrapper.find('[data-preview-section]').text()).toContain('With joy')
   })
 
-  it('shows the countdown\'s heading as the event\'s name, from the event details', async () => {
+  it('heads the countdown with the event\'s name until the host writes a heading, and with no heading again when emptied', async () => {
     const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] })
     await addSection(wrapper, 'countdown')
+    const headings = () => wrapper.findAll('[data-preview-section] h2').map(h2 => h2.text())
+    const field = () => wrapper.find('[data-countdown-heading] input')
 
-    await vi.waitFor(() => expect(wrapper.findAll('[data-preview-section] h2').map(h2 => h2.text())).toContain('Ana & Marco'))
-    expect(wrapper.find('[data-event-fields] [role="note"]').text()).toBe('Heading is from the event details. Click here to edit event details')
-    expect(wrapper.findAll('[data-event-fields] dd').map(dd => dd.text())).toEqual(['Ana & Marco'])
+    await vi.waitFor(() => expect(headings()).toContain('Ana & Marco'))
+    expect(field().attributes('placeholder')).toBe('Ana & Marco')
+    expect(wrapper.find('[data-event-fields]').exists()).toBe(false)
+
+    await field().setValue('Join us as we begin our life together')
+    expect(website(wrapper).sections[1]!.content).toMatchObject({ heading: 'Join us as we begin our life together' })
+    await vi.waitFor(() => expect(headings()).toContain('Join us as we begin our life together'))
+
+    await field().setValue('')
+    expect(website(wrapper).sections[1]!.content).toMatchObject({ heading: undefined })
   })
 
   it('adds a message with a generic signature and edits its message', async () => {
@@ -393,6 +402,17 @@ describe('website editor', () => {
 
     await wrapper.find('button[aria-label="All sections"]').trigger('click')
     expect(wrapper.find('[data-section-row]').exists()).toBe(true)
+  })
+
+  it('keeps the Sections and Style tabs, and an open section\'s title row under them, in view while the panel scrolls', async () => {
+    const wrapper = await mountEditor({ ...createBlankWebsite(), sections: [createWebsiteSection('hero', event)] })
+    // Under the app's sticky header while the page scrolls; at the panel's top from xl, where the panel scrolls itself
+    expect(wrapper.find('[data-editor-tabs]').classes()).toEqual(expect.arrayContaining(['sticky', 'top-16', 'xl:top-0', 'h-16', 'bg-card']))
+
+    await wrapper.find('[data-preview-section]').trigger('click')
+    const title = wrapper.find('[data-section-title]')
+    expect(title.classes()).toEqual(expect.arrayContaining(['sticky', 'top-32', 'xl:top-16', 'bg-card']))
+    expect(title.text()).toContain('Hero')
   })
 
   it('asks before starting over when the page has sections', async () => {

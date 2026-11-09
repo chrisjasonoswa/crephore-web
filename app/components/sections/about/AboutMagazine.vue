@@ -15,7 +15,7 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <div class="mx-auto flex max-w-4xl flex-col gap-8">
       <!-- The heading goes in the story's slot so the photo, floated first, sits beside all of it -->
       <AboutBody data-about-text :content="content" align="start" drop-cap>

@@ -6,7 +6,7 @@ import type { SiteTheme } from '~/site-theme/useSiteTheme'
 import { toRaw } from 'vue'
 import { occasionDate, sampleProgramItems, sampleProgramVenues } from '~/features/sections/program/program.helpers'
 import { withoutUnusedPhotos } from '~/features/sections/section.photos'
-import { fieldNotes } from '~/features/sections/section.fields'
+import { missingNotes } from '~/features/sections/section.fields'
 import { createDefaultSection, currentLayoutKey, getSectionLayout, getSectionType, withLayoutOptionsOnly } from '~/features/sections/section.registry'
 import { motionForEventType, normalizeSiteMotion } from '~/features/site-motion/site-motion.type'
 import { upgradeSectionContent } from '~/features/sections/section.upgrade'
@@ -15,7 +15,8 @@ import { eventKindFor } from '~/site-theme/eventKinds'
 import { defaultColorPreset } from '~/site-theme/presets'
 
 /**
- * The event as sections see it: its name and main venue (the hero's and countdown's), start and timezone (their dates),
+ * The event as sections see it: its name and main venue (the hero's; the countdown's name unless it has its own heading),
+ * start and timezone (their dates),
  * and its program with its venues (`sectionProgram`; none when only the date matters, e.g. the hero's fields).
  */
 export function eventOccasion(
@@ -78,6 +79,7 @@ const eventDetails: { [T in SectionType]: (event: Event) => Partial<SectionConte
   about: () => ({}),
   people: () => ({}),
   program: () => ({}),
+  'dress-code': () => ({}),
 }
 
 /** A new section for the event's page: the type's first layout and default content, with the event's details filled in. */
@@ -130,7 +132,7 @@ export function websiteWarnings(website: EventWebsiteDraft): string[] {
     if (!layout)
       return []
     const definition = getSectionType(section.type)
-    const { missing } = fieldNotes(definition, layout, section.content)
+    const missing = missingNotes(definition, layout, section.content)
     return missing.length ? [`${definition.name} (${layout.name}): ${missing.join(' ')}`] : []
   })
 }
@@ -187,6 +189,8 @@ export function mapWebsiteToRequest(website: EventWebsiteDraft): UpdateEventWebs
       backgroundColor: theme.backgroundColor ?? null,
       fontPairingKey: theme.fontPairingKey,
       cornerStyle: theme.cornerStyle,
+      heroHeadingSize: theme.heroHeadingSize ?? 'medium',
+      headingSize: theme.headingSize ?? 'medium',
       motion: theme.motion,
     },
     sections: website.sections.map(withoutUnusedPhotos).map(withLayoutOptionsOnly).map(section => ({

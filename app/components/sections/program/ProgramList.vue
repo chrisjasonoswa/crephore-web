@@ -25,7 +25,7 @@ const titlesOnRight = computed(() => !props.occasion.program.items.some(hasDetai
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
     <ProgramHeading :content="content" :venue="occasion.program.venue" :styles="styles" :align="titleAlign" class="mx-auto max-w-3xl" />
     <!-- Each day's date sits close to its items (just the first row's padding under it), with a wide gap before the next
          day, so the date reads as that day's heading -->

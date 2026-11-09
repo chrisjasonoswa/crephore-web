@@ -14,8 +14,8 @@ const photoOnLeft = computed(() => props.options.photoSide === 'left')
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div class="mx-auto grid max-w-6xl gap-12 @3xl:grid-cols-2 @3xl:gap-0">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div class="mx-auto grid gap-12 @3xl:grid-cols-2 @3xl:gap-0">
       <div
         data-about-photo-column
         class="relative @3xl:row-start-1 @3xl:py-6"

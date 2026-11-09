@@ -27,8 +27,8 @@ const date = computed(() => formatOccasionDate(props.occasion))
     />
     <div
       data-countdown-text
-      class="flex flex-col items-center justify-center gap-6 px-6 py-12 text-center @2xl:px-12 @3xl:row-start-1 @3xl:py-20"
-      :class="photoOnLeft ? '@3xl:col-start-2' : '@3xl:col-start-1'"
+      class="flex flex-col items-center justify-center gap-6 px-(--site-edge) py-12 text-center @3xl:row-start-1 @3xl:py-20"
+      :class="photoOnLeft ? '@3xl:col-start-2 @3xl:ps-(--site-gutter)' : '@3xl:col-start-1 @3xl:pe-(--site-gutter)'"
     >
       <CountdownHeading :content="content" :occasion="occasion" :styles="styles" size="medium" />
       <CountdownTiles :units="units" :styles="styles" compact />

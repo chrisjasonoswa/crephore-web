@@ -31,7 +31,7 @@ const theme = ref<SiteTheme>({
 const introKey = ref(0)
 
 // One section of each type, in page order
-const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown'), createDefaultSection('message'), createDefaultSection('about'), createDefaultSection('people'), createDefaultSection('program')])
+const sections = ref<Section[]>([createDefaultSection('hero'), createDefaultSection('countdown'), createDefaultSection('message'), createDefaultSection('about'), createDefaultSection('people'), createDefaultSection('program'), createDefaultSection('dress-code')])
 
 // The event (the sample's name and venue), and its start for the countdown: try a far date, the last hour, and one
 // that has passed
@@ -67,7 +67,7 @@ function setOccasion(next: unknown) {
     <!-- Controls on the left (sticky while scrolling the preview), preview on the right; stacked on small screens -->
     <div class="grid items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
       <!-- Scrolls on its own when taller than the viewport, so every control stays reachable -->
-      <Card class="lg:sticky lg:top-6 lg:max-h-[calc(100svh-3rem)] lg:overflow-y-auto">
+      <Card class="lg:sticky lg:top-22 lg:max-h-[calc(100svh-7rem)] lg:overflow-y-auto">
         <CardContent class="flex flex-col gap-6">
           <!-- Theme: applies to every section -->
           <section class="flex flex-col gap-4">

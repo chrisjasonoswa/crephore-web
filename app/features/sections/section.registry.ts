@@ -2,6 +2,7 @@ import type { SectionLayoutDefinition, SectionTypeDefinition } from './section.r
 import type { Section, SectionType } from './section.type'
 import { aboutSection } from './about/about.registry'
 import { countdownSection } from './countdown/countdown.registry'
+import { dressCodeSection } from './dress-code/dress-code.registry'
 import { heroSection } from './hero/hero.registry'
 import { messageSection } from './message/message.registry'
 import { peopleSection } from './people/people.registry'
@@ -19,6 +20,7 @@ export const sectionRegistry: SectionRegistry = {
   about: aboutSection,
   people: peopleSection,
   program: programSection,
+  'dress-code': dressCodeSection,
 }
 
 export function getSectionType<T extends SectionType>(type: T): SectionTypeDefinition<T> {
@@ -28,7 +30,9 @@ export function getSectionType<T extends SectionType>(type: T): SectionTypeDefin
 // Layouts that were removed, and the layout their saved sections show instead (the API moves saved ones too; published
 // copies keep the old key, so it's mapped where saved websites are read)
 const replacedLayouts: Partial<Record<SectionType, Record<string, string>>> = {
-  program: { 'tab-cards': 'cards' },
+  'program': { 'tab-cards': 'cards' },
+  // Without the attire presets the formality scale had nothing to place; without the scale it was the palette
+  'dress-code': { formality: 'palette' },
 }
 
 /**

@@ -24,8 +24,8 @@ const polaroids = [
 </script>
 
 <template>
-  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div class="mx-auto flex max-w-6xl flex-col items-center gap-12 @3xl:gap-14" :class="photoOnLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'">
+  <SectionFrame :background="background" :image-url="content.backgroundPhoto" overlay="none" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div data-about-scrapbook class="mx-auto flex flex-col items-center gap-12 @3xl:gap-14" :class="photoOnLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'">
       <div data-about-photos class="relative h-80 w-full max-w-sm shrink-0 @2xl:h-[24rem] @2xl:max-w-md @3xl:flex-1">
         <div
           v-for="(position, index) in polaroids"

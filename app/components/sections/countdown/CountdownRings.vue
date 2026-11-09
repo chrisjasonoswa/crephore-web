@@ -26,7 +26,7 @@ const justify = { start: '@2xl:justify-start', center: '@2xl:justify-center', en
 
 <template>
   <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto">
-    <div class="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-16 @2xl:px-10 @2xl:py-24" :class="alignClasses[align]">
+    <div class="px-(--site-edge) mx-auto flex w-full flex-col gap-10 py-16 @2xl:py-24" :class="alignClasses[align]">
       <CountdownHeading :content="content" :occasion="occasion" :styles="styles" :align="align" />
 
       <div role="timer" class="grid gap-4 @2xl:flex @2xl:gap-6" :class="[phoneColumns, justify[align]]">

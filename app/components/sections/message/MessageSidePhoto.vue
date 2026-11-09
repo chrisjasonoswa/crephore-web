@@ -18,8 +18,8 @@ const photoShape = computed(() => ({
 </script>
 
 <template>
-  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-6 py-14 @2xl:px-10 @2xl:py-20">
-    <div class="mx-auto flex max-w-5xl flex-col items-center gap-10 @3xl:gap-16" :class="photoOnLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'">
+  <SectionFrame v-slot="{ styles }" :background="background" :image-url="content.backgroundPhoto" class="px-(--site-edge) py-14 @2xl:py-20">
+    <div class="mx-auto flex flex-col items-center gap-10 @3xl:gap-16" :class="photoOnLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'">
       <div
         data-message-frame
         :data-frame="options.frame"

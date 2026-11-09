@@ -238,9 +238,9 @@ describe('placement options', () => {
   it('editorial: puts the heading and message side by side, the photo below or above them', async () => {
     const below = await mountLayout('editorial')
     expect(below.find('[data-message-text]').classes()).toContain('@3xl:grid-cols-2')
-    expect(below.find('.max-w-6xl').classes()).toContain('flex-col')
+    expect(below.find('[data-message-editorial]').classes()).toContain('flex-col')
 
-    expect((await mountLayout('editorial', { options: { photoPosition: 'above' } })).find('.max-w-6xl').classes()).toContain('flex-col-reverse')
+    expect((await mountLayout('editorial', { options: { photoPosition: 'above' } })).find('[data-message-editorial]').classes()).toContain('flex-col-reverse')
   })
 
   it('inline: floats a square photo on photoSide from the top of the note, with a drop cap', async () => {

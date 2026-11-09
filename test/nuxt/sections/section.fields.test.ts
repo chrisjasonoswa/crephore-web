@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fieldNotes, hiddenFields, layoutFields, missingFields } from '~/features/sections/section.fields'
+import { layoutFields, missingFields, missingNotes } from '~/features/sections/section.fields'
 
 const timeline = { fields: ['eyebrow', 'heading', 'body', 'timeline'], required: ['timeline'], labels: { body: 'Intro (optional)' } }
 const story = { fields: ['eyebrow', 'heading', 'body'] }
@@ -23,22 +23,13 @@ describe('section fields', () => {
     expect(missingFields(story, {})).toEqual([])
   })
 
-  it('lists the filled-in fields a layout doesn\'t show, not counting its items\' fields', () => {
-    const all = ['eyebrow', 'heading', 'body', 'timeline', 'timeline.photo']
+  it('words the missing notes with the type\'s field names: a list by its item, text as itself', () => {
+    const about = { fieldNames: { body: 'story', timeline: ['chapter', 'chapters'] as const } }
 
-    expect(hiddenFields(all, story, { heading: 'Our story', timeline: [{ heading: 'We met' }] })).toEqual(['timeline'])
-    expect(hiddenFields(all, story, { timeline: [] })).toEqual([])
-    expect(hiddenFields(all, timeline, { timeline: [{ heading: 'We met' }] })).toEqual([])
-  })
-
-  it('words the notes with the type\'s field names: a list in one and many, text as itself', () => {
-    const about = { fields: ['eyebrow', 'heading', 'body', 'timeline', 'timeline.photo'], fieldNames: { body: 'story', timeline: ['chapter', 'chapters'] as const } }
-
-    expect(fieldNotes(about, timeline, { timeline: [] }).missing).toEqual(['This layout needs at least one chapter.'])
-    expect(fieldNotes({ fields: ['body'], fieldNames: { body: 'message' } }, { fields: ['body'], required: ['body'] }, {}).missing)
-      .toEqual(['This layout needs a message.'])
-    expect(fieldNotes(about, story, { timeline: [{}, {}, {}] }).hidden).toEqual(['This layout doesn\'t show your 3 chapters. They\'re kept for layouts that do.'])
-    expect(fieldNotes(about, story, { timeline: [{}] }).hidden).toEqual(['This layout doesn\'t show your chapter. It\'s kept for layouts that do.'])
-    expect(fieldNotes(about, timeline, { timeline: [{}] })).toEqual({ missing: [], hidden: [] })
+    expect(missingNotes(about, timeline, { timeline: [] })).toEqual(['This layout needs at least one chapter.'])
+    expect(missingNotes({ fieldNames: { body: 'message' } }, { fields: ['body'], required: ['body'] }, {})).toEqual(['This layout needs a message.'])
+    expect(missingNotes({ fieldNames: { attire: 'attire motif' } }, { fields: ['attire'], required: ['attire'] }, {})).toEqual(['This layout needs an attire motif.'])
+    expect(missingNotes(about, timeline, { timeline: [{}] })).toEqual([])
+    expect(missingNotes(about, story, { timeline: [] })).toEqual([])
   })
 })
